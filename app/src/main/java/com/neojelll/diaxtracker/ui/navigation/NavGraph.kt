@@ -26,7 +26,6 @@ import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
     data object AddEntry : Screen("add_entry", "Запись", Icons.Filled.Edit)
     data object History : Screen("history", "История", Icons.Filled.History)
-    // Следующие вкладки (например "Настройки") добавляются сюда и в bottomNavItems ниже.
 }
 
 private val bottomNavItems = listOf(Screen.AddEntry, Screen.History)
