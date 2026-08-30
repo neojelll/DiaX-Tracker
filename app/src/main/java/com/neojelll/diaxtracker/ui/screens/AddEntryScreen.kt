@@ -1,11 +1,14 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,19 +20,20 @@ import androidx.compose.ui.window.Dialog
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.InsulinType
 import com.neojelll.diaxtracker.ui.theme.AppGradient
+import com.neojelll.diaxtracker.ui.theme.DeepForest
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-private val FieldShape = RoundedCornerShape(16.dp)
+private val DividerColor = DeepForest.copy(alpha = 0.12f)
 
 @Composable
-private fun fieldColors() = TextFieldDefaults.colors(
-    focusedContainerColor = Color.White,
-    unfocusedContainerColor = Color.White,
-    disabledContainerColor = Color.White,
+private fun transparentFieldColors() = TextFieldDefaults.colors(
+    focusedContainerColor = Color.Transparent,
+    unfocusedContainerColor = Color.Transparent,
+    disabledContainerColor = Color.Transparent,
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent
@@ -86,68 +90,62 @@ fun AddEntryScreen(
                 .padding(padding)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Время измерения",
-                style = MaterialTheme.typography.labelLarge,
-                color = Color.White
-            )
-            Surface(
-                onClick = { showTimePicker = true },
-                shape = FieldShape,
-                color = Color.White,
+            Card(
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = selectedTime.format(DateTimeFormatter.ofPattern("HH:mm")),
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(16.dp)
-                )
+                Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                    TimeRow(
+                        time = selectedTime,
+                        onClick = { showTimePicker = true }
+                    )
+                    HorizontalDivider(color = DividerColor)
+
+                    TextField(
+                        value = bloodSugar,
+                        onValueChange = { bloodSugar = it.filter { c -> c.isDigit() || c == '.' } },
+                        label = { Text("Уровень сахара (ммоль/л)") },
+                        placeholder = { Text("Например: 5.6") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        colors = transparentFieldColors(),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    HorizontalDivider(color = DividerColor)
+
+                    TextField(
+                        value = insulinDose,
+                        onValueChange = { insulinDose = it.filter { c -> c.isDigit() || c == '.' } },
+                        label = { Text("Доза инсулина (ед.)") },
+                        placeholder = { Text("Например: 4") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        colors = transparentFieldColors(),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    HorizontalDivider(color = DividerColor)
+
+                    InsulinTypeDropdown(
+                        selected = insulinType,
+                        onSelected = { insulinType = it }
+                    )
+                    HorizontalDivider(color = DividerColor)
+
+                    TextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        label = { Text("Комментарий") },
+                        placeholder = { Text("Дополнительный комментарий...") },
+                        colors = transparentFieldColors(),
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2,
+                        maxLines = 4
+                    )
+                }
             }
-
-            TextField(
-                value = bloodSugar,
-                onValueChange = { bloodSugar = it.filter { c -> c.isDigit() || c == '.' } },
-                label = { Text("Уровень сахара (ммоль/л)") },
-                placeholder = { Text("Например: 5.6") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                shape = FieldShape,
-                colors = fieldColors(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            TextField(
-                value = insulinDose,
-                onValueChange = { insulinDose = it.filter { c -> c.isDigit() || c == '.' } },
-                label = { Text("Доза инсулина (ед.)") },
-                placeholder = { Text("Например: 4") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                shape = FieldShape,
-                colors = fieldColors(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            InsulinTypeDropdown(
-                selected = insulinType,
-                onSelected = { insulinType = it }
-            )
-
-            TextField(
-                value = notes,
-                onValueChange = { notes = it },
-                label = { Text("Комментарий") },
-                placeholder = { Text("Дополнительный комментарий...") },
-                shape = FieldShape,
-                colors = fieldColors(),
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                maxLines = 4
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             Button(
                 onClick = {
@@ -176,6 +174,35 @@ fun AddEntryScreen(
     }
 }
 
+@Composable
+private fun TimeRow(
+    time: LocalTime,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = "Время измерения",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                style = MaterialTheme.typography.headlineSmall,
+                color = DeepForest
+            )
+        }
+        Icon(Icons.Filled.Schedule, contentDescription = null, tint = DeepForest)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun InsulinTypeDropdown(
@@ -195,8 +222,7 @@ private fun InsulinTypeDropdown(
             label = { Text("Тип инсулина") },
             placeholder = { Text("Не выбран") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            shape = FieldShape,
-            colors = fieldColors(),
+            colors = transparentFieldColors(),
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor()
