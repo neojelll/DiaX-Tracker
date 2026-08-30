@@ -1,11 +1,11 @@
-package com.neojelll.later.ui.viewmodel
+package com.neojelll.diaxtracker.ui.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.neojelll.later.data.DiaryDatabase
-import com.neojelll.later.data.DiaryEntry
-import com.neojelll.later.data.DiaryRepository
+import com.neojelll.diaxtracker.data.DiaryDatabase
+import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.data.DiaryRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

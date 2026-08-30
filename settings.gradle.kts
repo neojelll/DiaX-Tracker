@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Later"
+rootProject.name = "DiaX-Tracker"
 include(":app")

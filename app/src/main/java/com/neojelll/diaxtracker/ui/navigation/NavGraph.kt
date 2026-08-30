@@ -1,4 +1,4 @@
-package com.neojelll.later.ui.navigation
+package com.neojelll.diaxtracker.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,9 +19,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.neojelll.later.ui.screens.AddEntryScreen
-import com.neojelll.later.ui.screens.HistoryScreen
-import com.neojelll.later.ui.viewmodel.DiaryViewModel
+import com.neojelll.diaxtracker.ui.screens.AddEntryScreen
+import com.neojelll.diaxtracker.ui.screens.HistoryScreen
+import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
     data object AddEntry : Screen("add_entry", "Запись", Icons.Filled.Edit)

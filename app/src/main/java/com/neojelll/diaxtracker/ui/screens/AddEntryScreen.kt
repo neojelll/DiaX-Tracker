@@ -1,4 +1,4 @@
-package com.neojelll.later.ui.screens
+package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,9 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.neojelll.later.data.DiaryEntry
-import com.neojelll.later.data.MealTime
-import com.neojelll.later.ui.viewmodel.DiaryViewModel
+import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.data.MealTime
+import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

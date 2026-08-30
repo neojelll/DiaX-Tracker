@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.neojelll.later"
+    namespace = "com.neojelll.diaxtracker"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.neojelll.later"
+        applicationId = "com.neojelll.diaxtracker"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

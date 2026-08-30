@@ -1,11 +1,11 @@
-package com.neojelll.later.ui.theme
+package com.neojelll.diaxtracker.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val LaterColorScheme = lightColorScheme(
+private val DiaXTrackerColorScheme = lightColorScheme(
     primary = MossGreen,
     onPrimary = Color.White,
     primaryContainer = PaleLime,
@@ -29,9 +29,9 @@ private val LaterColorScheme = lightColorScheme(
 )
 
 @Composable
-fun LaterTheme(content: @Composable () -> Unit) {
+fun DiaXTrackerTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = LaterColorScheme,
+        colorScheme = DiaXTrackerColorScheme,
         content = content
     )
 }

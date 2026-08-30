@@ -1,4 +1,4 @@
-package com.neojelll.later.ui.screens
+package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,8 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.neojelll.later.data.DiaryEntry
-import com.neojelll.later.ui.viewmodel.DiaryViewModel
+import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)

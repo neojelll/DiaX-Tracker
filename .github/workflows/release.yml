@@ -22,9 +22,9 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk later-${{ github.ref_name }}.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk diax-tracker-${{ github.ref_name }}.apk
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: later-${{ github.ref_name }}.apk
+          files: diax-tracker-${{ github.ref_name }}.apk
           generate_release_notes: true

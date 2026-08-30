@@ -1,4 +1,4 @@
-package com.neojelll.later.ui.theme
+package com.neojelll.diaxtracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

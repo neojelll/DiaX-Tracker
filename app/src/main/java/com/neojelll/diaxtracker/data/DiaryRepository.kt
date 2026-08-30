@@ -1,4 +1,4 @@
-package com.neojelll.later.data
+package com.neojelll.diaxtracker.data
 
 import kotlinx.coroutines.flow.Flow
 

@@ -1,4 +1,4 @@
-package com.neojelll.later.data
+package com.neojelll.diaxtracker.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
