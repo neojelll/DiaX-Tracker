@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -18,8 +16,7 @@ import com.neojelll.later.ui.viewmodel.DiaryViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEntryScreen(
-    viewModel: DiaryViewModel,
-    onNavigateToHistory: () -> Unit
+    viewModel: DiaryViewModel
 ) {
     var bloodSugar by remember { mutableStateOf("") }
     var insulinDose by remember { mutableStateOf("") }
@@ -42,12 +39,7 @@ fun AddEntryScreen(
                 title = { Text("Новая запись") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                actions = {
-                    IconButton(onClick = onNavigateToHistory) {
-                        Icon(Icons.Default.History, contentDescription = "История")
-                    }
-                }
+                )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
