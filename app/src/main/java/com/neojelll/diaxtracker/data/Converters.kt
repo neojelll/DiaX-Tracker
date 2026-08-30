@@ -12,8 +12,8 @@ class Converters {
         value?.let { LocalDateTime.parse(it) }
 
     @TypeConverter
-    fun fromMealTime(value: MealTime): String = value.name
+    fun fromInsulinType(value: InsulinType?): String? = value?.name
 
     @TypeConverter
-    fun toMealTime(value: String): MealTime = MealTime.valueOf(value)
+    fun toInsulinType(value: String?): InsulinType? = value?.let { InsulinType.valueOf(it) }
 }

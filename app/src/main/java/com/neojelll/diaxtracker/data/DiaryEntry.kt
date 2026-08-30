@@ -10,15 +10,12 @@ data class DiaryEntry(
     val id: Long = 0,
     val bloodSugar: Float?,
     val insulinDose: Float?,
-    val mealDescription: String,
+    val insulinType: InsulinType?,
     val notes: String,
-    val mealTime: MealTime,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
 
-enum class MealTime(val label: String) {
-    BEFORE_MEAL("До еды"),
-    AFTER_MEAL("После еды"),
-    FASTING("Натощак"),
-    BEDTIME("Перед сном")
+enum class InsulinType(val label: String) {
+    SHORT("Короткий"),
+    LONG("Длинный")
 }

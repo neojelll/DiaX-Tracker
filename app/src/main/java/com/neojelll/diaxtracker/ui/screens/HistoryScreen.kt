@@ -1,5 +1,6 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,9 +8,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.ui.theme.AppGradient
+import com.neojelll.diaxtracker.ui.theme.DeepForest
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.format.DateTimeFormatter
 
@@ -21,46 +25,50 @@ fun HistoryScreen(
     val entries by viewModel.entries.collectAsState()
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("История записей") },
+                title = { Text("История записей", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = Color.Transparent
                 )
             )
         }
     ) { padding ->
-        if (entries.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "Записей пока нет",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Добавьте первую запись",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(AppGradient)
+                .padding(padding)
+        ) {
+            if (entries.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Записей пока нет",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Добавьте первую запись",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White
+                        )
+                    }
                 }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(entries) { entry ->
-                    DiaryEntryCard(entry = entry)
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(entries, key = { it.id }) { entry ->
+                        DiaryEntryCard(entry = entry)
+                    }
                 }
             }
         }
@@ -74,7 +82,7 @@ private fun DiaryEntryCard(entry: DiaryEntry) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = Color.White
         )
     ) {
         Column(
@@ -83,21 +91,11 @@ private fun DiaryEntryCard(entry: DiaryEntry) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = entry.createdAt.format(formatter),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                AssistChip(
-                    onClick = {},
-                    label = { Text(entry.mealTime.label, style = MaterialTheme.typography.labelSmall) }
-                )
-            }
+            Text(
+                text = entry.createdAt.format(formatter),
+                style = MaterialTheme.typography.labelMedium,
+                color = DeepForest
+            )
 
             HorizontalDivider()
 
@@ -110,7 +108,7 @@ private fun DiaryEntryCard(entry: DiaryEntry) {
                         Text(
                             text = "Сахар",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = DeepForest
                         )
                         Text(
                             text = "$it ммоль/л",
@@ -125,41 +123,29 @@ private fun DiaryEntryCard(entry: DiaryEntry) {
                         Text(
                             text = "Инсулин",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = DeepForest
                         )
                         Text(
-                            text = "$it ед.",
+                            text = "$it ед." + (entry.insulinType?.let { type -> " · ${type.label}" } ?: ""),
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = DeepForest
                         )
                     }
-                }
-            }
-
-            if (entry.mealDescription.isNotBlank()) {
-                Column {
-                    Text(
-                        text = "Что ели",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = entry.mealDescription,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
                 }
             }
 
             if (entry.notes.isNotBlank()) {
                 Column {
                     Text(
-                        text = "Заметки",
+                        text = "Комментарий",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = DeepForest
                     )
                     Text(
                         text = entry.notes,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = DeepForest
                     )
                 }
             }
