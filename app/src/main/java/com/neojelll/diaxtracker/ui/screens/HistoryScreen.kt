@@ -118,15 +118,30 @@ private fun DiaryEntryCard(entry: DiaryEntry) {
                         )
                     }
                 }
-                entry.insulinDose?.let {
+                entry.shortInsulinDose?.let {
                     Column {
                         Text(
-                            text = "Инсулин",
+                            text = "Короткий инсулин",
                             style = MaterialTheme.typography.labelSmall,
                             color = DeepForest
                         )
                         Text(
-                            text = "$it ед." + (entry.insulinType?.let { type -> " · ${type.label}" } ?: ""),
+                            text = "$it ед.",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = DeepForest
+                        )
+                    }
+                }
+                entry.longInsulinDose?.let {
+                    Column {
+                        Text(
+                            text = "Длинный инсулин",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = DeepForest
+                        )
+                        Text(
+                            text = "$it ед.",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = DeepForest

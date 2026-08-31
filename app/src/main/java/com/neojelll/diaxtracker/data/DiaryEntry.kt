@@ -9,13 +9,8 @@ data class DiaryEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val bloodSugar: Float?,
-    val insulinDose: Float?,
-    val insulinType: InsulinType?,
+    val shortInsulinDose: Float?,
+    val longInsulinDose: Float?,
     val notes: String,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
-
-enum class InsulinType(val label: String) {
-    SHORT("Короткий"),
-    LONG("Длинный")
-}

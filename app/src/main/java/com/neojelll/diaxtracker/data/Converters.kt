@@ -10,10 +10,4 @@ class Converters {
     @TypeConverter
     fun toLocalDateTime(value: String?): LocalDateTime? =
         value?.let { LocalDateTime.parse(it) }
-
-    @TypeConverter
-    fun fromInsulinType(value: InsulinType?): String? = value?.name
-
-    @TypeConverter
-    fun toInsulinType(value: String?): InsulinType? = value?.let { InsulinType.valueOf(it) }
 }

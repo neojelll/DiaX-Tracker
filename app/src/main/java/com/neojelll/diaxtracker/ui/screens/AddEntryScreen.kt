@@ -18,7 +18,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.neojelll.diaxtracker.data.DiaryEntry
-import com.neojelll.diaxtracker.data.InsulinType
 import com.neojelll.diaxtracker.ui.theme.AppGradient
 import com.neojelll.diaxtracker.ui.theme.DeepForest
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -45,8 +44,8 @@ fun AddEntryScreen(
     viewModel: DiaryViewModel
 ) {
     var bloodSugar by remember { mutableStateOf("") }
-    var insulinDose by remember { mutableStateOf("") }
-    var insulinType by remember { mutableStateOf<InsulinType?>(null) }
+    var shortInsulinDose by remember { mutableStateOf("") }
+    var longInsulinDose by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var selectedTime by remember { mutableStateOf(LocalTime.now()) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -117,9 +116,9 @@ fun AddEntryScreen(
                     HorizontalDivider(color = DividerColor)
 
                     TextField(
-                        value = insulinDose,
-                        onValueChange = { insulinDose = it.filter { c -> c.isDigit() || c == '.' } },
-                        label = { Text("Доза инсулина (ед.)") },
+                        value = shortInsulinDose,
+                        onValueChange = { shortInsulinDose = it.filter { c -> c.isDigit() || c == '.' } },
+                        label = { Text("Короткий инсулин (ед.)") },
                         placeholder = { Text("Например: 4") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         colors = transparentFieldColors(),
@@ -128,9 +127,15 @@ fun AddEntryScreen(
                     )
                     HorizontalDivider(color = DividerColor)
 
-                    InsulinTypeDropdown(
-                        selected = insulinType,
-                        onSelected = { insulinType = it }
+                    TextField(
+                        value = longInsulinDose,
+                        onValueChange = { longInsulinDose = it.filter { c -> c.isDigit() || c == '.' } },
+                        label = { Text("Длинный инсулин (ед.)") },
+                        placeholder = { Text("Например: 10") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        colors = transparentFieldColors(),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
                     )
                     HorizontalDivider(color = DividerColor)
 
@@ -152,21 +157,21 @@ fun AddEntryScreen(
                     viewModel.addEntry(
                         DiaryEntry(
                             bloodSugar = bloodSugar.toFloatOrNull(),
-                            insulinDose = insulinDose.toFloatOrNull(),
-                            insulinType = insulinType,
+                            shortInsulinDose = shortInsulinDose.toFloatOrNull(),
+                            longInsulinDose = longInsulinDose.toFloatOrNull(),
                             notes = notes.trim(),
                             createdAt = LocalDateTime.of(LocalDate.now(), selectedTime)
                         )
                     )
                     bloodSugar = ""
-                    insulinDose = ""
-                    insulinType = null
+                    shortInsulinDose = ""
+                    longInsulinDose = ""
                     notes = ""
                     selectedTime = LocalTime.now()
                     showSuccessSnackbar = true
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = bloodSugar.isNotBlank() || insulinDose.isNotBlank()
+                enabled = bloodSugar.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
             ) {
                 Text("Сохранить запись")
             }
@@ -200,47 +205,6 @@ private fun TimeRow(
             )
         }
         Icon(Icons.Filled.Schedule, contentDescription = null, tint = DeepForest)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun InsulinTypeDropdown(
-    selected: InsulinType?,
-    onSelected: (InsulinType?) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-        TextField(
-            value = selected?.label ?: "",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Тип инсулина") },
-            placeholder = { Text("Не выбран") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = transparentFieldColors(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor()
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            InsulinType.entries.forEach { type ->
-                DropdownMenuItem(
-                    text = { Text(type.label) },
-                    onClick = {
-                        onSelected(type)
-                        expanded = false
-                    }
-                )
-            }
-        }
     }
 }
 
