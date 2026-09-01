@@ -8,8 +8,11 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryRepository
 import com.neojelll.diaxtracker.sensor.PostMealScheduler
 import com.neojelll.diaxtracker.sensor.SensorReadingStore
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -25,6 +28,18 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList()
     )
+
+    private val _sensorAvailable = MutableStateFlow(sensorReadingStore.getLatestReading() != null)
+    val sensorAvailable: StateFlow<Boolean> = _sensorAvailable.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            while (true) {
+                _sensorAvailable.value = sensorReadingStore.getLatestReading() != null
+                delay(SENSOR_POLL_INTERVAL_MILLIS)
+            }
+        }
+    }
 
     fun addEntry(
         bloodSugar: Float?,
@@ -45,5 +60,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
             )
             PostMealScheduler.scheduleFollowUps(getApplication())
         }
+    }
+
+    private companion object {
+        const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
     }
 }

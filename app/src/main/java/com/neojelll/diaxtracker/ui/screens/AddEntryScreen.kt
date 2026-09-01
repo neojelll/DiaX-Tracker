@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,6 +51,7 @@ fun AddEntryScreen(
     var showTimePicker by remember { mutableStateOf(false) }
     var showSuccessSnackbar by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val sensorAvailable by viewModel.sensorAvailable.collectAsState()
 
     LaunchedEffect(showSuccessSnackbar) {
         if (showSuccessSnackbar) {
@@ -90,6 +92,10 @@ fun AddEntryScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (!sensorAvailable) {
+                SensorWarningBanner()
+            }
+
             Card(
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -172,6 +178,28 @@ fun AddEntryScreen(
             ) {
                 Text("Сохранить запись")
             }
+        }
+    }
+}
+
+@Composable
+private fun SensorWarningBanner() {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+            Text(
+                text = "Нет свежих данных с датчика — сахар нужно ввести вручную",
+                style = MaterialTheme.typography.bodyMedium,
+                color = DeepForest
+            )
         }
     }
 }
