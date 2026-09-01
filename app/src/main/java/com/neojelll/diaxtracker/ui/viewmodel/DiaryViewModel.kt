@@ -62,6 +62,18 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateEntry(entry: DiaryEntry) {
+        viewModelScope.launch {
+            repository.update(entry)
+        }
+    }
+
+    fun deleteEntry(entry: DiaryEntry) {
+        viewModelScope.launch {
+            repository.delete(entry)
+        }
+    }
+
     private companion object {
         const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
     }

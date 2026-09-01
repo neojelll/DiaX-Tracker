@@ -1,6 +1,7 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,7 +21,8 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    viewModel: DiaryViewModel
+    viewModel: DiaryViewModel,
+    onEntryClick: (Long) -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
 
@@ -67,7 +69,7 @@ fun HistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(entries, key = { it.id }) { entry ->
-                        DiaryEntryCard(entry = entry)
+                        DiaryEntryCard(entry = entry, onClick = { onEntryClick(entry.id) })
                     }
                 }
             }
@@ -76,11 +78,13 @@ fun HistoryScreen(
 }
 
 @Composable
-private fun DiaryEntryCard(entry: DiaryEntry) {
+private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm")
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )

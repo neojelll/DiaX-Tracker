@@ -1,42 +1,19 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.neojelll.diaxtracker.ui.theme.AppGradient
-import com.neojelll.diaxtracker.ui.theme.DeepForest
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-
-private val DividerColor = DeepForest.copy(alpha = 0.12f)
-
-@Composable
-private fun transparentFieldColors() = TextFieldDefaults.colors(
-    focusedContainerColor = Color.Transparent,
-    unfocusedContainerColor = Color.Transparent,
-    disabledContainerColor = Color.Transparent,
-    focusedIndicatorColor = Color.Transparent,
-    unfocusedIndicatorColor = Color.Transparent,
-    disabledIndicatorColor = Color.Transparent
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,66 +73,18 @@ fun AddEntryScreen(
                 SensorWarningBanner()
             }
 
-            Card(
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                    TimeRow(
-                        time = selectedTime,
-                        onClick = { showTimePicker = true }
-                    )
-                    HorizontalDivider(color = DividerColor)
-
-                    TextField(
-                        value = bloodSugar,
-                        onValueChange = { bloodSugar = it.filter { c -> c.isDigit() || c == '.' } },
-                        label = { Text("Уровень сахара (ммоль/л)") },
-                        placeholder = { Text("Например: 5.6") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        colors = transparentFieldColors(),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    HorizontalDivider(color = DividerColor)
-
-                    TextField(
-                        value = shortInsulinDose,
-                        onValueChange = { shortInsulinDose = it.filter { c -> c.isDigit() || c == '.' } },
-                        label = { Text("Короткий инсулин (ед.)") },
-                        placeholder = { Text("Например: 4") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        colors = transparentFieldColors(),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    HorizontalDivider(color = DividerColor)
-
-                    TextField(
-                        value = longInsulinDose,
-                        onValueChange = { longInsulinDose = it.filter { c -> c.isDigit() || c == '.' } },
-                        label = { Text("Длинный инсулин (ед.)") },
-                        placeholder = { Text("Например: 10") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        colors = transparentFieldColors(),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    HorizontalDivider(color = DividerColor)
-
-                    TextField(
-                        value = notes,
-                        onValueChange = { notes = it },
-                        label = { Text("Комментарий") },
-                        placeholder = { Text("Дополнительный комментарий...") },
-                        colors = transparentFieldColors(),
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 2,
-                        maxLines = 4
-                    )
-                }
-            }
+            EntryFormCard(
+                selectedTime = selectedTime,
+                onTimeClick = { showTimePicker = true },
+                bloodSugar = bloodSugar,
+                onBloodSugarChange = { bloodSugar = it },
+                shortInsulinDose = shortInsulinDose,
+                onShortInsulinDoseChange = { shortInsulinDose = it },
+                longInsulinDose = longInsulinDose,
+                onLongInsulinDoseChange = { longInsulinDose = it },
+                notes = notes,
+                onNotesChange = { notes = it }
+            )
 
             Button(
                 onClick = {
@@ -177,95 +106,6 @@ fun AddEntryScreen(
                 enabled = bloodSugar.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
             ) {
                 Text("Сохранить запись")
-            }
-        }
-    }
-}
-
-@Composable
-private fun SensorWarningBanner() {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-            Text(
-                text = "Нет свежих данных с датчика — сахар нужно ввести вручную",
-                style = MaterialTheme.typography.bodyMedium,
-                color = DeepForest
-            )
-        }
-    }
-}
-
-@Composable
-private fun TimeRow(
-    time: LocalTime,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(
-                text = "Время измерения",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
-                style = MaterialTheme.typography.headlineSmall,
-                color = DeepForest
-            )
-        }
-        Icon(Icons.Filled.Schedule, contentDescription = null, tint = DeepForest)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TimePickerDialog(
-    initialTime: LocalTime,
-    onConfirm: (LocalTime) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val state = rememberTimePickerState(
-        initialHour = initialTime.hour,
-        initialMinute = initialTime.minute,
-        is24Hour = true
-    )
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(shape = RoundedCornerShape(24.dp), color = Color.White) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                TimePicker(state = state)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Отмена")
-                    }
-                    TextButton(onClick = { onConfirm(LocalTime.of(state.hour, state.minute)) }) {
-                        Text("ОК")
-                    }
-                }
             }
         }
     }

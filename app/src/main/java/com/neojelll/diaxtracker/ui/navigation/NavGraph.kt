@@ -23,10 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.neojelll.diaxtracker.ui.screens.AddEntryScreen
+import com.neojelll.diaxtracker.ui.screens.EditEntryScreen
 import com.neojelll.diaxtracker.ui.screens.HistoryScreen
 import com.neojelll.diaxtracker.ui.theme.AppGradient
 import com.neojelll.diaxtracker.ui.theme.DeepForest
@@ -38,6 +41,9 @@ sealed class Screen(val route: String, val label: String, val icon: ImageVector)
 }
 
 private val bottomNavItems = listOf(Screen.AddEntry, Screen.History)
+
+private const val EDIT_ENTRY_ROUTE = "edit_entry/{entryId}"
+private fun editEntryRoute(entryId: Long) = "edit_entry/$entryId"
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -70,7 +76,21 @@ fun NavGraph(navController: NavHostController) {
                 AddEntryScreen(viewModel = viewModel)
             }
             composable(Screen.History.route) {
-                HistoryScreen(viewModel = viewModel)
+                HistoryScreen(
+                    viewModel = viewModel,
+                    onEntryClick = { entryId -> navController.navigate(editEntryRoute(entryId)) }
+                )
+            }
+            composable(
+                route = EDIT_ENTRY_ROUTE,
+                arguments = listOf(navArgument("entryId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val entryId = backStackEntry.arguments?.getLong("entryId") ?: return@composable
+                EditEntryScreen(
+                    viewModel = viewModel,
+                    entryId = entryId,
+                    onDone = { navController.popBackStack() }
+                )
             }
         }
     }
