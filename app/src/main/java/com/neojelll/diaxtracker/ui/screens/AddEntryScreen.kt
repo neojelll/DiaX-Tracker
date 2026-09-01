@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.ui.theme.AppGradient
 import com.neojelll.diaxtracker.ui.theme.DeepForest
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -155,13 +154,11 @@ fun AddEntryScreen(
             Button(
                 onClick = {
                     viewModel.addEntry(
-                        DiaryEntry(
-                            bloodSugar = bloodSugar.toFloatOrNull(),
-                            shortInsulinDose = shortInsulinDose.toFloatOrNull(),
-                            longInsulinDose = longInsulinDose.toFloatOrNull(),
-                            notes = notes.trim(),
-                            createdAt = LocalDateTime.of(LocalDate.now(), selectedTime)
-                        )
+                        bloodSugar = bloodSugar.toFloatOrNull(),
+                        shortInsulinDose = shortInsulinDose.toFloatOrNull(),
+                        longInsulinDose = longInsulinDose.toFloatOrNull(),
+                        notes = notes.trim(),
+                        createdAt = LocalDateTime.of(LocalDate.now(), selectedTime)
                     )
                     bloodSugar = ""
                     shortInsulinDose = ""
