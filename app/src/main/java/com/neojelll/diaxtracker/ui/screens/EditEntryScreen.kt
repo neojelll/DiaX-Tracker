@@ -13,8 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.SugarSource
+import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -71,20 +74,20 @@ fun EditEntryScreen(
             containerColor = Color.Black.copy(alpha = 0.75f),
             titleContentColor = OnGlass,
             textContentColor = OnGlass,
-            title = { Text("Удалить запись?") },
-            text = { Text("Это действие нельзя отменить.") },
+            title = { Text(stringResource(R.string.delete_entry_confirm_title)) },
+            text = { Text(stringResource(R.string.delete_entry_confirm_text)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteEntry(entry)
                     showDeleteConfirm = false
                     onDone()
                 }) {
-                    Text("Удалить", color = OnGlass)
+                    Text(stringResource(R.string.delete), color = OnGlass)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Отмена", color = OnGlass)
+                    Text(stringResource(R.string.cancel), color = OnGlass)
                 }
             }
         )
@@ -94,16 +97,17 @@ fun EditEntryScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Редактирование", color = Color.White) },
+                title = { Text(stringResource(R.string.edit_entry_title), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
                     }
                 },
                 actions = {
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Удалить", tint = Color.White)
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete), tint = Color.White)
                     }
+                    LanguageMenu()
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
@@ -162,7 +166,7 @@ fun EditEntryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "Сохранить изменения",
+                    stringResource(R.string.save_changes_button),
                     color = OnGlass,
                     style = MaterialTheme.typography.titleMedium
                 )

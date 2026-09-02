@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,7 +22,9 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.neojelll.diaxtracker.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -41,9 +44,9 @@ import com.neojelll.diaxtracker.ui.theme.GlassSheen
 import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
-sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
-    data object AddEntry : Screen("add_entry", "Запись", Icons.Filled.Edit)
-    data object History : Screen("history", "История", Icons.Filled.History)
+sealed class Screen(val route: String, @StringRes val labelRes: Int, val icon: ImageVector) {
+    data object AddEntry : Screen("add_entry", R.string.nav_entry, Icons.Filled.Edit)
+    data object History : Screen("history", R.string.nav_history, Icons.Filled.History)
 }
 
 private val bottomNavItems = listOf(Screen.AddEntry, Screen.History)
@@ -155,6 +158,7 @@ private fun AppBottomBar(
         ) {
             bottomNavItems.forEach { screen ->
                 val selected = currentRoute == screen.route
+                val label = stringResource(screen.labelRes)
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -167,12 +171,12 @@ private fun AppBottomBar(
                 ) {
                     Icon(
                         imageVector = screen.icon,
-                        contentDescription = screen.label,
+                        contentDescription = label,
                         tint = if (selected) Color.White else OnGlassMuted,
                         modifier = Modifier.size(28.dp)
                     )
                     Text(
-                        text = screen.label,
+                        text = label,
                         style = MaterialTheme.typography.labelMedium,
                         color = if (selected) Color.White else OnGlassMuted
                     )

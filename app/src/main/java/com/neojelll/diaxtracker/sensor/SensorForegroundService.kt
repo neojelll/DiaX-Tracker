@@ -49,7 +49,7 @@ class SensorForegroundService : Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Датчик глюкозы",
+            getString(R.string.sensor_notification_channel),
             NotificationManager.IMPORTANCE_MIN
         )
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
@@ -57,8 +57,8 @@ class SensorForegroundService : Service() {
 
     private fun buildNotification(): Notification =
         NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("DiaX-Tracker")
-            .setContentText("Слушает данные с датчика")
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(R.string.sensor_notification_text))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_MIN)
