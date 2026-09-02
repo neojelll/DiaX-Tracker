@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -38,9 +39,23 @@ fun EditEntryScreen(
     var shortInsulinDose by remember(entryId) { mutableStateOf(entry.shortInsulinDose?.toString() ?: "") }
     var longInsulinDose by remember(entryId) { mutableStateOf(entry.longInsulinDose?.toString() ?: "") }
     var notes by remember(entryId) { mutableStateOf(entry.notes) }
+    var selectedDate by remember(entryId) { mutableStateOf(entry.createdAt.toLocalDate()) }
     var selectedTime by remember(entryId) { mutableStateOf(entry.createdAt.toLocalTime()) }
+    var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            hazeState = hazeState,
+            initialDate = selectedDate,
+            onConfirm = {
+                selectedDate = it
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false }
+        )
+    }
 
     if (showTimePicker) {
         TimePickerDialog(
@@ -110,6 +125,8 @@ fun EditEntryScreen(
         ) {
             EntryFormCard(
                 hazeState = hazeState,
+                selectedDate = selectedDate,
+                onDateClick = { showDatePicker = true },
                 selectedTime = selectedTime,
                 onTimeClick = { showTimePicker = true },
                 bloodSugar = bloodSugar,
@@ -129,13 +146,19 @@ fun EditEntryScreen(
                     .clickable(
                         enabled = bloodSugar.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
                     ) {
+                        val newBloodSugar = bloodSugar.toFloatOrNull()
                         viewModel.updateEntry(
                             entry.copy(
-                                bloodSugar = bloodSugar.toFloatOrNull(),
+                                bloodSugar = newBloodSugar,
+                                sugarSource = if (newBloodSugar != entry.bloodSugar) {
+                                    newBloodSugar?.let { SugarSource.MANUAL }
+                                } else {
+                                    entry.sugarSource
+                                },
                                 shortInsulinDose = shortInsulinDose.toFloatOrNull(),
                                 longInsulinDose = longInsulinDose.toFloatOrNull(),
                                 notes = notes.trim(),
-                                createdAt = LocalDateTime.of(entry.createdAt.toLocalDate(), selectedTime)
+                                createdAt = LocalDateTime.of(selectedDate, selectedTime)
                             )
                         )
                         onDone()

@@ -10,4 +10,10 @@ class Converters {
     @TypeConverter
     fun toLocalDateTime(value: String?): LocalDateTime? =
         value?.let { LocalDateTime.parse(it) }
+
+    @TypeConverter
+    fun fromSugarSource(value: SugarSource?): String? = value?.name
+
+    @TypeConverter
+    fun toSugarSource(value: String?): SugarSource? = value?.let { SugarSource.valueOf(it) }
 }

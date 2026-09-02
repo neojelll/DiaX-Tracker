@@ -29,7 +29,9 @@ fun AddEntryScreen(
     var shortInsulinDose by remember { mutableStateOf("") }
     var longInsulinDose by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedTime by remember { mutableStateOf(LocalTime.now()) }
+    var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showSuccessSnackbar by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -40,6 +42,18 @@ fun AddEntryScreen(
             snackbarHostState.showSnackbar("Запись сохранена!")
             showSuccessSnackbar = false
         }
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            hazeState = hazeState,
+            initialDate = selectedDate,
+            onConfirm = {
+                selectedDate = it
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false }
+        )
     }
 
     if (showTimePicker) {
@@ -80,6 +94,8 @@ fun AddEntryScreen(
 
             EntryFormCard(
                 hazeState = hazeState,
+                selectedDate = selectedDate,
+                onDateClick = { showDatePicker = true },
                 selectedTime = selectedTime,
                 onTimeClick = { showTimePicker = true },
                 bloodSugar = bloodSugar,
@@ -104,12 +120,13 @@ fun AddEntryScreen(
                             shortInsulinDose = shortInsulinDose.toFloatOrNull(),
                             longInsulinDose = longInsulinDose.toFloatOrNull(),
                             notes = notes.trim(),
-                            createdAt = LocalDateTime.of(LocalDate.now(), selectedTime)
+                            createdAt = LocalDateTime.of(selectedDate, selectedTime)
                         )
                         bloodSugar = ""
                         shortInsulinDose = ""
                         longInsulinDose = ""
                         notes = ""
+                        selectedDate = LocalDate.now()
                         selectedTime = LocalTime.now()
                         showSuccessSnackbar = true
                     }

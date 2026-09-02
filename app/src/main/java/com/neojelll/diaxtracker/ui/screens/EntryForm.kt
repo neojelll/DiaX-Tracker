@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
@@ -29,9 +30,13 @@ import com.neojelll.diaxtracker.ui.theme.glassPanel
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 internal val DividerColor = OnGlass.copy(alpha = 0.12f)
 
@@ -109,6 +114,8 @@ internal fun InsulinActiveBanner(hazeState: HazeState, entry: DiaryEntry) {
 @Composable
 internal fun EntryFormCard(
     hazeState: HazeState,
+    selectedDate: LocalDate,
+    onDateClick: () -> Unit,
     selectedTime: LocalTime,
     onTimeClick: () -> Unit,
     bloodSugar: String,
@@ -126,6 +133,9 @@ internal fun EntryFormCard(
             .glassPanel(hazeState, RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
+            DateRow(date = selectedDate, onClick = onDateClick)
+            HorizontalDivider(color = DividerColor)
+
             TimeRow(time = selectedTime, onClick = onTimeClick)
             HorizontalDivider(color = DividerColor)
 
@@ -176,6 +186,35 @@ internal fun EntryFormCard(
                 maxLines = 4
             )
         }
+    }
+}
+
+@Composable
+private fun DateRow(
+    date: LocalDate,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = "Дата записи",
+                style = MaterialTheme.typography.labelMedium,
+                color = OnGlassMuted
+            )
+            Text(
+                text = date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))),
+                style = MaterialTheme.typography.headlineSmall,
+                color = OnGlass
+            )
+        }
+        Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = OnGlass)
     }
 }
 
@@ -241,6 +280,55 @@ internal fun TimePickerDialog(
                         Text("Отмена", color = OnGlass)
                     }
                     TextButton(onClick = { onConfirm(LocalTime.of(state.hour, state.minute)) }) {
+                        Text("ОК", color = OnGlass)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun DatePickerDialog(
+    hazeState: HazeState,
+    initialDate: LocalDate,
+    onConfirm: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val state = rememberDatePickerState(
+        initialSelectedDateMillis = initialDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                utcTimeMillis <= System.currentTimeMillis()
+        }
+    )
+
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier.glassPanel(hazeState, RoundedCornerShape(24.dp))
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                DatePicker(state = state, showModeToggle = false)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Отмена", color = OnGlass)
+                    }
+                    TextButton(onClick = {
+                        val millis = state.selectedDateMillis
+                        if (millis != null) {
+                            onConfirm(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
+                        }
+                        onDismiss()
+                    }) {
                         Text("ОК", color = OnGlass)
                     }
                 }

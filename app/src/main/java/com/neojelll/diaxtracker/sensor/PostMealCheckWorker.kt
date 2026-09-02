@@ -5,6 +5,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.data.SugarSource
 import java.time.LocalDateTime
 
 class PostMealCheckWorker(
@@ -18,6 +19,7 @@ class PostMealCheckWorker(
         DiaryDatabase.getDatabase(applicationContext).diaryDao().insert(
             DiaryEntry(
                 bloodSugar = sugar,
+                sugarSource = SugarSource.SENSOR,
                 shortInsulinDose = null,
                 longInsulinDose = null,
                 notes = "",

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryRepository
+import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.sensor.PostMealScheduler
 import com.neojelll.diaxtracker.sensor.SensorReadingStore
 import kotlinx.coroutines.delay
@@ -70,9 +71,15 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         createdAt: LocalDateTime
     ) {
         viewModelScope.launch {
+            val sensorReading = sensorReadingStore.getLatestReading()
             val entryId = repository.insert(
                 DiaryEntry(
-                    bloodSugar = bloodSugar ?: sensorReadingStore.getLatestReading(),
+                    bloodSugar = bloodSugar ?: sensorReading,
+                    sugarSource = when {
+                        bloodSugar != null -> SugarSource.MANUAL
+                        sensorReading != null -> SugarSource.SENSOR
+                        else -> null
+                    },
                     shortInsulinDose = shortInsulinDose,
                     longInsulinDose = longInsulinDose,
                     notes = notes,
