@@ -10,7 +10,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -34,10 +37,11 @@ fun AddEntryScreen(
     var showSuccessSnackbar by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val sensorAvailable by viewModel.sensorAvailable.collectAsState()
+    val entrySavedMessage = stringResource(R.string.entry_saved_snackbar)
 
     LaunchedEffect(showSuccessSnackbar) {
         if (showSuccessSnackbar) {
-            snackbarHostState.showSnackbar("Запись сохранена!")
+            snackbarHostState.showSnackbar(entrySavedMessage)
             showSuccessSnackbar = false
         }
     }
@@ -68,7 +72,8 @@ fun AddEntryScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Новая запись", color = Color.White) },
+                title = { Text(stringResource(R.string.add_entry_title), color = Color.White) },
+                actions = { LanguageMenu() },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
@@ -129,7 +134,7 @@ fun AddEntryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "Сохранить запись",
+                    stringResource(R.string.save_entry_button),
                     color = OnGlass,
                     style = MaterialTheme.typography.titleMedium
                 )

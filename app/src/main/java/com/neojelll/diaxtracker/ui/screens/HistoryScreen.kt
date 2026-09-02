@@ -10,9 +10,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
@@ -33,7 +37,8 @@ fun HistoryScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("История записей", color = Color.White) },
+                title = { Text(stringResource(R.string.history_title), color = Color.White) },
+                actions = { LanguageMenu() },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
@@ -52,13 +57,13 @@ fun HistoryScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Записей пока нет",
+                            text = stringResource(R.string.no_entries_title),
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Добавьте первую запись",
+                            text = stringResource(R.string.no_entries_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.White
                         )
@@ -84,7 +89,8 @@ fun HistoryScreen(
 
 @Composable
 private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
-    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm")
+    val locale = LocalConfiguration.current.locales[0]
+    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", locale)
 
     Box(
         modifier = Modifier
@@ -113,12 +119,12 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                 entry.bloodSugar?.let {
                     Column {
                         Text(
-                            text = "Сахар",
+                            text = stringResource(R.string.sugar_label),
                             style = MaterialTheme.typography.labelSmall,
                             color = OnGlassMuted
                         )
                         Text(
-                            text = "${String.format(Locale.US, "%.1f", it)} ммоль/л",
+                            text = stringResource(R.string.sugar_value_format, String.format(Locale.US, "%.1f", it)),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = sugarColor(it)
@@ -128,12 +134,12 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                 entry.shortInsulinDose?.let {
                     Column {
                         Text(
-                            text = "Короткий инсулин",
+                            text = stringResource(R.string.short_insulin_short_label),
                             style = MaterialTheme.typography.labelSmall,
                             color = OnGlassMuted
                         )
                         Text(
-                            text = "$it ед.",
+                            text = stringResource(R.string.dose_value_format, it.toString()),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = OnGlass
@@ -143,12 +149,12 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                 entry.longInsulinDose?.let {
                     Column {
                         Text(
-                            text = "Длинный инсулин",
+                            text = stringResource(R.string.long_insulin_short_label),
                             style = MaterialTheme.typography.labelSmall,
                             color = OnGlassMuted
                         )
                         Text(
-                            text = "$it ед.",
+                            text = stringResource(R.string.dose_value_format, it.toString()),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = OnGlass
@@ -160,7 +166,7 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
             if (entry.notes.isNotBlank()) {
                 Column {
                     Text(
-                        text = "Комментарий",
+                        text = stringResource(R.string.comment_label),
                         style = MaterialTheme.typography.labelSmall,
                         color = OnGlassMuted
                     )

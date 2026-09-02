@@ -19,9 +19,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
@@ -35,7 +38,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 internal val DividerColor = OnGlass.copy(alpha = 0.12f)
 
@@ -68,7 +70,7 @@ internal fun SensorWarningBanner() {
     ) {
         Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = MaterialTheme.colorScheme.error)
         Text(
-            text = "Нет свежих данных с датчика — сахар нужно ввести вручную",
+            text = stringResource(R.string.sensor_warning),
             style = MaterialTheme.typography.bodyMedium,
             color = OnGlass
         )
@@ -91,7 +93,11 @@ internal fun InsulinActiveBanner(entry: DiaryEntry) {
     val totalMinutes = remaining.toMinutes()
     val hours = totalMinutes / 60
     val minutes = totalMinutes % 60
-    val timeText = if (hours > 0) "$hours ч $minutes мин" else "$minutes мин"
+    val timeText = if (hours > 0) {
+        stringResource(R.string.duration_hours_minutes, hours, minutes)
+    } else {
+        stringResource(R.string.duration_minutes, minutes)
+    }
 
     Row(
         modifier = Modifier
@@ -103,7 +109,7 @@ internal fun InsulinActiveBanner(entry: DiaryEntry) {
     ) {
         Icon(Icons.Filled.Bolt, contentDescription = null, tint = SproutGreen)
         Text(
-            text = "Короткий инсулин ещё действует — осталось $timeText",
+            text = stringResource(R.string.insulin_active_banner, timeText),
             style = MaterialTheme.typography.bodyMedium,
             color = OnGlass
         )
@@ -140,8 +146,8 @@ internal fun EntryFormCard(
             TextField(
                 value = bloodSugar,
                 onValueChange = { onBloodSugarChange(it.filter { c -> c.isDigit() || c == '.' }) },
-                label = { Text("Уровень сахара (ммоль/л)") },
-                placeholder = { Text("Например: 5.6") },
+                label = { Text(stringResource(R.string.blood_sugar_label)) },
+                placeholder = { Text(stringResource(R.string.blood_sugar_placeholder)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 colors = transparentFieldColors(),
                 modifier = Modifier.fillMaxWidth(),
@@ -152,8 +158,8 @@ internal fun EntryFormCard(
             TextField(
                 value = shortInsulinDose,
                 onValueChange = { onShortInsulinDoseChange(it.filter { c -> c.isDigit() || c == '.' }) },
-                label = { Text("Короткий инсулин (ед.)") },
-                placeholder = { Text("Например: 4") },
+                label = { Text(stringResource(R.string.short_insulin_label)) },
+                placeholder = { Text(stringResource(R.string.short_insulin_placeholder)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 colors = transparentFieldColors(),
                 modifier = Modifier.fillMaxWidth(),
@@ -164,8 +170,8 @@ internal fun EntryFormCard(
             TextField(
                 value = longInsulinDose,
                 onValueChange = { onLongInsulinDoseChange(it.filter { c -> c.isDigit() || c == '.' }) },
-                label = { Text("Длинный инсулин (ед.)") },
-                placeholder = { Text("Например: 10") },
+                label = { Text(stringResource(R.string.long_insulin_label)) },
+                placeholder = { Text(stringResource(R.string.long_insulin_placeholder)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 colors = transparentFieldColors(),
                 modifier = Modifier.fillMaxWidth(),
@@ -176,8 +182,8 @@ internal fun EntryFormCard(
             TextField(
                 value = notes,
                 onValueChange = onNotesChange,
-                label = { Text("Комментарий") },
-                placeholder = { Text("Дополнительный комментарий...") },
+                label = { Text(stringResource(R.string.comment_label)) },
+                placeholder = { Text(stringResource(R.string.comment_placeholder)) },
                 colors = transparentFieldColors(),
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
@@ -200,14 +206,15 @@ private fun DateRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val locale = LocalConfiguration.current.locales[0]
         Column {
             Text(
-                text = "Дата записи",
+                text = stringResource(R.string.entry_date_label),
                 style = MaterialTheme.typography.labelMedium,
                 color = OnGlassMuted
             )
             Text(
-                text = date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))),
+                text = date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale)),
                 style = MaterialTheme.typography.headlineSmall,
                 color = OnGlass
             )
@@ -231,7 +238,7 @@ private fun TimeRow(
     ) {
         Column {
             Text(
-                text = "Время измерения",
+                text = stringResource(R.string.entry_time_label),
                 style = MaterialTheme.typography.labelMedium,
                 color = OnGlassMuted
             )
@@ -274,10 +281,10 @@ internal fun TimePickerDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Отмена", color = OnGlass)
+                        Text(stringResource(R.string.cancel), color = OnGlass)
                     }
                     TextButton(onClick = { onConfirm(LocalTime.of(state.hour, state.minute)) }) {
-                        Text("ОК", color = OnGlass)
+                        Text(stringResource(R.string.ok), color = OnGlass)
                     }
                 }
             }
@@ -316,7 +323,7 @@ internal fun DatePickerDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Отмена", color = OnGlass)
+                        Text(stringResource(R.string.cancel), color = OnGlass)
                     }
                     TextButton(onClick = {
                         val millis = state.selectedDateMillis
@@ -325,7 +332,7 @@ internal fun DatePickerDialog(
                         }
                         onDismiss()
                     }) {
-                        Text("ОК", color = OnGlass)
+                        Text(stringResource(R.string.ok), color = OnGlass)
                     }
                 }
             }
