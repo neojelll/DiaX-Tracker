@@ -124,6 +124,8 @@ internal fun EntryFormCard(
     onTimeClick: () -> Unit,
     bloodSugar: String,
     onBloodSugarChange: (String) -> Unit,
+    breadUnits: String,
+    onBreadUnitsChange: (String) -> Unit,
     shortInsulinDose: String,
     onShortInsulinDoseChange: (String) -> Unit,
     longInsulinDose: String,
@@ -148,6 +150,18 @@ internal fun EntryFormCard(
                 onValueChange = { onBloodSugarChange(it.filter { c -> c.isDigit() || c == '.' }) },
                 label = { Text(stringResource(R.string.blood_sugar_label)) },
                 placeholder = { Text(stringResource(R.string.blood_sugar_placeholder)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                colors = transparentFieldColors(),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            HorizontalDivider(color = DividerColor)
+
+            TextField(
+                value = breadUnits,
+                onValueChange = { onBreadUnitsChange(it.filter { c -> c.isDigit() || c == '.' }) },
+                label = { Text(stringResource(R.string.bread_units_label)) },
+                placeholder = { Text(stringResource(R.string.bread_units_placeholder)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 colors = transparentFieldColors(),
                 modifier = Modifier.fillMaxWidth(),

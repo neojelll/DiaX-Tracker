@@ -65,6 +65,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addEntry(
         bloodSugar: Float?,
+        breadUnits: Float?,
         shortInsulinDose: Float?,
         longInsulinDose: Float?,
         notes: String,
@@ -80,6 +81,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                         sensorReading != null -> SugarSource.SENSOR
                         else -> null
                     },
+                    breadUnits = breadUnits,
                     shortInsulinDose = shortInsulinDose,
                     longInsulinDose = longInsulinDose,
                     notes = notes,

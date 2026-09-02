@@ -1,0 +1,76 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "e56d1400f67f5dbb46e77633e10e9b1d",
+    "entities": [
+      {
+        "tableName": "diary_entries",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bloodSugar` REAL, `sugarSource` TEXT, `breadUnits` REAL, `shortInsulinDose` REAL, `longInsulinDose` REAL, `notes` TEXT NOT NULL, `createdAt` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bloodSugar",
+            "columnName": "bloodSugar",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sugarSource",
+            "columnName": "sugarSource",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "breadUnits",
+            "columnName": "breadUnits",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "shortInsulinDose",
+            "columnName": "shortInsulinDose",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "longInsulinDose",
+            "columnName": "longInsulinDose",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e56d1400f67f5dbb46e77633e10e9b1d')"
+    ]
+  }
+}

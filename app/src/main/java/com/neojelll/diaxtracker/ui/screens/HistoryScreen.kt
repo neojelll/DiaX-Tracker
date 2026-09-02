@@ -131,6 +131,21 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                         )
                     }
                 }
+                entry.breadUnits?.let {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.bread_units_short_label),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = OnGlassMuted
+                        )
+                        Text(
+                            text = stringResource(R.string.bread_units_value_format, String.format(Locale.US, "%.1f", it)),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = OnGlass
+                        )
+                    }
+                }
                 entry.shortInsulinDose?.let {
                     Column {
                         Text(
