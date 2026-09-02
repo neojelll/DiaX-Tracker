@@ -5,21 +5,35 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.neojelll.diaxtracker.ui.theme.DeepForest
+import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.ui.theme.OnGlass
+import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
+import com.neojelll.diaxtracker.ui.theme.SproutGreen
+import com.neojelll.diaxtracker.ui.theme.glassPanel
+import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.delay
+import java.time.Duration
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-internal val DividerColor = DeepForest.copy(alpha = 0.12f)
+internal val DividerColor = OnGlass.copy(alpha = 0.12f)
 
 @Composable
 internal fun transparentFieldColors() = TextFieldDefaults.colors(
@@ -28,33 +42,73 @@ internal fun transparentFieldColors() = TextFieldDefaults.colors(
     disabledContainerColor = Color.Transparent,
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
-    disabledIndicatorColor = Color.Transparent
+    disabledIndicatorColor = Color.Transparent,
+    focusedTextColor = OnGlass,
+    unfocusedTextColor = OnGlass,
+    focusedLabelColor = OnGlassMuted,
+    unfocusedLabelColor = OnGlassMuted,
+    focusedPlaceholderColor = OnGlassMuted,
+    unfocusedPlaceholderColor = OnGlassMuted,
+    cursorColor = OnGlass
 )
 
 @Composable
-internal fun SensorWarningBanner() {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White,
-        modifier = Modifier.fillMaxWidth()
+internal fun SensorWarningBanner(hazeState: HazeState) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassPanel(hazeState, RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-            Text(
-                text = "Нет свежих данных с датчика — сахар нужно ввести вручную",
-                style = MaterialTheme.typography.bodyMedium,
-                color = DeepForest
-            )
+        Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+        Text(
+            text = "Нет свежих данных с датчика — сахар нужно ввести вручную",
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnGlass
+        )
+    }
+}
+
+@Composable
+internal fun InsulinActiveBanner(hazeState: HazeState, entry: DiaryEntry) {
+    var now by remember(entry.id) { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(entry.id) {
+        while (true) {
+            now = LocalDateTime.now()
+            delay(30_000L)
         }
+    }
+
+    val remaining = Duration.between(now, entry.createdAt.plusHours(4)).let {
+        if (it.isNegative) Duration.ZERO else it
+    }
+    val totalMinutes = remaining.toMinutes()
+    val hours = totalMinutes / 60
+    val minutes = totalMinutes % 60
+    val timeText = if (hours > 0) "$hours ч $minutes мин" else "$minutes мин"
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassPanel(hazeState, RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(Icons.Filled.Bolt, contentDescription = null, tint = SproutGreen)
+        Text(
+            text = "Короткий инсулин ещё действует — осталось $timeText",
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnGlass
+        )
     }
 }
 
 @Composable
 internal fun EntryFormCard(
+    hazeState: HazeState,
     selectedTime: LocalTime,
     onTimeClick: () -> Unit,
     bloodSugar: String,
@@ -66,10 +120,10 @@ internal fun EntryFormCard(
     notes: String,
     onNotesChange: (String) -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassPanel(hazeState, RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             TimeRow(time = selectedTime, onClick = onTimeClick)
@@ -142,21 +196,22 @@ private fun TimeRow(
             Text(
                 text = "Время измерения",
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = OnGlassMuted
             )
             Text(
                 text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
                 style = MaterialTheme.typography.headlineSmall,
-                color = DeepForest
+                color = OnGlass
             )
         }
-        Icon(Icons.Filled.Schedule, contentDescription = null, tint = DeepForest)
+        Icon(Icons.Filled.Schedule, contentDescription = null, tint = OnGlass)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TimePickerDialog(
+    hazeState: HazeState,
     initialTime: LocalTime,
     onConfirm: (LocalTime) -> Unit,
     onDismiss: () -> Unit
@@ -168,7 +223,9 @@ internal fun TimePickerDialog(
     )
 
     Dialog(onDismissRequest = onDismiss) {
-        Surface(shape = RoundedCornerShape(24.dp), color = Color.White) {
+        Box(
+            modifier = Modifier.glassPanel(hazeState, RoundedCornerShape(24.dp))
+        ) {
             Column(
                 modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -181,10 +238,10 @@ internal fun TimePickerDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Отмена")
+                        Text("Отмена", color = OnGlass)
                     }
                     TextButton(onClick = { onConfirm(LocalTime.of(state.hour, state.minute)) }) {
-                        Text("ОК")
+                        Text("ОК", color = OnGlass)
                     }
                 }
             }

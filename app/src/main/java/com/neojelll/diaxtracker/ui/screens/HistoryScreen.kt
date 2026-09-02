@@ -1,10 +1,10 @@
 package com.neojelll.diaxtracker.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,15 +13,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.data.DiaryEntry
-import com.neojelll.diaxtracker.ui.theme.AppGradient
-import com.neojelll.diaxtracker.ui.theme.DeepForest
+import com.neojelll.diaxtracker.ui.theme.OnGlass
+import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
+import com.neojelll.diaxtracker.ui.theme.SproutGreen
+import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import dev.chrisbanes.haze.HazeState
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: DiaryViewModel,
+    hazeState: HazeState,
     onEntryClick: (Long) -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
@@ -40,7 +45,6 @@ fun HistoryScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AppGradient)
                 .padding(padding)
         ) {
             if (entries.isEmpty()) {
@@ -69,7 +73,11 @@ fun HistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(entries, key = { it.id }) { entry ->
-                        DiaryEntryCard(entry = entry, onClick = { onEntryClick(entry.id) })
+                        DiaryEntryCard(
+                            entry = entry,
+                            hazeState = hazeState,
+                            onClick = { onEntryClick(entry.id) }
+                        )
                     }
                 }
             }
@@ -78,16 +86,14 @@ fun HistoryScreen(
 }
 
 @Composable
-private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
+private fun DiaryEntryCard(entry: DiaryEntry, hazeState: HazeState, onClick: () -> Unit) {
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm")
 
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+            .glassPanel(hazeState, RoundedCornerShape(24.dp))
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier
@@ -98,10 +104,10 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
             Text(
                 text = entry.createdAt.format(formatter),
                 style = MaterialTheme.typography.labelMedium,
-                color = DeepForest
+                color = OnGlassMuted
             )
 
-            HorizontalDivider()
+            HorizontalDivider(color = OnGlass.copy(alpha = 0.12f))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -112,10 +118,10 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                         Text(
                             text = "Сахар",
                             style = MaterialTheme.typography.labelSmall,
-                            color = DeepForest
+                            color = OnGlassMuted
                         )
                         Text(
-                            text = "$it ммоль/л",
+                            text = "${String.format(Locale.US, "%.1f", it)} ммоль/л",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = sugarColor(it)
@@ -127,13 +133,13 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                         Text(
                             text = "Короткий инсулин",
                             style = MaterialTheme.typography.labelSmall,
-                            color = DeepForest
+                            color = OnGlassMuted
                         )
                         Text(
                             text = "$it ед.",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = DeepForest
+                            color = OnGlass
                         )
                     }
                 }
@@ -142,13 +148,13 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                         Text(
                             text = "Длинный инсулин",
                             style = MaterialTheme.typography.labelSmall,
-                            color = DeepForest
+                            color = OnGlassMuted
                         )
                         Text(
                             text = "$it ед.",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = DeepForest
+                            color = OnGlass
                         )
                     }
                 }
@@ -159,12 +165,12 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                     Text(
                         text = "Комментарий",
                         style = MaterialTheme.typography.labelSmall,
-                        color = DeepForest
+                        color = OnGlassMuted
                     )
                     Text(
                         text = entry.notes,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = DeepForest
+                        color = OnGlass
                     )
                 }
             }
@@ -177,5 +183,5 @@ private fun sugarColor(value: Float) = when {
     value < 3.9f -> MaterialTheme.colorScheme.error
     value > 10.0f -> MaterialTheme.colorScheme.error
     value > 7.8f -> MaterialTheme.colorScheme.tertiary
-    else -> MaterialTheme.colorScheme.primary
+    else -> SproutGreen
 }
