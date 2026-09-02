@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Surface
 import androidx.navigation.compose.rememberNavController
+import androidx.work.WorkManager
 import com.neojelll.diaxtracker.sensor.SensorForegroundService
 import com.neojelll.diaxtracker.ui.navigation.NavGraph
 import com.neojelll.diaxtracker.ui.theme.DiaXTrackerTheme
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
         SensorForegroundService.start(this)
+        cancelStalePostMealWorkOnce()
 
         setContent {
             DiaXTrackerTheme {
@@ -35,5 +37,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun cancelStalePostMealWorkOnce() {
+        val prefs = getSharedPreferences("migrations", MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_CANCELLED_STALE_WORK, false)) return
+        WorkManager.getInstance(this).cancelAllWork()
+        prefs.edit().putBoolean(KEY_CANCELLED_STALE_WORK, true).apply()
+    }
+
+    private companion object {
+        const val KEY_CANCELLED_STALE_WORK = "cancelled_stale_post_meal_work"
     }
 }

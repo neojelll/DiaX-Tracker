@@ -49,7 +49,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         createdAt: LocalDateTime
     ) {
         viewModelScope.launch {
-            repository.insert(
+            val entryId = repository.insert(
                 DiaryEntry(
                     bloodSugar = bloodSugar ?: sensorReadingStore.getLatestReading(),
                     shortInsulinDose = shortInsulinDose,
@@ -58,7 +58,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                     createdAt = createdAt
                 )
             )
-            PostMealScheduler.scheduleFollowUps(getApplication())
+            if (shortInsulinDose != null || longInsulinDose != null) {
+                PostMealScheduler.scheduleFollowUps(getApplication(), entryId)
+            }
         }
     }
 
@@ -70,11 +72,13 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteEntry(entry: DiaryEntry) {
         viewModelScope.launch {
+            PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
             repository.delete(entry)
         }
     }
 
     private companion object {
         const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
+        const val INSULIN_CHECK_INTERVAL_MILLIS = 30_000L
     }
 }
