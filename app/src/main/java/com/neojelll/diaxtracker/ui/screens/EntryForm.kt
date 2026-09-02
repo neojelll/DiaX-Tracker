@@ -27,7 +27,6 @@ import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
 import com.neojelll.diaxtracker.ui.theme.glassPanel
-import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.Instant
@@ -58,11 +57,11 @@ internal fun transparentFieldColors() = TextFieldDefaults.colors(
 )
 
 @Composable
-internal fun SensorWarningBanner(hazeState: HazeState) {
+internal fun SensorWarningBanner() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(hazeState, RoundedCornerShape(16.dp))
+            .glassPanel(RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -77,7 +76,7 @@ internal fun SensorWarningBanner(hazeState: HazeState) {
 }
 
 @Composable
-internal fun InsulinActiveBanner(hazeState: HazeState, entry: DiaryEntry) {
+internal fun InsulinActiveBanner(entry: DiaryEntry) {
     var now by remember(entry.id) { mutableStateOf(LocalDateTime.now()) }
     LaunchedEffect(entry.id) {
         while (true) {
@@ -97,7 +96,7 @@ internal fun InsulinActiveBanner(hazeState: HazeState, entry: DiaryEntry) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(hazeState, RoundedCornerShape(16.dp))
+            .glassPanel(RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -113,7 +112,6 @@ internal fun InsulinActiveBanner(hazeState: HazeState, entry: DiaryEntry) {
 
 @Composable
 internal fun EntryFormCard(
-    hazeState: HazeState,
     selectedDate: LocalDate,
     onDateClick: () -> Unit,
     selectedTime: LocalTime,
@@ -130,7 +128,7 @@ internal fun EntryFormCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(hazeState, RoundedCornerShape(24.dp))
+            .glassPanel(RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             DateRow(date = selectedDate, onClick = onDateClick)
@@ -250,7 +248,6 @@ private fun TimeRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TimePickerDialog(
-    hazeState: HazeState,
     initialTime: LocalTime,
     onConfirm: (LocalTime) -> Unit,
     onDismiss: () -> Unit
@@ -263,7 +260,7 @@ internal fun TimePickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
-            modifier = Modifier.glassPanel(hazeState, RoundedCornerShape(24.dp))
+            modifier = Modifier.glassPanel(RoundedCornerShape(24.dp))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -291,7 +288,6 @@ internal fun TimePickerDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DatePickerDialog(
-    hazeState: HazeState,
     initialDate: LocalDate,
     onConfirm: (LocalDate) -> Unit,
     onDismiss: () -> Unit
@@ -306,7 +302,7 @@ internal fun DatePickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
-            modifier = Modifier.glassPanel(hazeState, RoundedCornerShape(24.dp))
+            modifier = Modifier.glassPanel(RoundedCornerShape(24.dp))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),

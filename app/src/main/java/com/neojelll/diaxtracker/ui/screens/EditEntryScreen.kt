@@ -18,7 +18,6 @@ import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
-import dev.chrisbanes.haze.HazeState
 import java.time.LocalDateTime
 import java.util.Locale
 
@@ -27,7 +26,6 @@ import java.util.Locale
 fun EditEntryScreen(
     viewModel: DiaryViewModel,
     entryId: Long,
-    hazeState: HazeState,
     onDone: () -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
@@ -47,7 +45,6 @@ fun EditEntryScreen(
 
     if (showDatePicker) {
         DatePickerDialog(
-            hazeState = hazeState,
             initialDate = selectedDate,
             onConfirm = {
                 selectedDate = it
@@ -59,7 +56,6 @@ fun EditEntryScreen(
 
     if (showTimePicker) {
         TimePickerDialog(
-            hazeState = hazeState,
             initialTime = selectedTime,
             onConfirm = {
                 selectedTime = it
@@ -124,7 +120,6 @@ fun EditEntryScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             EntryFormCard(
-                hazeState = hazeState,
                 selectedDate = selectedDate,
                 onDateClick = { showDatePicker = true },
                 selectedTime = selectedTime,
@@ -142,7 +137,7 @@ fun EditEntryScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .glassPanel(hazeState, RoundedCornerShape(16.dp))
+                    .glassPanel(RoundedCornerShape(16.dp))
                     .clickable(
                         enabled = bloodSugar.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
                     ) {

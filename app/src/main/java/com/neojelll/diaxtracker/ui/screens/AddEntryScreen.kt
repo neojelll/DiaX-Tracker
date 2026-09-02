@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
-import dev.chrisbanes.haze.HazeState
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -22,8 +21,7 @@ import java.time.LocalTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEntryScreen(
-    viewModel: DiaryViewModel,
-    hazeState: HazeState
+    viewModel: DiaryViewModel
 ) {
     var bloodSugar by remember { mutableStateOf("") }
     var shortInsulinDose by remember { mutableStateOf("") }
@@ -46,7 +44,6 @@ fun AddEntryScreen(
 
     if (showDatePicker) {
         DatePickerDialog(
-            hazeState = hazeState,
             initialDate = selectedDate,
             onConfirm = {
                 selectedDate = it
@@ -58,7 +55,6 @@ fun AddEntryScreen(
 
     if (showTimePicker) {
         TimePickerDialog(
-            hazeState = hazeState,
             initialTime = selectedTime,
             onConfirm = {
                 selectedTime = it
@@ -89,11 +85,10 @@ fun AddEntryScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (!sensorAvailable) {
-                SensorWarningBanner(hazeState = hazeState)
+                SensorWarningBanner()
             }
 
             EntryFormCard(
-                hazeState = hazeState,
                 selectedDate = selectedDate,
                 onDateClick = { showDatePicker = true },
                 selectedTime = selectedTime,
@@ -111,7 +106,7 @@ fun AddEntryScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .glassPanel(hazeState, RoundedCornerShape(16.dp))
+                    .glassPanel(RoundedCornerShape(16.dp))
                     .clickable(
                         enabled = bloodSugar.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
                     ) {

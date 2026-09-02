@@ -18,7 +18,6 @@ import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
-import dev.chrisbanes.haze.HazeState
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -26,7 +25,6 @@ import java.util.Locale
 @Composable
 fun HistoryScreen(
     viewModel: DiaryViewModel,
-    hazeState: HazeState,
     onEntryClick: (Long) -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
@@ -75,7 +73,6 @@ fun HistoryScreen(
                     items(entries, key = { it.id }) { entry ->
                         DiaryEntryCard(
                             entry = entry,
-                            hazeState = hazeState,
                             onClick = { onEntryClick(entry.id) }
                         )
                     }
@@ -86,13 +83,13 @@ fun HistoryScreen(
 }
 
 @Composable
-private fun DiaryEntryCard(entry: DiaryEntry, hazeState: HazeState, onClick: () -> Unit) {
+private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm")
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(hazeState, RoundedCornerShape(24.dp))
+            .glassPanel(RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
     ) {
         Column(
