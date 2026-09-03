@@ -80,10 +80,20 @@ fun HistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(entries, key = { it.id }) { entry ->
-                        DiaryEntryCard(
-                            entry = entry,
-                            onClick = { onEntryClick(entry.id) }
-                        )
+                        val stats = entryStats(entry)
+                        if (stats.size <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
+                            CompactEntryRow(
+                                entry = entry,
+                                stat = stats.firstOrNull(),
+                                onClick = { onEntryClick(entry.id) }
+                            )
+                        } else {
+                            DiaryEntryCard(
+                                entry = entry,
+                                stats = stats,
+                                onClick = { onEntryClick(entry.id) }
+                            )
+                        }
                     }
                 }
             }
@@ -98,7 +108,77 @@ private data class EntryStat(
 )
 
 @Composable
-private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
+private fun entryStats(entry: DiaryEntry): List<EntryStat> = buildList {
+    entry.bloodSugar?.let {
+        add(
+            EntryStat(
+                label = stringResource(R.string.sugar_label),
+                value = stringResource(R.string.sugar_value_format, String.format(Locale.US, "%.1f", it)),
+                color = sugarColor(it)
+            )
+        )
+    }
+    entry.breadUnits?.let {
+        add(
+            EntryStat(
+                label = stringResource(R.string.bread_units_short_label),
+                value = stringResource(R.string.bread_units_value_format, String.format(Locale.US, "%.1f", it))
+            )
+        )
+    }
+    entry.shortInsulinDose?.let {
+        add(
+            EntryStat(
+                label = stringResource(R.string.short_insulin_short_label),
+                value = stringResource(R.string.dose_value_format, it.toString())
+            )
+        )
+    }
+    entry.longInsulinDose?.let {
+        add(
+            EntryStat(
+                label = stringResource(R.string.long_insulin_short_label),
+                value = stringResource(R.string.dose_value_format, it.toString())
+            )
+        )
+    }
+}
+
+@Composable
+private fun CompactEntryRow(entry: DiaryEntry, stat: EntryStat?, onClick: () -> Unit) {
+    val locale = LocalConfiguration.current.locales[0]
+    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", locale)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassPanel(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = entry.createdAt.format(formatter),
+            style = MaterialTheme.typography.labelMedium,
+            color = OnGlassMuted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        if (stat != null) {
+            Text(
+                text = stat.value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = stat.color
+            )
+        }
+    }
+}
+
+@Composable
+private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: () -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", locale)
 
@@ -137,42 +217,6 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
             }
 
             HorizontalDivider(color = OnGlass.copy(alpha = 0.12f))
-
-            val stats = buildList {
-                entry.bloodSugar?.let {
-                    add(
-                        EntryStat(
-                            label = stringResource(R.string.sugar_label),
-                            value = stringResource(R.string.sugar_value_format, String.format(Locale.US, "%.1f", it)),
-                            color = sugarColor(it)
-                        )
-                    )
-                }
-                entry.breadUnits?.let {
-                    add(
-                        EntryStat(
-                            label = stringResource(R.string.bread_units_short_label),
-                            value = stringResource(R.string.bread_units_value_format, String.format(Locale.US, "%.1f", it))
-                        )
-                    )
-                }
-                entry.shortInsulinDose?.let {
-                    add(
-                        EntryStat(
-                            label = stringResource(R.string.short_insulin_short_label),
-                            value = stringResource(R.string.dose_value_format, it.toString())
-                        )
-                    )
-                }
-                entry.longInsulinDose?.let {
-                    add(
-                        EntryStat(
-                            label = stringResource(R.string.long_insulin_short_label),
-                            value = stringResource(R.string.dose_value_format, it.toString())
-                        )
-                    )
-                }
-            }
 
             stats.chunked(2).forEach { rowStats ->
                 Row(
