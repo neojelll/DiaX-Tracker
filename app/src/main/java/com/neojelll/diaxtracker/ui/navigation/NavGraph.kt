@@ -58,7 +58,7 @@ private fun editEntryRoute(entryId: Long) = "edit_entry/$entryId"
 fun NavGraph(navController: NavHostController) {
     val viewModel: DiaryViewModel = viewModel()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val activeInsulinEntry by viewModel.activeInsulinEntry.collectAsState()
+    val activeInsulinEntries by viewModel.activeInsulinEntries.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -123,14 +123,14 @@ fun NavGraph(navController: NavHostController) {
             }
         }
 
-        activeInsulinEntry?.let { entry ->
+        if (activeInsulinEntries.isNotEmpty()) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 108.dp)
             ) {
-                InsulinActiveBanner(entry = entry)
+                InsulinActiveBanner(entries = activeInsulinEntries)
             }
         }
     }

@@ -19,6 +19,8 @@
 
     <string name="sensor_warning">No recent sensor data — enter blood sugar manually</string>
     <string name="insulin_active_banner">Fast-acting insulin still active — %1$s left</string>
+    <string name="insulin_active_banner_multi_title">Multiple fast-acting insulin doses still active</string>
+    <string name="insulin_active_dose_line">%1$s units — %2$s left</string>
     <string name="duration_hours_minutes">%1$dh %2$dm</string>
     <string name="duration_minutes">%1$dm</string>
     <string name="entry_date_label">Date</string>
