@@ -37,6 +37,7 @@ fun EditEntryScreen(
     var bloodSugar by remember(entryId) {
         mutableStateOf(entry.bloodSugar?.let { String.format(Locale.US, "%.1f", it) } ?: "")
     }
+    var breadUnits by remember(entryId) { mutableStateOf(entry.breadUnits?.toString() ?: "") }
     var shortInsulinDose by remember(entryId) { mutableStateOf(entry.shortInsulinDose?.toString() ?: "") }
     var longInsulinDose by remember(entryId) { mutableStateOf(entry.longInsulinDose?.toString() ?: "") }
     var notes by remember(entryId) { mutableStateOf(entry.notes) }
@@ -130,6 +131,8 @@ fun EditEntryScreen(
                 onTimeClick = { showTimePicker = true },
                 bloodSugar = bloodSugar,
                 onBloodSugarChange = { bloodSugar = it },
+                breadUnits = breadUnits,
+                onBreadUnitsChange = { breadUnits = it },
                 shortInsulinDose = shortInsulinDose,
                 onShortInsulinDoseChange = { shortInsulinDose = it },
                 longInsulinDose = longInsulinDose,
@@ -143,7 +146,7 @@ fun EditEntryScreen(
                     .fillMaxWidth()
                     .glassPanel(RoundedCornerShape(16.dp))
                     .clickable(
-                        enabled = bloodSugar.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
+                        enabled = bloodSugar.isNotBlank() || breadUnits.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
                     ) {
                         val newBloodSugar = bloodSugar.toFloatOrNull()
                         viewModel.updateEntry(
@@ -154,6 +157,7 @@ fun EditEntryScreen(
                                 } else {
                                     entry.sugarSource
                                 },
+                                breadUnits = breadUnits.toFloatOrNull(),
                                 shortInsulinDose = shortInsulinDose.toFloatOrNull(),
                                 longInsulinDose = longInsulinDose.toFloatOrNull(),
                                 notes = notes.trim(),
@@ -171,6 +175,8 @@ fun EditEntryScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+
+            Spacer(modifier = Modifier.height(96.dp))
         }
     }
 }

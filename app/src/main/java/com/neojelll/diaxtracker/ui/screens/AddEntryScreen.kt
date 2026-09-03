@@ -27,6 +27,7 @@ fun AddEntryScreen(
     viewModel: DiaryViewModel
 ) {
     var bloodSugar by remember { mutableStateOf("") }
+    var breadUnits by remember { mutableStateOf("") }
     var shortInsulinDose by remember { mutableStateOf("") }
     var longInsulinDose by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
@@ -100,6 +101,8 @@ fun AddEntryScreen(
                 onTimeClick = { showTimePicker = true },
                 bloodSugar = bloodSugar,
                 onBloodSugarChange = { bloodSugar = it },
+                breadUnits = breadUnits,
+                onBreadUnitsChange = { breadUnits = it },
                 shortInsulinDose = shortInsulinDose,
                 onShortInsulinDoseChange = { shortInsulinDose = it },
                 longInsulinDose = longInsulinDose,
@@ -113,16 +116,18 @@ fun AddEntryScreen(
                     .fillMaxWidth()
                     .glassPanel(RoundedCornerShape(16.dp))
                     .clickable(
-                        enabled = bloodSugar.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
+                        enabled = bloodSugar.isNotBlank() || breadUnits.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
                     ) {
                         viewModel.addEntry(
                             bloodSugar = bloodSugar.toFloatOrNull(),
+                            breadUnits = breadUnits.toFloatOrNull(),
                             shortInsulinDose = shortInsulinDose.toFloatOrNull(),
                             longInsulinDose = longInsulinDose.toFloatOrNull(),
                             notes = notes.trim(),
                             createdAt = LocalDateTime.of(selectedDate, selectedTime)
                         )
                         bloodSugar = ""
+                        breadUnits = ""
                         shortInsulinDose = ""
                         longInsulinDose = ""
                         notes = ""
@@ -139,6 +144,8 @@ fun AddEntryScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+
+            Spacer(modifier = Modifier.height(96.dp))
         }
     }
 }
