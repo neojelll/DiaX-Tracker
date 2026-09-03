@@ -1,5 +1,6 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -26,6 +27,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.neojelll.diaxtracker.R
@@ -184,10 +186,12 @@ internal fun EntryFormCard(
             .glassPanel(RoundedCornerShape(24.dp))
     ) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
-            DateRow(date = selectedDate, onClick = onDateClick)
-            HorizontalDivider(color = DividerColor)
-
-            TimeRow(time = selectedTime, onClick = onTimeClick)
+            DateTimeRow(
+                date = selectedDate,
+                onDateClick = onDateClick,
+                time = selectedTime,
+                onTimeClick = onTimeClick
+            )
             HorizontalDivider(color = DividerColor)
 
             CompactField(
@@ -240,61 +244,77 @@ internal fun EntryFormCard(
 }
 
 @Composable
-private fun DateRow(
+private fun DateTimeRow(
     date: LocalDate,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val locale = LocalConfiguration.current.locales[0]
-        Column {
-            Text(
-                text = stringResource(R.string.entry_date_label),
-                style = MaterialTheme.typography.labelMedium,
-                color = OnGlassMuted
-            )
-            Text(
-                text = date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale)),
-                style = MaterialTheme.typography.titleLarge,
-                color = OnGlass
-            )
-        }
-        Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = OnGlass)
-    }
-}
-
-@Composable
-private fun TimeRow(
+    onDateClick: () -> Unit,
     time: LocalTime,
-    onClick: () -> Unit
+    onTimeClick: () -> Unit
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
-            Text(
-                text = stringResource(R.string.entry_time_label),
-                style = MaterialTheme.typography.labelMedium,
-                color = OnGlassMuted
-            )
-            Text(
-                text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
-                style = MaterialTheme.typography.titleLarge,
-                color = OnGlass
-            )
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onDateClick)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f, fill = false)) {
+                Text(
+                    text = stringResource(R.string.entry_date_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = OnGlassMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = date.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = OnGlass,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = OnGlass, modifier = Modifier.size(20.dp))
         }
-        Icon(Icons.Filled.Schedule, contentDescription = null, tint = OnGlass)
+
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(36.dp)
+                .background(DividerColor)
+        )
+
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onTimeClick)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f, fill = false)) {
+                Text(
+                    text = stringResource(R.string.entry_time_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = OnGlassMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = OnGlass,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Icon(Icons.Filled.Schedule, contentDescription = null, tint = OnGlass, modifier = Modifier.size(20.dp))
+        }
     }
 }
 
