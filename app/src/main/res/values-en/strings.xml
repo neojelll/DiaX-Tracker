@@ -33,6 +33,9 @@
     <string name="long_insulin_placeholder">E.g. 10</string>
     <string name="comment_label">Comment</string>
     <string name="comment_placeholder">Additional comment...</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="remove_photo">Remove Photo</string>
+    <string name="entry_photo">Entry Photo</string>
 
     <string name="history_title">Entry History</string>
     <string name="no_entries_title">No entries yet</string>

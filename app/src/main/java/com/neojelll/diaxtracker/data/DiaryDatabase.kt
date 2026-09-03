@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [DiaryEntry::class], version = 5, exportSchema = true)
+@Database(entities = [DiaryEntry::class], version = 6, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class DiaryDatabase : RoomDatabase() {
     abstract fun diaryDao(): DiaryDao
@@ -29,13 +29,19 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE diary_entries ADD COLUMN photoPath TEXT")
+            }
+        }
+
         fun getDatabase(context: Context): DiaryDatabase {
             return INSTANCE ?: synchronized(this) {
                 Room.databaseBuilder(
                     context.applicationContext,
                     DiaryDatabase::class.java,
                     "diary_database"
-                ).addMigrations(MIGRATION_3_4, MIGRATION_4_5).build().also { INSTANCE = it }
+                ).addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build().also { INSTANCE = it }
             }
         }
     }

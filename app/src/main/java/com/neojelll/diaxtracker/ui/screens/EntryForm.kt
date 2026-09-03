@@ -1,5 +1,9 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -8,8 +12,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
@@ -18,25 +24,35 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
 import com.neojelll.diaxtracker.ui.theme.glassPanel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -170,6 +186,25 @@ internal fun EntryFormCard(
     onDateClick: () -> Unit,
     onTimeClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val oldPath = state.photoPath
+            coroutineScope.launch(Dispatchers.IO) {
+                val newPath = PhotoStore.savePhoto(context, uri)
+                if (newPath != null) {
+                    withContext(Dispatchers.Main) {
+                        onStateChange(state.copy(photoPath = newPath))
+                    }
+                    oldPath?.let { PhotoStore.deletePhoto(it) }
+                }
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,6 +263,64 @@ internal fun EntryFormCard(
                 singleLine = false,
                 minLines = 1,
                 maxLines = 3
+            )
+            HorizontalDivider(color = DividerColor)
+
+            PhotoRow(
+                photoPath = state.photoPath,
+                onPickPhoto = {
+                    photoPickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                onRemovePhoto = {
+                    PhotoStore.deletePhoto(state.photoPath)
+                    onStateChange(state.copy(photoPath = null))
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun PhotoRow(
+    photoPath: String?,
+    onPickPhoto: () -> Unit,
+    onRemovePhoto: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (photoPath == null) Modifier.clickable(onClick = onPickPhoto) else Modifier)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (photoPath != null) {
+            AsyncImage(
+                model = File(photoPath),
+                contentDescription = stringResource(R.string.entry_photo),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(onClick = onPickPhoto)
+            )
+            Text(
+                text = stringResource(R.string.entry_photo),
+                style = MaterialTheme.typography.bodyLarge,
+                color = OnGlass,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onRemovePhoto, modifier = Modifier.size(32.dp)) {
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.remove_photo), tint = OnGlassMuted)
+            }
+        } else {
+            Icon(Icons.Filled.AddAPhoto, contentDescription = null, tint = OnGlass)
+            Text(
+                text = stringResource(R.string.add_photo),
+                style = MaterialTheme.typography.bodyLarge,
+                color = OnGlass
             )
         }
     }

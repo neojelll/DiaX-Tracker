@@ -104,6 +104,7 @@ fun AddEntryScreen(
                             shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
                             longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
                             notes = formState.notes.trim(),
+                            photoPath = formState.photoPath,
                             createdAt = LocalDateTime.of(formState.date, formState.time)
                         )
                         formState = EntryFormState()
