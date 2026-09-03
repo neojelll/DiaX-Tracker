@@ -153,7 +153,7 @@ private fun AppBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             bottomNavItems.forEach { screen ->
@@ -165,19 +165,19 @@ private fun AppBottomBar(
                         .clip(RoundedCornerShape(20.dp))
                         .then(if (selected) Modifier.background(AppGradient) else Modifier)
                         .clickable { onSelect(screen) }
-                        .padding(vertical = 14.dp),
+                        .padding(vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Icon(
                         imageVector = screen.icon,
                         contentDescription = label,
                         tint = if (selected) Color.White else OnGlassMuted,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                     Text(
                         text = label,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = if (selected) Color.White else OnGlassMuted
                     )
                 }
