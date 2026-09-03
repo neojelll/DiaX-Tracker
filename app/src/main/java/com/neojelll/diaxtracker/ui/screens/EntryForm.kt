@@ -165,20 +165,10 @@ internal fun InsulinActiveBanner(entry: DiaryEntry) {
 
 @Composable
 internal fun EntryFormCard(
-    selectedDate: LocalDate,
+    state: EntryFormState,
+    onStateChange: (EntryFormState) -> Unit,
     onDateClick: () -> Unit,
-    selectedTime: LocalTime,
-    onTimeClick: () -> Unit,
-    bloodSugar: String,
-    onBloodSugarChange: (String) -> Unit,
-    breadUnits: String,
-    onBreadUnitsChange: (String) -> Unit,
-    shortInsulinDose: String,
-    onShortInsulinDoseChange: (String) -> Unit,
-    longInsulinDose: String,
-    onLongInsulinDoseChange: (String) -> Unit,
-    notes: String,
-    onNotesChange: (String) -> Unit
+    onTimeClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -187,16 +177,16 @@ internal fun EntryFormCard(
     ) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             DateTimeRow(
-                date = selectedDate,
+                date = state.date,
                 onDateClick = onDateClick,
-                time = selectedTime,
+                time = state.time,
                 onTimeClick = onTimeClick
             )
             HorizontalDivider(color = DividerColor)
 
             CompactField(
-                value = bloodSugar,
-                onValueChange = { onBloodSugarChange(it.filter { c -> c.isDigit() || c == '.' }) },
+                value = state.bloodSugar,
+                onValueChange = { onStateChange(state.copy(bloodSugar = it.filter { c -> c.isDigit() || c == '.' })) },
                 label = stringResource(R.string.blood_sugar_label),
                 placeholder = stringResource(R.string.blood_sugar_placeholder),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -204,8 +194,8 @@ internal fun EntryFormCard(
             HorizontalDivider(color = DividerColor)
 
             CompactField(
-                value = breadUnits,
-                onValueChange = { onBreadUnitsChange(it.filter { c -> c.isDigit() || c == '.' }) },
+                value = state.breadUnits,
+                onValueChange = { onStateChange(state.copy(breadUnits = it.filter { c -> c.isDigit() || c == '.' })) },
                 label = stringResource(R.string.bread_units_label),
                 placeholder = stringResource(R.string.bread_units_placeholder),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -213,8 +203,8 @@ internal fun EntryFormCard(
             HorizontalDivider(color = DividerColor)
 
             CompactField(
-                value = shortInsulinDose,
-                onValueChange = { onShortInsulinDoseChange(it.filter { c -> c.isDigit() || c == '.' }) },
+                value = state.shortInsulinDose,
+                onValueChange = { onStateChange(state.copy(shortInsulinDose = it.filter { c -> c.isDigit() || c == '.' })) },
                 label = stringResource(R.string.short_insulin_label),
                 placeholder = stringResource(R.string.short_insulin_placeholder),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -222,8 +212,8 @@ internal fun EntryFormCard(
             HorizontalDivider(color = DividerColor)
 
             CompactField(
-                value = longInsulinDose,
-                onValueChange = { onLongInsulinDoseChange(it.filter { c -> c.isDigit() || c == '.' }) },
+                value = state.longInsulinDose,
+                onValueChange = { onStateChange(state.copy(longInsulinDose = it.filter { c -> c.isDigit() || c == '.' })) },
                 label = stringResource(R.string.long_insulin_label),
                 placeholder = stringResource(R.string.long_insulin_placeholder),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -231,8 +221,8 @@ internal fun EntryFormCard(
             HorizontalDivider(color = DividerColor)
 
             CompactField(
-                value = notes,
-                onValueChange = onNotesChange,
+                value = state.notes,
+                onValueChange = { onStateChange(state.copy(notes = it)) },
                 label = stringResource(R.string.comment_label),
                 placeholder = stringResource(R.string.comment_placeholder),
                 singleLine = false,

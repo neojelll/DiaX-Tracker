@@ -34,24 +34,28 @@ fun EditEntryScreen(
     val entries by viewModel.entries.collectAsState()
     val entry = entries.find { it.id == entryId } ?: return
 
-    var bloodSugar by remember(entryId) {
-        mutableStateOf(entry.bloodSugar?.let { String.format(Locale.US, "%.1f", it) } ?: "")
+    var formState by remember(entryId) {
+        mutableStateOf(
+            EntryFormState(
+                date = entry.createdAt.toLocalDate(),
+                time = entry.createdAt.toLocalTime(),
+                bloodSugar = entry.bloodSugar?.let { String.format(Locale.US, "%.1f", it) } ?: "",
+                breadUnits = entry.breadUnits?.toString() ?: "",
+                shortInsulinDose = entry.shortInsulinDose?.toString() ?: "",
+                longInsulinDose = entry.longInsulinDose?.toString() ?: "",
+                notes = entry.notes
+            )
+        )
     }
-    var breadUnits by remember(entryId) { mutableStateOf(entry.breadUnits?.toString() ?: "") }
-    var shortInsulinDose by remember(entryId) { mutableStateOf(entry.shortInsulinDose?.toString() ?: "") }
-    var longInsulinDose by remember(entryId) { mutableStateOf(entry.longInsulinDose?.toString() ?: "") }
-    var notes by remember(entryId) { mutableStateOf(entry.notes) }
-    var selectedDate by remember(entryId) { mutableStateOf(entry.createdAt.toLocalDate()) }
-    var selectedTime by remember(entryId) { mutableStateOf(entry.createdAt.toLocalTime()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
         DatePickerDialog(
-            initialDate = selectedDate,
+            initialDate = formState.date,
             onConfirm = {
-                selectedDate = it
+                formState = formState.copy(date = it)
                 showDatePicker = false
             },
             onDismiss = { showDatePicker = false }
@@ -60,9 +64,9 @@ fun EditEntryScreen(
 
     if (showTimePicker) {
         TimePickerDialog(
-            initialTime = selectedTime,
+            initialTime = formState.time,
             onConfirm = {
-                selectedTime = it
+                formState = formState.copy(time = it)
                 showTimePicker = false
             },
             onDismiss = { showTimePicker = false }
@@ -125,30 +129,18 @@ fun EditEntryScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             EntryFormCard(
-                selectedDate = selectedDate,
+                state = formState,
+                onStateChange = { formState = it },
                 onDateClick = { showDatePicker = true },
-                selectedTime = selectedTime,
-                onTimeClick = { showTimePicker = true },
-                bloodSugar = bloodSugar,
-                onBloodSugarChange = { bloodSugar = it },
-                breadUnits = breadUnits,
-                onBreadUnitsChange = { breadUnits = it },
-                shortInsulinDose = shortInsulinDose,
-                onShortInsulinDoseChange = { shortInsulinDose = it },
-                longInsulinDose = longInsulinDose,
-                onLongInsulinDoseChange = { longInsulinDose = it },
-                notes = notes,
-                onNotesChange = { notes = it }
+                onTimeClick = { showTimePicker = true }
             )
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .glassPanel(RoundedCornerShape(16.dp))
-                    .clickable(
-                        enabled = bloodSugar.isNotBlank() || breadUnits.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
-                    ) {
-                        val newBloodSugar = bloodSugar.toFloatOrNull()
+                    .clickable(enabled = formState.isFillable) {
+                        val newBloodSugar = formState.bloodSugar.toFloatOrNull()
                         viewModel.updateEntry(
                             entry.copy(
                                 bloodSugar = newBloodSugar,
@@ -157,11 +149,11 @@ fun EditEntryScreen(
                                 } else {
                                     entry.sugarSource
                                 },
-                                breadUnits = breadUnits.toFloatOrNull(),
-                                shortInsulinDose = shortInsulinDose.toFloatOrNull(),
-                                longInsulinDose = longInsulinDose.toFloatOrNull(),
-                                notes = notes.trim(),
-                                createdAt = LocalDateTime.of(selectedDate, selectedTime)
+                                breadUnits = formState.breadUnits.toFloatOrNull(),
+                                shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
+                                longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
+                                notes = formState.notes.trim(),
+                                createdAt = LocalDateTime.of(formState.date, formState.time)
                             )
                         )
                         onDone()
