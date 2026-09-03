@@ -32,6 +32,7 @@ private val DiaXTrackerColorScheme = lightColorScheme(
 fun DiaXTrackerTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = DiaXTrackerColorScheme,
+        typography = DiaXTrackerTypography,
         content = content
     )
 }
