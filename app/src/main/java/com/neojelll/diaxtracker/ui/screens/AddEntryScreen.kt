@@ -88,7 +88,7 @@ fun AddEntryScreen(
                 .padding(padding)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (!sensorAvailable) {
                 SensorWarningBanner()

@@ -1,8 +1,10 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
@@ -19,9 +21,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.neojelll.diaxtracker.R
@@ -58,13 +62,54 @@ internal fun transparentFieldColors() = TextFieldDefaults.colors(
     cursorColor = OnGlass
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CompactField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = OnGlass),
+        cursorBrush = SolidColor(OnGlass),
+        keyboardOptions = keyboardOptions,
+        singleLine = singleLine,
+        minLines = minLines,
+        maxLines = maxLines,
+        interactionSource = interactionSource
+    ) { innerTextField ->
+        TextFieldDefaults.DecorationBox(
+            value = value,
+            innerTextField = innerTextField,
+            enabled = true,
+            singleLine = singleLine,
+            visualTransformation = VisualTransformation.None,
+            interactionSource = interactionSource,
+            label = { Text(label) },
+            placeholder = { Text(placeholder) },
+            colors = transparentFieldColors(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
 @Composable
 internal fun SensorWarningBanner() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .glassPanel(RoundedCornerShape(16.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -103,7 +148,7 @@ internal fun InsulinActiveBanner(entry: DiaryEntry) {
         modifier = Modifier
             .fillMaxWidth()
             .glassPanel(RoundedCornerShape(16.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -145,63 +190,50 @@ internal fun EntryFormCard(
             TimeRow(time = selectedTime, onClick = onTimeClick)
             HorizontalDivider(color = DividerColor)
 
-            TextField(
+            CompactField(
                 value = bloodSugar,
                 onValueChange = { onBloodSugarChange(it.filter { c -> c.isDigit() || c == '.' }) },
-                label = { Text(stringResource(R.string.blood_sugar_label)) },
-                placeholder = { Text(stringResource(R.string.blood_sugar_placeholder)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                colors = transparentFieldColors(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = stringResource(R.string.blood_sugar_label),
+                placeholder = stringResource(R.string.blood_sugar_placeholder),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
             HorizontalDivider(color = DividerColor)
 
-            TextField(
+            CompactField(
                 value = breadUnits,
                 onValueChange = { onBreadUnitsChange(it.filter { c -> c.isDigit() || c == '.' }) },
-                label = { Text(stringResource(R.string.bread_units_label)) },
-                placeholder = { Text(stringResource(R.string.bread_units_placeholder)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                colors = transparentFieldColors(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = stringResource(R.string.bread_units_label),
+                placeholder = stringResource(R.string.bread_units_placeholder),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
             HorizontalDivider(color = DividerColor)
 
-            TextField(
+            CompactField(
                 value = shortInsulinDose,
                 onValueChange = { onShortInsulinDoseChange(it.filter { c -> c.isDigit() || c == '.' }) },
-                label = { Text(stringResource(R.string.short_insulin_label)) },
-                placeholder = { Text(stringResource(R.string.short_insulin_placeholder)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                colors = transparentFieldColors(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = stringResource(R.string.short_insulin_label),
+                placeholder = stringResource(R.string.short_insulin_placeholder),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
             HorizontalDivider(color = DividerColor)
 
-            TextField(
+            CompactField(
                 value = longInsulinDose,
                 onValueChange = { onLongInsulinDoseChange(it.filter { c -> c.isDigit() || c == '.' }) },
-                label = { Text(stringResource(R.string.long_insulin_label)) },
-                placeholder = { Text(stringResource(R.string.long_insulin_placeholder)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                colors = transparentFieldColors(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = stringResource(R.string.long_insulin_label),
+                placeholder = stringResource(R.string.long_insulin_placeholder),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
             HorizontalDivider(color = DividerColor)
 
-            TextField(
+            CompactField(
                 value = notes,
                 onValueChange = onNotesChange,
-                label = { Text(stringResource(R.string.comment_label)) },
-                placeholder = { Text(stringResource(R.string.comment_placeholder)) },
-                colors = transparentFieldColors(),
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                maxLines = 4
+                label = stringResource(R.string.comment_label),
+                placeholder = stringResource(R.string.comment_placeholder),
+                singleLine = false,
+                minLines = 1,
+                maxLines = 3
             )
         }
     }
@@ -216,7 +248,7 @@ private fun DateRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -229,7 +261,7 @@ private fun DateRow(
             )
             Text(
                 text = date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale)),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge,
                 color = OnGlass
             )
         }
@@ -246,7 +278,7 @@ private fun TimeRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -258,7 +290,7 @@ private fun TimeRow(
             )
             Text(
                 text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge,
                 color = OnGlass
             )
         }
