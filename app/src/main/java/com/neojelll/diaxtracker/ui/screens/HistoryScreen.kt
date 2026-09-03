@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
@@ -87,6 +88,12 @@ fun HistoryScreen(
     }
 }
 
+private data class EntryStat(
+    val label: String,
+    val value: String,
+    val color: Color = OnGlass
+)
+
 @Composable
 private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
@@ -112,68 +119,63 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
 
             HorizontalDivider(color = OnGlass.copy(alpha = 0.12f))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
+            val stats = buildList {
                 entry.bloodSugar?.let {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.sugar_label),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = OnGlassMuted
-                        )
-                        Text(
-                            text = stringResource(R.string.sugar_value_format, String.format(Locale.US, "%.1f", it)),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                    add(
+                        EntryStat(
+                            label = stringResource(R.string.sugar_label),
+                            value = stringResource(R.string.sugar_value_format, String.format(Locale.US, "%.1f", it)),
                             color = sugarColor(it)
                         )
-                    }
+                    )
                 }
                 entry.breadUnits?.let {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.bread_units_short_label),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = OnGlassMuted
+                    add(
+                        EntryStat(
+                            label = stringResource(R.string.bread_units_short_label),
+                            value = stringResource(R.string.bread_units_value_format, String.format(Locale.US, "%.1f", it))
                         )
-                        Text(
-                            text = stringResource(R.string.bread_units_value_format, String.format(Locale.US, "%.1f", it)),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = OnGlass
-                        )
-                    }
+                    )
                 }
                 entry.shortInsulinDose?.let {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.short_insulin_short_label),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = OnGlassMuted
+                    add(
+                        EntryStat(
+                            label = stringResource(R.string.short_insulin_short_label),
+                            value = stringResource(R.string.dose_value_format, it.toString())
                         )
-                        Text(
-                            text = stringResource(R.string.dose_value_format, it.toString()),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = OnGlass
-                        )
-                    }
+                    )
                 }
                 entry.longInsulinDose?.let {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.long_insulin_short_label),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = OnGlassMuted
+                    add(
+                        EntryStat(
+                            label = stringResource(R.string.long_insulin_short_label),
+                            value = stringResource(R.string.dose_value_format, it.toString())
                         )
-                        Text(
-                            text = stringResource(R.string.dose_value_format, it.toString()),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = OnGlass
-                        )
+                    )
+                }
+            }
+
+            stats.chunked(2).forEach { rowStats ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    rowStats.forEach { stat ->
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stat.label,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = OnGlassMuted,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = stat.value,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = stat.color
+                            )
+                        }
                     }
                 }
             }
