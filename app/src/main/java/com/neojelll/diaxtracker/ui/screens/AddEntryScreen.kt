@@ -17,22 +17,14 @@ import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEntryScreen(
     viewModel: DiaryViewModel
 ) {
-    var bloodSugar by remember { mutableStateOf("") }
-    var breadUnits by remember { mutableStateOf("") }
-    var shortInsulinDose by remember { mutableStateOf("") }
-    var longInsulinDose by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var selectedTime by remember { mutableStateOf(LocalTime.now()) }
+    var formState by remember { mutableStateOf(EntryFormState()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showSuccessSnackbar by remember { mutableStateOf(false) }
@@ -49,9 +41,9 @@ fun AddEntryScreen(
 
     if (showDatePicker) {
         DatePickerDialog(
-            initialDate = selectedDate,
+            initialDate = formState.date,
             onConfirm = {
-                selectedDate = it
+                formState = formState.copy(date = it)
                 showDatePicker = false
             },
             onDismiss = { showDatePicker = false }
@@ -60,9 +52,9 @@ fun AddEntryScreen(
 
     if (showTimePicker) {
         TimePickerDialog(
-            initialTime = selectedTime,
+            initialTime = formState.time,
             onConfirm = {
-                selectedTime = it
+                formState = formState.copy(time = it)
                 showTimePicker = false
             },
             onDismiss = { showTimePicker = false }
@@ -95,44 +87,26 @@ fun AddEntryScreen(
             }
 
             EntryFormCard(
-                selectedDate = selectedDate,
+                state = formState,
+                onStateChange = { formState = it },
                 onDateClick = { showDatePicker = true },
-                selectedTime = selectedTime,
-                onTimeClick = { showTimePicker = true },
-                bloodSugar = bloodSugar,
-                onBloodSugarChange = { bloodSugar = it },
-                breadUnits = breadUnits,
-                onBreadUnitsChange = { breadUnits = it },
-                shortInsulinDose = shortInsulinDose,
-                onShortInsulinDoseChange = { shortInsulinDose = it },
-                longInsulinDose = longInsulinDose,
-                onLongInsulinDoseChange = { longInsulinDose = it },
-                notes = notes,
-                onNotesChange = { notes = it }
+                onTimeClick = { showTimePicker = true }
             )
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .glassPanel(RoundedCornerShape(16.dp))
-                    .clickable(
-                        enabled = bloodSugar.isNotBlank() || breadUnits.isNotBlank() || shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
-                    ) {
+                    .clickable(enabled = formState.isFillable) {
                         viewModel.addEntry(
-                            bloodSugar = bloodSugar.toFloatOrNull(),
-                            breadUnits = breadUnits.toFloatOrNull(),
-                            shortInsulinDose = shortInsulinDose.toFloatOrNull(),
-                            longInsulinDose = longInsulinDose.toFloatOrNull(),
-                            notes = notes.trim(),
-                            createdAt = LocalDateTime.of(selectedDate, selectedTime)
+                            bloodSugar = formState.bloodSugar.toFloatOrNull(),
+                            breadUnits = formState.breadUnits.toFloatOrNull(),
+                            shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
+                            longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
+                            notes = formState.notes.trim(),
+                            createdAt = LocalDateTime.of(formState.date, formState.time)
                         )
-                        bloodSugar = ""
-                        breadUnits = ""
-                        shortInsulinDose = ""
-                        longInsulinDose = ""
-                        notes = ""
-                        selectedDate = LocalDate.now()
-                        selectedTime = LocalTime.now()
+                        formState = EntryFormState()
                         showSuccessSnackbar = true
                     }
                     .padding(vertical = 14.dp),
