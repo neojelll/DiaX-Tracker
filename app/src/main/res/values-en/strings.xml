@@ -21,8 +21,8 @@
     <string name="insulin_active_banner">Fast-acting insulin still active — %1$s left</string>
     <string name="duration_hours_minutes">%1$dh %2$dm</string>
     <string name="duration_minutes">%1$dm</string>
-    <string name="entry_date_label">Entry Date</string>
-    <string name="entry_time_label">Measurement Time</string>
+    <string name="entry_date_label">Date</string>
+    <string name="entry_time_label">Time</string>
     <string name="blood_sugar_label">Blood Sugar (mmol/L)</string>
     <string name="blood_sugar_placeholder">E.g. 5.6</string>
     <string name="bread_units_label">Bread Units (BU)</string>
