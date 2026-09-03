@@ -9,12 +9,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.ui.components.LanguageMenu
@@ -23,6 +26,7 @@ import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import java.io.File
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -111,11 +115,27 @@ private fun DiaryEntryCard(entry: DiaryEntry, onClick: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = entry.createdAt.format(formatter),
-                style = MaterialTheme.typography.labelMedium,
-                color = OnGlassMuted
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = entry.createdAt.format(formatter),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = OnGlassMuted
+                )
+                entry.photoPath?.let { path ->
+                    AsyncImage(
+                        model = File(path),
+                        contentDescription = stringResource(R.string.entry_photo),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                    )
+                }
+            }
 
             HorizontalDivider(color = OnGlass.copy(alpha = 0.12f))
 

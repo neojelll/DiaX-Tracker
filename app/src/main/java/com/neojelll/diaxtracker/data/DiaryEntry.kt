@@ -16,5 +16,6 @@ data class DiaryEntry(
     val shortInsulinDose: Float?,
     val longInsulinDose: Float?,
     val notes: String,
+    val photoPath: String? = null,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )

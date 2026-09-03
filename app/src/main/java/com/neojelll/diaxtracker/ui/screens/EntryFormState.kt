@@ -10,7 +10,8 @@ internal data class EntryFormState(
     val breadUnits: String = "",
     val shortInsulinDose: String = "",
     val longInsulinDose: String = "",
-    val notes: String = ""
+    val notes: String = "",
+    val photoPath: String? = null
 ) {
     val isFillable: Boolean
         get() = bloodSugar.isNotBlank() || breadUnits.isNotBlank() ||
