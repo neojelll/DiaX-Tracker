@@ -6,6 +6,7 @@ import androidx.work.WorkerParameters
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.SugarSource
+import java.time.Duration
 import java.time.LocalDateTime
 
 class PostMealCheckWorker(
@@ -15,8 +16,14 @@ class PostMealCheckWorker(
 
     override suspend fun doWork(): Result {
         val sugar = SensorReadingStore(applicationContext).getLatestReading() ?: return Result.success()
+        val dao = DiaryDatabase.getDatabase(applicationContext).diaryDao()
 
-        DiaryDatabase.getDatabase(applicationContext).diaryDao().insert(
+        val recentEntry = dao.getMostRecentEntry()
+        if (recentEntry != null && Duration.between(recentEntry.createdAt, LocalDateTime.now()) < MIN_GAP_BETWEEN_AUTO_ENTRIES) {
+            return Result.success()
+        }
+
+        dao.insert(
             DiaryEntry(
                 bloodSugar = sugar,
                 sugarSource = SugarSource.SENSOR,
@@ -27,5 +34,9 @@ class PostMealCheckWorker(
             )
         )
         return Result.success()
+    }
+
+    private companion object {
+        val MIN_GAP_BETWEEN_AUTO_ENTRIES: Duration = Duration.ofMinutes(20)
     }
 }

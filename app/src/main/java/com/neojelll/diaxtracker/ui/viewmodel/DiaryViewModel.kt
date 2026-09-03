@@ -44,15 +44,15 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    val activeInsulinEntry: StateFlow<DiaryEntry?> = combine(entries, insulinTicker) { list, _ ->
+    val activeInsulinEntries: StateFlow<List<DiaryEntry>> = combine(entries, insulinTicker) { list, _ ->
+        val now = LocalDateTime.now()
         list
-            .filter { it.shortInsulinDose != null }
-            .maxByOrNull { it.createdAt }
-            ?.takeIf { Duration.between(it.createdAt, LocalDateTime.now()) < Duration.ofHours(4) }
+            .filter { it.shortInsulinDose != null && Duration.between(it.createdAt, now) < Duration.ofHours(4) }
+            .sortedByDescending { it.createdAt }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = null
+        initialValue = emptyList()
     )
 
     init {
@@ -100,6 +100,11 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun updateEntry(entry: DiaryEntry) {
         viewModelScope.launch {
             repository.update(entry)
+            if (entry.shortInsulinDose != null || entry.longInsulinDose != null) {
+                PostMealScheduler.scheduleFollowUps(getApplication(), entry.id)
+            } else {
+                PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
+            }
         }
     }
 

@@ -20,4 +20,7 @@ interface DiaryDao {
 
     @Query("SELECT * FROM diary_entries ORDER BY createdAt DESC")
     fun getAllEntries(): Flow<List<DiaryEntry>>
+
+    @Query("SELECT * FROM diary_entries ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getMostRecentEntry(): DiaryEntry?
 }

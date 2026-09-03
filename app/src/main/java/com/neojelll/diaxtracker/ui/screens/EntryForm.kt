@@ -141,25 +141,30 @@ internal fun SensorWarningBanner() {
 }
 
 @Composable
-internal fun InsulinActiveBanner(entry: DiaryEntry) {
-    var now by remember(entry.id) { mutableStateOf(LocalDateTime.now()) }
-    LaunchedEffect(entry.id) {
+internal fun InsulinActiveBanner(entries: List<DiaryEntry>) {
+    if (entries.isEmpty()) return
+
+    var now by remember(entries.map { it.id }) { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(entries.map { it.id }) {
         while (true) {
             now = LocalDateTime.now()
             delay(30_000L)
         }
     }
 
-    val remaining = Duration.between(now, entry.createdAt.plusHours(4)).let {
-        if (it.isNegative) Duration.ZERO else it
-    }
-    val totalMinutes = remaining.toMinutes()
-    val hours = totalMinutes / 60
-    val minutes = totalMinutes % 60
-    val timeText = if (hours > 0) {
-        stringResource(R.string.duration_hours_minutes, hours, minutes)
-    } else {
-        stringResource(R.string.duration_minutes, minutes)
+    @Composable
+    fun remainingText(entry: DiaryEntry): String {
+        val remaining = Duration.between(now, entry.createdAt.plusHours(4)).let {
+            if (it.isNegative) Duration.ZERO else it
+        }
+        val totalMinutes = remaining.toMinutes()
+        val hours = totalMinutes / 60
+        val minutes = totalMinutes % 60
+        return if (hours > 0) {
+            stringResource(R.string.duration_hours_minutes, hours, minutes)
+        } else {
+            stringResource(R.string.duration_minutes, minutes)
+        }
     }
 
     Row(
@@ -171,11 +176,30 @@ internal fun InsulinActiveBanner(entry: DiaryEntry) {
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Icon(Icons.Filled.Bolt, contentDescription = null, tint = SproutGreen)
-        Text(
-            text = stringResource(R.string.insulin_active_banner, timeText),
-            style = MaterialTheme.typography.bodyMedium,
-            color = OnGlass
-        )
+        if (entries.size == 1) {
+            Text(
+                text = stringResource(R.string.insulin_active_banner, remainingText(entries[0])),
+                style = MaterialTheme.typography.bodyMedium,
+                color = OnGlass
+            )
+        } else {
+            Column {
+                Text(
+                    text = stringResource(R.string.insulin_active_banner_multi_title),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = OnGlass
+                )
+                entries.forEach { entry ->
+                    entry.shortInsulinDose?.let { dose ->
+                        Text(
+                            text = stringResource(R.string.insulin_active_dose_line, dose.toString(), remainingText(entry)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = OnGlass
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

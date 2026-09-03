@@ -19,6 +19,8 @@
 
     <string name="sensor_warning">Нет свежих данных с датчика — сахар нужно ввести вручную</string>
     <string name="insulin_active_banner">Короткий инсулин ещё действует — осталось %1$s</string>
+    <string name="insulin_active_banner_multi_title">Несколько доз короткого инсулина ещё активны</string>
+    <string name="insulin_active_dose_line">%1$s ед. — осталось %2$s</string>
     <string name="duration_hours_minutes">%1$d ч %2$d мин</string>
     <string name="duration_minutes">%1$d мин</string>
     <string name="entry_date_label">Дата</string>
