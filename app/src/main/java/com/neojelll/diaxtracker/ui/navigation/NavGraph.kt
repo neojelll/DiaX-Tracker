@@ -72,18 +72,30 @@ fun NavGraph(navController: NavHostController) {
         Scaffold(
             containerColor = Color.Transparent,
             bottomBar = {
-                AppBottomBar(
-                    currentRoute = currentRoute,
-                    onSelect = { screen ->
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
+                Column {
+                    if (activeInsulinEntries.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(PageBackground)
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            InsulinActiveBanner(entries = activeInsulinEntries)
                         }
                     }
-                )
+                    AppBottomBar(
+                        currentRoute = currentRoute,
+                        onSelect = { screen ->
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
             }
         ) { padding ->
             NavHost(
@@ -114,17 +126,6 @@ fun NavGraph(navController: NavHostController) {
                         onDone = { navController.popBackStack() }
                     )
                 }
-            }
-        }
-
-        if (activeInsulinEntries.isNotEmpty()) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 108.dp)
-            ) {
-                InsulinActiveBanner(entries = activeInsulinEntries)
             }
         }
     }
