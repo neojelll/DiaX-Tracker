@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
-import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.DangerRed
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
@@ -105,7 +104,6 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
                         tint = TextPrimary
                     )
                 }
-                LanguageMenu()
             }
         )
 

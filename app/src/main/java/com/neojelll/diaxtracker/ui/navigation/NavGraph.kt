@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -37,6 +38,7 @@ import com.neojelll.diaxtracker.ui.screens.EditEntryScreen
 import com.neojelll.diaxtracker.ui.screens.HistoryScreen
 import com.neojelll.diaxtracker.ui.screens.InsulinActiveBanner
 import com.neojelll.diaxtracker.ui.screens.MealPresetsScreen
+import com.neojelll.diaxtracker.ui.screens.SettingsScreen
 import com.neojelll.diaxtracker.ui.theme.CardBackground
 import com.neojelll.diaxtracker.ui.theme.CardBorder
 import com.neojelll.diaxtracker.ui.theme.FieldBackground
@@ -49,9 +51,10 @@ sealed class Screen(val route: String, @StringRes val labelRes: Int, val icon: I
     data object AddEntry : Screen("add_entry", R.string.nav_entry, Icons.Filled.Home)
     data object MealPresets : Screen("meal_presets", R.string.nav_meal_presets, Icons.Filled.Restaurant)
     data object History : Screen("history", R.string.nav_history, Icons.Filled.History)
+    data object Settings : Screen("settings", R.string.nav_settings, Icons.Filled.Settings)
 }
 
-private val bottomNavItems = listOf(Screen.AddEntry, Screen.MealPresets, Screen.History)
+private val bottomNavItems = listOf(Screen.AddEntry, Screen.MealPresets, Screen.History, Screen.Settings)
 
 private const val EDIT_ENTRY_ROUTE = "edit_entry/{entryId}"
 private fun editEntryRoute(entryId: Long) = "edit_entry/$entryId"
@@ -114,6 +117,9 @@ fun NavGraph(navController: NavHostController) {
                         viewModel = viewModel,
                         onEntryClick = { entryId -> navController.navigate(editEntryRoute(entryId)) }
                     )
+                }
+                composable(Screen.Settings.route) {
+                    SettingsScreen()
                 }
                 composable(
                     route = EDIT_ENTRY_ROUTE,
