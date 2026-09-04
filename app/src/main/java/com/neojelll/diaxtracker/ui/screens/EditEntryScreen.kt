@@ -37,6 +37,7 @@ fun EditEntryScreen(
     val entries by viewModel.entries.collectAsState()
     val entry = entries.find { it.id == entryId } ?: return
     val mealPresets by viewModel.mealPresets.collectAsState()
+    val breadUnitsValueFormat = stringResource(R.string.bread_units_value_format)
 
     var formState by remember(entryId) {
         mutableStateOf(
@@ -44,7 +45,10 @@ fun EditEntryScreen(
                 date = entry.createdAt.toLocalDate(),
                 time = entry.createdAt.toLocalTime(),
                 bloodSugar = entry.bloodSugar?.let { String.format(Locale.US, "%.1f", it) } ?: "",
-                breadUnits = entry.breadUnits?.toString() ?: "",
+                breadUnits = entry.breadUnits?.let { formatBreadUnits(it) } ?: "",
+                foodLabel = entry.breadUnits?.let {
+                    String.format(breadUnitsValueFormat, formatBreadUnits(it))
+                } ?: "",
                 shortInsulinDose = entry.shortInsulinDose?.toString() ?: "",
                 longInsulinDose = entry.longInsulinDose?.toString() ?: "",
                 notes = entry.notes,

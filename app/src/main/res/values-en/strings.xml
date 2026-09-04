@@ -67,5 +67,9 @@
     <string name="no_meal_presets_title">No meal presets yet</string>
     <string name="no_meal_presets_subtitle">Add a meal you eat often</string>
     <string name="delete_meal_preset_confirm_title">Delete meal preset?</string>
-    <string name="save_meal_preset_button">Save</string>
+    <string name="save">Save</string>
+
+    <string name="food_label">Food</string>
+    <string name="food_placeholder">Pick a meal</string>
+    <string name="enter_manually">Enter manually</string>
 </resources>

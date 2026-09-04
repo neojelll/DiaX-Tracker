@@ -67,5 +67,9 @@
     <string name="no_meal_presets_title">Приёмов пищи пока нет</string>
     <string name="no_meal_presets_subtitle">Добавьте часто повторяющийся приём пищи</string>
     <string name="delete_meal_preset_confirm_title">Удалить приём пищи?</string>
-    <string name="save_meal_preset_button">Сохранить</string>
+    <string name="save">Сохранить</string>
+
+    <string name="food_label">Еда</string>
+    <string name="food_placeholder">Выберите приём пищи</string>
+    <string name="enter_manually">Ввести вручную</string>
 </resources>

@@ -8,6 +8,7 @@ internal data class EntryFormState(
     val time: LocalTime = LocalTime.now(),
     val bloodSugar: String = "",
     val breadUnits: String = "",
+    val foodLabel: String = "",
     val shortInsulinDose: String = "",
     val longInsulinDose: String = "",
     val notes: String = "",

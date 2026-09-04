@@ -31,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
@@ -263,10 +262,26 @@ internal fun EntryFormCard(
             )
             HorizontalDivider(color = DividerColor)
 
-            BreadUnitsField(
-                value = state.breadUnits,
-                onValueChange = { onStateChange(state.copy(breadUnits = it.filter { c -> c.isDigit() || c == '.' })) },
-                mealPresets = mealPresets
+            val breadUnitsFormat = stringResource(R.string.bread_units_value_format)
+            FoodField(
+                foodLabel = state.foodLabel,
+                mealPresets = mealPresets,
+                onPresetSelected = { preset ->
+                    onStateChange(
+                        state.copy(
+                            breadUnits = formatBreadUnits(preset.breadUnits),
+                            foodLabel = preset.name
+                        )
+                    )
+                },
+                onManualEntryConfirmed = { value ->
+                    onStateChange(
+                        state.copy(
+                            breadUnits = formatBreadUnits(value),
+                            foodLabel = String.format(breadUnitsFormat, formatBreadUnits(value))
+                        )
+                    )
+                }
             )
             HorizontalDivider(color = DividerColor)
 
@@ -315,56 +330,43 @@ internal fun EntryFormCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BreadUnitsField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    mealPresets: List<MealPreset>
+private fun FoodField(
+    foodLabel: String,
+    mealPresets: List<MealPreset>,
+    onPresetSelected: (MealPreset) -> Unit,
+    onManualEntryConfirmed: (Float) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val label = stringResource(R.string.bread_units_label)
-    val placeholder = stringResource(R.string.bread_units_placeholder)
-    val keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+    var showManualDialog by remember { mutableStateOf(false) }
 
-    if (mealPresets.isEmpty()) {
-        CompactField(
-            value = value,
-            onValueChange = onValueChange,
-            label = label,
-            placeholder = placeholder,
-            keyboardOptions = keyboardOptions
-        )
-        return
-    }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
-    ) {
-        CompactField(
-            value = value,
-            onValueChange = onValueChange,
-            label = label,
-            placeholder = placeholder,
-            keyboardOptions = keyboardOptions,
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Row(
             modifier = Modifier
-                .menuAnchor()
-                .onFocusChanged { if (it.isFocused) expanded = true },
-            trailingIcon = {
-                IconButton(onClick = { expanded = !expanded }) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
-                        contentDescription = stringResource(R.string.meal_presets_title),
-                        tint = OnGlassMuted
-                    )
-                }
-            }
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.food_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = OnGlassMuted
+                )
+                Text(
+                    text = foodLabel.ifBlank { stringResource(R.string.food_placeholder) },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (foodLabel.isBlank()) OnGlassMuted else OnGlass
+                )
+            }
+            Icon(
+                imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = OnGlassMuted
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             mealPresets.forEach { preset ->
                 DropdownMenuItem(
                     text = {
@@ -377,13 +379,70 @@ private fun BreadUnitsField(
                         )
                     },
                     onClick = {
-                        onValueChange(formatBreadUnits(preset.breadUnits))
+                        onPresetSelected(preset)
                         expanded = false
                     }
                 )
             }
+            if (mealPresets.isNotEmpty()) HorizontalDivider(color = DividerColor)
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.enter_manually)) },
+                onClick = {
+                    expanded = false
+                    showManualDialog = true
+                }
+            )
         }
     }
+
+    if (showManualDialog) {
+        ManualFoodEntryDialog(
+            onConfirm = {
+                onManualEntryConfirmed(it)
+                showManualDialog = false
+            },
+            onDismiss = { showManualDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun ManualFoodEntryDialog(
+    onConfirm: (Float) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var breadUnitsText by remember { mutableStateOf("") }
+    val breadUnits = breadUnitsText.toFloatOrNull()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color.Black.copy(alpha = 0.75f),
+        titleContentColor = OnGlass,
+        textContentColor = OnGlass,
+        title = { Text(stringResource(R.string.enter_manually)) },
+        text = {
+            CompactField(
+                value = breadUnitsText,
+                onValueChange = { breadUnitsText = it.filter { c -> c.isDigit() || c == '.' } },
+                label = stringResource(R.string.bread_units_label),
+                placeholder = stringResource(R.string.bread_units_placeholder),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
+        },
+        confirmButton = {
+            TextButton(
+                enabled = breadUnits != null,
+                onClick = { onConfirm(breadUnits!!) }
+            ) {
+                Text(stringResource(R.string.save), color = OnGlass)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel), color = OnGlass)
+            }
+        }
+    )
 }
 
 @Composable

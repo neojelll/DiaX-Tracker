@@ -219,7 +219,7 @@ private fun MealPresetEditorDialog(
                 enabled = isValid,
                 onClick = { onConfirm(name.trim(), breadUnits!!) }
             ) {
-                Text(stringResource(R.string.save_meal_preset_button), color = OnGlass)
+                Text(stringResource(R.string.save), color = OnGlass)
             }
         },
         dismissButton = {
