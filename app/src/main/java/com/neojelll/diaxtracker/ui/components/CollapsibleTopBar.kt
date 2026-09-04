@@ -29,6 +29,9 @@ class CollapsibleTopBarState(val maxHeightPx: Float) {
     var heightPx by mutableFloatStateOf(maxHeightPx)
         private set
 
+    val isFullyExpanded: Boolean
+        get() = heightPx >= maxHeightPx
+
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             if (available.y == 0f) return Offset.Zero

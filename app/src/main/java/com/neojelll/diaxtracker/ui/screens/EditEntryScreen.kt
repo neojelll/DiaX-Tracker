@@ -108,10 +108,7 @@ fun EditEntryScreen(
 
     val topBarState = rememberCollapsibleTopBarState()
     val scrollState = rememberScrollState()
-    var canScroll by remember { mutableStateOf(false) }
-    LaunchedEffect(scrollState.maxValue) {
-        if (scrollState.maxValue > 0) canScroll = true
-    }
+    val canScroll = scrollState.maxValue > 0 || !topBarState.isFullyExpanded
 
     Scaffold(
         containerColor = Color.Transparent,
