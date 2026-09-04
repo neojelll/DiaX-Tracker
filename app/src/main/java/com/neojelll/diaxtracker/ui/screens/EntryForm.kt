@@ -274,19 +274,26 @@ internal fun EntryFormCard(
             step = 0.1f
         )
 
-        StepperField(
-            label = stringResource(R.string.short_insulin_label),
-            value = state.shortInsulinDose,
-            onValueChange = { onStateChange(state.copy(shortInsulinDose = it)) },
-            step = 0.5f
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StepperField(
+                label = stringResource(R.string.short_insulin_short_label),
+                value = state.shortInsulinDose,
+                onValueChange = { onStateChange(state.copy(shortInsulinDose = it)) },
+                step = 0.5f,
+                modifier = Modifier.weight(1f)
+            )
 
-        StepperField(
-            label = stringResource(R.string.long_insulin_label),
-            value = state.longInsulinDose,
-            onValueChange = { onStateChange(state.copy(longInsulinDose = it)) },
-            step = 0.5f
-        )
+            StepperField(
+                label = stringResource(R.string.long_insulin_short_label),
+                value = state.longInsulinDose,
+                onValueChange = { onStateChange(state.copy(longInsulinDose = it)) },
+                step = 0.5f,
+                modifier = Modifier.weight(1f)
+            )
+        }
 
         HorizontalDivider(color = CardBorder)
 
@@ -396,14 +403,16 @@ private fun StepperField(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             StepperButton(icon = Icons.Filled.Remove, onClick = { adjust(-step) })
             Text(
                 text = value.ifBlank { "—" },
-                style = MaterialTheme.typography.titleLarge,
-                color = TextPrimary,
+                style = MaterialTheme.typography.titleMedium,
+                color = if (value.isBlank()) TextSecondary else TextPrimary,
                 textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .weight(1f)
                     .clickable { showManualDialog = true }
@@ -430,10 +439,10 @@ private fun StepperButton(icon: ImageVector, onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
-            .size(36.dp)
-            .fieldBox(RoundedCornerShape(10.dp))
+            .size(32.dp)
+            .fieldBox(RoundedCornerShape(9.dp))
     ) {
-        Icon(icon, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(18.dp))
+        Icon(icon, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(16.dp))
     }
 }
 
