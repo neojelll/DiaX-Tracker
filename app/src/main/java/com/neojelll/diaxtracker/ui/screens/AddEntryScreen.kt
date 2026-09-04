@@ -12,8 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.LanguageMenu
+import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -61,66 +64,72 @@ fun AddEntryScreen(
         )
     }
 
+    val topBarState = rememberCollapsibleTopBarState()
+
     Scaffold(
         containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.add_entry_title), color = Color.White) },
-                actions = { LanguageMenu() },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .nestedScroll(topBarState.nestedScrollConnection)
         ) {
-            if (!sensorAvailable) {
-                SensorWarningBanner()
-            }
-
-            EntryFormCard(
-                state = formState,
-                onStateChange = { formState = it },
-                onDateClick = { showDatePicker = true },
-                onTimeClick = { showTimePicker = true }
+            CollapsibleTopBar(
+                state = topBarState,
+                title = { Text(stringResource(R.string.add_entry_title), color = Color.White) },
+                actions = { LanguageMenu() }
             )
 
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .glassPanel(RoundedCornerShape(16.dp))
-                    .clickable(enabled = formState.isFillable) {
-                        viewModel.addEntry(
-                            bloodSugar = formState.bloodSugar.toFloatOrNull(),
-                            breadUnits = formState.breadUnits.toFloatOrNull(),
-                            shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
-                            longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
-                            notes = formState.notes.trim(),
-                            photoPath = formState.photoPath,
-                            createdAt = LocalDateTime.of(formState.date, formState.time)
-                        )
-                        formState = EntryFormState()
-                        showSuccessSnackbar = true
-                    }
-                    .padding(vertical = 14.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    stringResource(R.string.save_entry_button),
-                    color = OnGlass,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
+                if (!sensorAvailable) {
+                    SensorWarningBanner()
+                }
 
-            Spacer(modifier = Modifier.height(96.dp))
+                EntryFormCard(
+                    state = formState,
+                    onStateChange = { formState = it },
+                    onDateClick = { showDatePicker = true },
+                    onTimeClick = { showTimePicker = true }
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .glassPanel(RoundedCornerShape(16.dp))
+                        .clickable(enabled = formState.isFillable) {
+                            viewModel.addEntry(
+                                bloodSugar = formState.bloodSugar.toFloatOrNull(),
+                                breadUnits = formState.breadUnits.toFloatOrNull(),
+                                shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
+                                longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
+                                notes = formState.notes.trim(),
+                                photoPath = formState.photoPath,
+                                createdAt = LocalDateTime.of(formState.date, formState.time)
+                            )
+                            formState = EntryFormState()
+                            showSuccessSnackbar = true
+                        }
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        stringResource(R.string.save_entry_button),
+                        color = OnGlass,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(96.dp))
+            }
         }
     }
 }

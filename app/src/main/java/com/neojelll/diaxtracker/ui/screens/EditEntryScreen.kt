@@ -15,9 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.SugarSource
+import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.LanguageMenu
+import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.glassPanel
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -99,10 +102,20 @@ fun EditEntryScreen(
         )
     }
 
+    val topBarState = rememberCollapsibleTopBarState()
+
     Scaffold(
         containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .nestedScroll(topBarState.nestedScrollConnection)
+        ) {
+            CollapsibleTopBar(
+                state = topBarState,
                 title = { Text(stringResource(R.string.edit_entry_title), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
@@ -114,63 +127,59 @@ fun EditEntryScreen(
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete), tint = Color.White)
                     }
                     LanguageMenu()
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            EntryFormCard(
-                state = formState,
-                onStateChange = { formState = it },
-                onDateClick = { showDatePicker = true },
-                onTimeClick = { showTimePicker = true }
+                }
             )
 
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .glassPanel(RoundedCornerShape(16.dp))
-                    .clickable(enabled = formState.isFillable) {
-                        val newBloodSugar = formState.bloodSugar.toFloatOrNull()
-                        viewModel.updateEntry(
-                            entry.copy(
-                                bloodSugar = newBloodSugar,
-                                sugarSource = if (newBloodSugar != entry.bloodSugar) {
-                                    newBloodSugar?.let { SugarSource.MANUAL }
-                                } else {
-                                    entry.sugarSource
-                                },
-                                breadUnits = formState.breadUnits.toFloatOrNull(),
-                                shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
-                                longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
-                                notes = formState.notes.trim(),
-                                photoPath = formState.photoPath,
-                                createdAt = LocalDateTime.of(formState.date, formState.time)
-                            )
-                        )
-                        onDone()
-                    }
-                    .padding(vertical = 14.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    stringResource(R.string.save_changes_button),
-                    color = OnGlass,
-                    style = MaterialTheme.typography.titleMedium
+                EntryFormCard(
+                    state = formState,
+                    onStateChange = { formState = it },
+                    onDateClick = { showDatePicker = true },
+                    onTimeClick = { showTimePicker = true }
                 )
-            }
 
-            Spacer(modifier = Modifier.height(96.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .glassPanel(RoundedCornerShape(16.dp))
+                        .clickable(enabled = formState.isFillable) {
+                            val newBloodSugar = formState.bloodSugar.toFloatOrNull()
+                            viewModel.updateEntry(
+                                entry.copy(
+                                    bloodSugar = newBloodSugar,
+                                    sugarSource = if (newBloodSugar != entry.bloodSugar) {
+                                        newBloodSugar?.let { SugarSource.MANUAL }
+                                    } else {
+                                        entry.sugarSource
+                                    },
+                                    breadUnits = formState.breadUnits.toFloatOrNull(),
+                                    shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
+                                    longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
+                                    notes = formState.notes.trim(),
+                                    photoPath = formState.photoPath,
+                                    createdAt = LocalDateTime.of(formState.date, formState.time)
+                                )
+                            )
+                            onDone()
+                        }
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        stringResource(R.string.save_changes_button),
+                        color = OnGlass,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(96.dp))
+            }
         }
     }
 }

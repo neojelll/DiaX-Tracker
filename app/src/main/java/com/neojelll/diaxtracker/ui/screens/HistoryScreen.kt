@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -20,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.LanguageMenu
+import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
@@ -37,24 +40,20 @@ fun HistoryScreen(
     onEntryClick: (Long) -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
+    val topBarState = rememberCollapsibleTopBarState()
 
-    Scaffold(
-        containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.history_title), color = Color.White) },
-                actions = { LanguageMenu() },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(topBarState.nestedScrollConnection)
+    ) {
+        CollapsibleTopBar(
+            state = topBarState,
+            title = { Text(stringResource(R.string.history_title), color = Color.White) },
+            actions = { LanguageMenu() }
+        )
+
+        Box(modifier = Modifier.weight(1f)) {
             if (entries.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
