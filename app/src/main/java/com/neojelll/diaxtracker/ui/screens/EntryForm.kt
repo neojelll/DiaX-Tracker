@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -663,19 +664,27 @@ private fun DateTimeSection(
 ) {
     val locale = LocalConfiguration.current.locales[0]
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .fieldBox(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        DateTimeButton(
+        DateTimeChip(
             icon = Icons.Filled.CalendarMonth,
-            label = stringResource(R.string.entry_date_label),
+            contentDescription = stringResource(R.string.entry_date_label),
             value = date.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)),
             onClick = onDateClick,
             modifier = Modifier.weight(1f)
         )
-        DateTimeButton(
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(20.dp)
+                .background(CardBorder)
+        )
+        DateTimeChip(
             icon = Icons.Filled.Schedule,
-            label = stringResource(R.string.entry_time_label),
+            contentDescription = stringResource(R.string.entry_time_label),
             value = time.format(DateTimeFormatter.ofPattern("HH:mm")),
             onClick = onTimeClick,
             modifier = Modifier.weight(1f)
@@ -684,32 +693,28 @@ private fun DateTimeSection(
 }
 
 @Composable
-private fun DateTimeButton(
+private fun DateTimeChip(
     icon: ImageVector,
-    label: String,
+    contentDescription: String,
     value: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
-            .fieldBox()
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(18.dp))
-        Column {
-            Text(label, style = MaterialTheme.typography.labelSmall, color = TextSecondary)
-            Text(
-                value,
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        Icon(icon, contentDescription = contentDescription, tint = TextSecondary, modifier = Modifier.size(16.dp))
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
