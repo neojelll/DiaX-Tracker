@@ -108,6 +108,10 @@ fun EditEntryScreen(
 
     val topBarState = rememberCollapsibleTopBarState()
     val scrollState = rememberScrollState()
+    var canScroll by remember { mutableStateOf(false) }
+    LaunchedEffect(scrollState.maxValue) {
+        if (scrollState.maxValue > 0) canScroll = true
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -118,7 +122,7 @@ fun EditEntryScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .then(
-                    if (scrollState.maxValue > 0) Modifier.nestedScroll(topBarState.nestedScrollConnection) else Modifier
+                    if (canScroll) Modifier.nestedScroll(topBarState.nestedScrollConnection) else Modifier
                 )
         ) {
             CollapsibleTopBar(
@@ -138,7 +142,8 @@ fun EditEntryScreen(
 
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .weight(1f)
+                    .fillMaxWidth()
                     .padding(12.dp)
                     .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(10.dp)

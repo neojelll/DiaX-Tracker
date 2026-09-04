@@ -43,7 +43,10 @@ fun HistoryScreen(
     val entries by viewModel.entries.collectAsState()
     val topBarState = rememberCollapsibleTopBarState()
     val listState = rememberLazyListState()
-    val canScroll = listState.canScrollForward || listState.canScrollBackward
+    var canScroll by remember { mutableStateOf(false) }
+    LaunchedEffect(listState.canScrollForward, listState.canScrollBackward) {
+        if (listState.canScrollForward || listState.canScrollBackward) canScroll = true
+    }
 
     Column(
         modifier = Modifier
