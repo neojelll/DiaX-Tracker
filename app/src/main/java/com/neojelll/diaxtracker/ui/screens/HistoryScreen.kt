@@ -3,7 +3,6 @@ package com.neojelll.diaxtracker.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -19,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
@@ -31,6 +31,7 @@ import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.io.File
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -84,20 +85,29 @@ fun HistoryScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(entries, key = { it.id }) { entry ->
-                        val stats = entryStats(entry)
-                        if (stats.size <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
-                            CompactEntryRow(
-                                entry = entry,
-                                stat = stats.firstOrNull(),
-                                onClick = { onEntryClick(entry.id) }
-                            )
-                        } else {
-                            DiaryEntryCard(
-                                entry = entry,
-                                stats = stats,
-                                onClick = { onEntryClick(entry.id) }
-                            )
+                    entries.forEachIndexed { index, entry ->
+                        val entryDate = entry.createdAt.toLocalDate()
+                        val previousDate = entries.getOrNull(index - 1)?.createdAt?.toLocalDate()
+                        if (entryDate != previousDate) {
+                            item(key = "day-$entryDate") {
+                                DayDivider(date = entryDate)
+                            }
+                        }
+                        item(key = entry.id) {
+                            val stats = entryStats(entry)
+                            if (stats.size <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
+                                CompactEntryRow(
+                                    entry = entry,
+                                    stat = stats.firstOrNull(),
+                                    onClick = { onEntryClick(entry.id) }
+                                )
+                            } else {
+                                DiaryEntryCard(
+                                    entry = entry,
+                                    stats = stats,
+                                    onClick = { onEntryClick(entry.id) }
+                                )
+                            }
                         }
                     }
                 }
@@ -147,6 +157,23 @@ private fun entryStats(entry: DiaryEntry): List<EntryStat> = buildList {
             )
         )
     }
+}
+
+@Composable
+private fun DayDivider(date: LocalDate) {
+    val locale = LocalConfiguration.current.locales[0]
+    val today = LocalDate.now()
+    val label = when (date) {
+        today -> stringResource(R.string.today_label)
+        today.minusDays(1) -> stringResource(R.string.yesterday_label)
+        else -> date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale))
+    }
+    Text(
+        text = label.uppercase(locale),
+        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.6.sp),
+        color = TextSecondary,
+        modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+    )
 }
 
 @Composable

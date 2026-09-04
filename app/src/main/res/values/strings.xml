@@ -51,6 +51,8 @@
     <string name="entry_photo">Фото записи</string>
 
     <string name="history_title">История записей</string>
+    <string name="today_label">Сегодня</string>
+    <string name="yesterday_label">Вчера</string>
     <string name="no_entries_title">Записей пока нет</string>
     <string name="no_entries_subtitle">Добавьте первую запись</string>
     <string name="sugar_label">Сахар</string>
