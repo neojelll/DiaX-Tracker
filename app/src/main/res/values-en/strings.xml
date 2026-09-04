@@ -2,6 +2,7 @@
     <string name="app_name">DiaX-Tracker</string>
 
     <string name="nav_entry">Entry</string>
+    <string name="nav_meal_presets">Meals</string>
     <string name="nav_history">History</string>
 
     <string name="add_entry_title">New Entry</string>
@@ -56,4 +57,15 @@
     <string name="language">Language</string>
     <string name="language_russian">Русский</string>
     <string name="language_english">English</string>
+
+    <string name="meal_presets_title">Meal Presets</string>
+    <string name="add_meal_preset">Add Meal Preset</string>
+    <string name="edit_meal_preset">Edit Meal Preset</string>
+    <string name="meal_preset_name_label">Name</string>
+    <string name="meal_preset_name_placeholder">E.g. Oatmeal</string>
+    <string name="meal_preset_option_format">%1$s — %2$s BU</string>
+    <string name="no_meal_presets_title">No meal presets yet</string>
+    <string name="no_meal_presets_subtitle">Add a meal you eat often</string>
+    <string name="delete_meal_preset_confirm_title">Delete meal preset?</string>
+    <string name="save_meal_preset_button">Save</string>
 </resources>

@@ -33,6 +33,7 @@ fun AddEntryScreen(
     var showSuccessSnackbar by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val sensorAvailable by viewModel.sensorAvailable.collectAsState()
+    val mealPresets by viewModel.mealPresets.collectAsState()
     val entrySavedMessage = stringResource(R.string.entry_saved_snackbar)
 
     LaunchedEffect(showSuccessSnackbar) {
@@ -98,7 +99,8 @@ fun AddEntryScreen(
                     state = formState,
                     onStateChange = { formState = it },
                     onDateClick = { showDatePicker = true },
-                    onTimeClick = { showTimePicker = true }
+                    onTimeClick = { showTimePicker = true },
+                    mealPresets = mealPresets
                 )
 
                 Box(

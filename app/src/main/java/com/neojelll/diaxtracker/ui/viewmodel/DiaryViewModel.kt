@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryRepository
+import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.sensor.PostMealScheduler
@@ -24,11 +25,18 @@ import java.time.LocalDateTime
 
 class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = DiaryRepository(
-        DiaryDatabase.getDatabase(application).diaryDao()
+        DiaryDatabase.getDatabase(application).diaryDao(),
+        DiaryDatabase.getDatabase(application).mealPresetDao()
     )
     private val sensorReadingStore = SensorReadingStore(application)
 
     val entries: StateFlow<List<DiaryEntry>> = repository.allEntries.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
+    )
+
+    val mealPresets: StateFlow<List<MealPreset>> = repository.allMealPresets.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList()
@@ -113,6 +121,24 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
             PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
             repository.delete(entry)
             PhotoStore.deletePhoto(entry.photoPath)
+        }
+    }
+
+    fun addMealPreset(name: String, breadUnits: Float) {
+        viewModelScope.launch {
+            repository.insertMealPreset(MealPreset(name = name, breadUnits = breadUnits))
+        }
+    }
+
+    fun updateMealPreset(preset: MealPreset) {
+        viewModelScope.launch {
+            repository.updateMealPreset(preset)
+        }
+    }
+
+    fun deleteMealPreset(preset: MealPreset) {
+        viewModelScope.launch {
+            repository.deleteMealPreset(preset)
         }
     }
 

@@ -2,6 +2,7 @@
     <string name="app_name">DiaX-Tracker</string>
 
     <string name="nav_entry">Запись</string>
+    <string name="nav_meal_presets">Приёмы</string>
     <string name="nav_history">История</string>
 
     <string name="add_entry_title">Новая запись</string>
@@ -56,4 +57,15 @@
     <string name="language">Язык</string>
     <string name="language_russian">Русский</string>
     <string name="language_english">English</string>
+
+    <string name="meal_presets_title">Приёмы пищи</string>
+    <string name="add_meal_preset">Добавить приём пищи</string>
+    <string name="edit_meal_preset">Изменить приём пищи</string>
+    <string name="meal_preset_name_label">Название</string>
+    <string name="meal_preset_name_placeholder">Например: Овсянка</string>
+    <string name="meal_preset_option_format">%1$s — %2$s ХЕ</string>
+    <string name="no_meal_presets_title">Приёмов пищи пока нет</string>
+    <string name="no_meal_presets_subtitle">Добавьте часто повторяющийся приём пищи</string>
+    <string name="delete_meal_preset_confirm_title">Удалить приём пищи?</string>
+    <string name="save_meal_preset_button">Сохранить</string>
 </resources>

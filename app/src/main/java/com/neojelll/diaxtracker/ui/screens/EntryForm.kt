@@ -13,6 +13,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
@@ -29,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
@@ -43,6 +46,7 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.ui.theme.OnGlass
 import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
@@ -82,7 +86,7 @@ internal fun transparentFieldColors() = TextFieldDefaults.colors(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CompactField(
+internal fun CompactField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -91,7 +95,8 @@ private fun CompactField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     singleLine: Boolean = true,
     minLines: Int = 1,
-    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     BasicTextField(
@@ -115,11 +120,15 @@ private fun CompactField(
             interactionSource = interactionSource,
             label = { Text(label) },
             placeholder = { Text(placeholder) },
+            trailingIcon = trailingIcon,
             colors = transparentFieldColors(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         )
     }
 }
+
+internal fun formatBreadUnits(value: Float): String =
+    if (value == value.toInt().toFloat()) value.toInt().toString() else value.toString()
 
 @Composable
 internal fun SensorWarningBanner() {
@@ -203,12 +212,14 @@ internal fun InsulinActiveBanner(entries: List<DiaryEntry>) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun EntryFormCard(
     state: EntryFormState,
     onStateChange: (EntryFormState) -> Unit,
     onDateClick: () -> Unit,
-    onTimeClick: () -> Unit
+    onTimeClick: () -> Unit,
+    mealPresets: List<MealPreset> = emptyList()
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -252,12 +263,10 @@ internal fun EntryFormCard(
             )
             HorizontalDivider(color = DividerColor)
 
-            CompactField(
+            BreadUnitsField(
                 value = state.breadUnits,
                 onValueChange = { onStateChange(state.copy(breadUnits = it.filter { c -> c.isDigit() || c == '.' })) },
-                label = stringResource(R.string.bread_units_label),
-                placeholder = stringResource(R.string.bread_units_placeholder),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                mealPresets = mealPresets
             )
             HorizontalDivider(color = DividerColor)
 
@@ -302,6 +311,77 @@ internal fun EntryFormCard(
                     onStateChange(state.copy(photoPath = null))
                 }
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BreadUnitsField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    mealPresets: List<MealPreset>
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val label = stringResource(R.string.bread_units_label)
+    val placeholder = stringResource(R.string.bread_units_placeholder)
+    val keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+
+    if (mealPresets.isEmpty()) {
+        CompactField(
+            value = value,
+            onValueChange = onValueChange,
+            label = label,
+            placeholder = placeholder,
+            keyboardOptions = keyboardOptions
+        )
+        return
+    }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        CompactField(
+            value = value,
+            onValueChange = onValueChange,
+            label = label,
+            placeholder = placeholder,
+            keyboardOptions = keyboardOptions,
+            modifier = Modifier
+                .menuAnchor()
+                .onFocusChanged { if (it.isFocused) expanded = true },
+            trailingIcon = {
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                        contentDescription = stringResource(R.string.meal_presets_title),
+                        tint = OnGlassMuted
+                    )
+                }
+            }
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            mealPresets.forEach { preset ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(
+                                R.string.meal_preset_option_format,
+                                preset.name,
+                                formatBreadUnits(preset.breadUnits)
+                            )
+                        )
+                    },
+                    onClick = {
+                        onValueChange(formatBreadUnits(preset.breadUnits))
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }
