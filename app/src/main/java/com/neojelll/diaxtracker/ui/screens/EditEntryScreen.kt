@@ -191,8 +191,6 @@ fun EditEntryScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
