@@ -664,9 +664,7 @@ private fun DateTimeSection(
 ) {
     val locale = LocalConfiguration.current.locales[0]
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fieldBox(),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         DateTimeChip(
@@ -703,7 +701,7 @@ private fun DateTimeChip(
     Row(
         modifier = modifier
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 8.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
