@@ -36,6 +36,7 @@ fun EditEntryScreen(
 ) {
     val entries by viewModel.entries.collectAsState()
     val entry = entries.find { it.id == entryId } ?: return
+    val mealPresets by viewModel.mealPresets.collectAsState()
 
     var formState by remember(entryId) {
         mutableStateOf(
@@ -141,7 +142,8 @@ fun EditEntryScreen(
                     state = formState,
                     onStateChange = { formState = it },
                     onDateClick = { showDatePicker = true },
-                    onTimeClick = { showTimePicker = true }
+                    onTimeClick = { showTimePicker = true },
+                    mealPresets = mealPresets
                 )
 
                 Box(
