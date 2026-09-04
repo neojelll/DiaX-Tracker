@@ -125,6 +125,7 @@ fun AddEntryScreen(
                     onDateClick = { showDatePicker = true },
                     onTimeClick = { showTimePicker = true },
                     mealPresets = mealPresets,
+                    cardTitle = stringResource(R.string.add_entry_title),
                     onReset = { formState = EntryFormState() }
                 )
 

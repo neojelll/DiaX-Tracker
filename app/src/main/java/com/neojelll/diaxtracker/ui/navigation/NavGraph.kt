@@ -16,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -35,8 +34,8 @@ import com.neojelll.diaxtracker.ui.screens.EditEntryScreen
 import com.neojelll.diaxtracker.ui.screens.HistoryScreen
 import com.neojelll.diaxtracker.ui.screens.InsulinActiveBanner
 import com.neojelll.diaxtracker.ui.screens.MealPresetsScreen
-import com.neojelll.diaxtracker.ui.theme.AccentDark
 import com.neojelll.diaxtracker.ui.theme.PageBackground
+import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -141,27 +140,20 @@ private fun AppBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(horizontal = 24.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 32.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             bottomNavItems.forEach { screen ->
                 val selected = currentRoute == screen.route
                 val label = stringResource(screen.labelRes)
-                Box(
+                Icon(
+                    imageVector = screen.icon,
+                    contentDescription = label,
+                    tint = if (selected) TextPrimary else TextSecondary,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .then(if (selected) Modifier.background(AccentDark) else Modifier)
+                        .size(24.dp)
                         .clickable { onSelect(screen) }
-                        .padding(horizontal = 20.dp, vertical = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = screen.icon,
-                        contentDescription = label,
-                        tint = if (selected) Color.White else TextSecondary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
+                )
             }
         }
     }

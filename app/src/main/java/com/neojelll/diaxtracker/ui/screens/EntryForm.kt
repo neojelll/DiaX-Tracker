@@ -235,6 +235,7 @@ internal fun EntryFormCard(
     onDateClick: () -> Unit,
     onTimeClick: () -> Unit,
     mealPresets: List<MealPreset> = emptyList(),
+    cardTitle: String? = null,
     onReset: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -263,6 +264,10 @@ internal fun EntryFormCard(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        if (cardTitle != null) {
+            Text(cardTitle, style = MaterialTheme.typography.titleMedium, color = TextPrimary)
+        }
+
         DateTimeSection(
             date = state.date,
             onDateClick = onDateClick,
