@@ -5,9 +5,17 @@
     <string name="nav_meal_presets">Приёмы</string>
     <string name="nav_history">История</string>
 
-    <string name="add_entry_title">Новая запись</string>
+    <string name="add_entry_title">Добавить запись</string>
+    <string name="greeting_title">Привет!</string>
     <string name="entry_saved_snackbar">Запись сохранена!</string>
     <string name="save_entry_button">Сохранить запись</string>
+
+    <plurals name="today_entries_count">
+        <item quantity="one">Сегодня у тебя %d запись</item>
+        <item quantity="few">Сегодня у тебя %d записи</item>
+        <item quantity="many">Сегодня у тебя %d записей</item>
+        <item quantity="other">Сегодня у тебя %d записей</item>
+    </plurals>
 
     <string name="edit_entry_title">Редактирование</string>
     <string name="back">Назад</string>
@@ -37,6 +45,7 @@
     <string name="comment_label">Комментарий</string>
     <string name="comment_placeholder">Дополнительный комментарий...</string>
     <string name="add_photo">Добавить фото</string>
+    <string name="add_photo_short">Фото</string>
     <string name="remove_photo">Удалить фото</string>
     <string name="entry_photo">Фото записи</string>
 

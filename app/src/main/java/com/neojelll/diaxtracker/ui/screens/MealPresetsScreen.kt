@@ -13,7 +13,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -24,9 +23,10 @@ import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
-import com.neojelll.diaxtracker.ui.theme.OnGlass
-import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
-import com.neojelll.diaxtracker.ui.theme.glassPanel
+import com.neojelll.diaxtracker.ui.theme.DangerRed
+import com.neojelll.diaxtracker.ui.theme.TextPrimary
+import com.neojelll.diaxtracker.ui.theme.TextSecondary
+import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,9 +67,6 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
     presetPendingDelete?.let { preset ->
         AlertDialog(
             onDismissRequest = { presetPendingDelete = null },
-            containerColor = Color.Black.copy(alpha = 0.75f),
-            titleContentColor = OnGlass,
-            textContentColor = OnGlass,
             title = { Text(stringResource(R.string.delete_meal_preset_confirm_title)) },
             text = { Text(stringResource(R.string.delete_entry_confirm_text)) },
             confirmButton = {
@@ -77,12 +74,12 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
                     viewModel.deleteMealPreset(preset)
                     presetPendingDelete = null
                 }) {
-                    Text(stringResource(R.string.delete), color = OnGlass)
+                    Text(stringResource(R.string.delete), color = DangerRed)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { presetPendingDelete = null }) {
-                    Text(stringResource(R.string.cancel), color = OnGlass)
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -95,13 +92,13 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
     ) {
         CollapsibleTopBar(
             state = topBarState,
-            title = { Text(stringResource(R.string.meal_presets_title), color = Color.White) },
+            title = { Text(stringResource(R.string.meal_presets_title), color = TextPrimary) },
             actions = {
                 IconButton(onClick = { showAddDialog = true }) {
                     Icon(
                         Icons.Filled.Add,
                         contentDescription = stringResource(R.string.add_meal_preset),
-                        tint = Color.White
+                        tint = TextPrimary
                     )
                 }
                 LanguageMenu()
@@ -118,13 +115,13 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
                         Text(
                             text = stringResource(R.string.no_meal_presets_title),
                             style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
+                            color = TextPrimary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = stringResource(R.string.no_meal_presets_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White
+                            color = TextSecondary
                         )
                     }
                 }
@@ -138,7 +135,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .glassPanel(RoundedCornerShape(16.dp))
+                                .card(RoundedCornerShape(16.dp))
                                 .clickable { editingPreset = preset }
                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -147,16 +144,16 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
                             Text(
                                 text = preset.name,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = OnGlass
+                                color = TextPrimary
                             )
                             Text(
                                 text = stringResource(
                                     R.string.bread_units_value_format,
-                                    formatBreadUnits(preset.breadUnits)
+                                    formatAmount(preset.breadUnits)
                                 ),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = OnGlass
+                                color = TextPrimary
                             )
                         }
                     }
@@ -174,15 +171,12 @@ private fun MealPresetEditorDialog(
     onDelete: (() -> Unit)? = null
 ) {
     var name by remember { mutableStateOf(preset?.name ?: "") }
-    var breadUnitsText by remember { mutableStateOf(preset?.let { formatBreadUnits(it.breadUnits) } ?: "") }
+    var breadUnitsText by remember { mutableStateOf(preset?.let { formatAmount(it.breadUnits) } ?: "") }
     val breadUnits = breadUnitsText.toFloatOrNull()
     val isValid = name.isNotBlank() && breadUnits != null
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.Black.copy(alpha = 0.75f),
-        titleContentColor = OnGlass,
-        textContentColor = OnGlass,
         title = {
             Text(
                 stringResource(
@@ -207,9 +201,9 @@ private fun MealPresetEditorDialog(
                 )
                 if (onDelete != null) {
                     TextButton(onClick = onDelete, modifier = Modifier.padding(top = 8.dp)) {
-                        Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                        Icon(Icons.Filled.Delete, contentDescription = null, tint = DangerRed)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.delete), color = DangerRed)
                     }
                 }
             }
@@ -219,12 +213,12 @@ private fun MealPresetEditorDialog(
                 enabled = isValid,
                 onClick = { onConfirm(name.trim(), breadUnits!!) }
             ) {
-                Text(stringResource(R.string.save), color = OnGlass)
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel), color = OnGlass)
+                Text(stringResource(R.string.cancel))
             }
         }
     )

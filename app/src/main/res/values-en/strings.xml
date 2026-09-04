@@ -5,9 +5,15 @@
     <string name="nav_meal_presets">Meals</string>
     <string name="nav_history">History</string>
 
-    <string name="add_entry_title">New Entry</string>
+    <string name="add_entry_title">Add Entry</string>
+    <string name="greeting_title">Hi!</string>
     <string name="entry_saved_snackbar">Entry saved!</string>
     <string name="save_entry_button">Save Entry</string>
+
+    <plurals name="today_entries_count">
+        <item quantity="one">You have %d entry today</item>
+        <item quantity="other">You have %d entries today</item>
+    </plurals>
 
     <string name="edit_entry_title">Edit Entry</string>
     <string name="back">Back</string>
@@ -37,6 +43,7 @@
     <string name="comment_label">Comment</string>
     <string name="comment_placeholder">Additional comment...</string>
     <string name="add_photo">Add Photo</string>
+    <string name="add_photo_short">Photo</string>
     <string name="remove_photo">Remove Photo</string>
     <string name="entry_photo">Entry Photo</string>
 

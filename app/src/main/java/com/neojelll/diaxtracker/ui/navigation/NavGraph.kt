@@ -1,25 +1,21 @@
 package com.neojelll.diaxtracker.ui.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -39,15 +35,14 @@ import com.neojelll.diaxtracker.ui.screens.EditEntryScreen
 import com.neojelll.diaxtracker.ui.screens.HistoryScreen
 import com.neojelll.diaxtracker.ui.screens.InsulinActiveBanner
 import com.neojelll.diaxtracker.ui.screens.MealPresetsScreen
-import com.neojelll.diaxtracker.ui.theme.AppGradient
-import com.neojelll.diaxtracker.ui.theme.GlassBorderColor
-import com.neojelll.diaxtracker.ui.theme.GlassPanelColor
-import com.neojelll.diaxtracker.ui.theme.GlassSheen
-import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
+import com.neojelll.diaxtracker.ui.theme.AccentDark
+import com.neojelll.diaxtracker.ui.theme.PageBackground
+import com.neojelll.diaxtracker.ui.theme.TextSecondary
+import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
 sealed class Screen(val route: String, @StringRes val labelRes: Int, val icon: ImageVector) {
-    data object AddEntry : Screen("add_entry", R.string.nav_entry, Icons.Filled.Edit)
+    data object AddEntry : Screen("add_entry", R.string.nav_entry, Icons.Filled.Home)
     data object MealPresets : Screen("meal_presets", R.string.nav_meal_presets, Icons.Filled.Restaurant)
     data object History : Screen("history", R.string.nav_history, Icons.Filled.History)
 }
@@ -67,18 +62,7 @@ fun NavGraph(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AppGradient)
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(AppGradient)
-                .blur(60.dp)
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(GlassSheen)
+                .background(PageBackground)
         )
 
         Scaffold(
@@ -151,40 +135,31 @@ private fun AppBottomBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(barShape)
-            .background(GlassPanelColor)
-            .border(1.dp, GlassBorderColor, barShape)
+            .card(barShape)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(horizontal = 16.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 24.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             bottomNavItems.forEach { screen ->
                 val selected = currentRoute == screen.route
                 val label = stringResource(screen.labelRes)
-                Column(
+                Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(20.dp))
-                        .then(if (selected) Modifier.background(AppGradient) else Modifier)
+                        .clip(RoundedCornerShape(16.dp))
+                        .then(if (selected) Modifier.background(AccentDark) else Modifier)
                         .clickable { onSelect(screen) }
-                        .padding(vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                        .padding(horizontal = 20.dp, vertical = 10.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = screen.icon,
                         contentDescription = label,
-                        tint = if (selected) Color.White else OnGlassMuted,
+                        tint = if (selected) Color.White else TextSecondary,
                         modifier = Modifier.size(22.dp)
-                    )
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (selected) Color.White else OnGlassMuted
                     )
                 }
             }
