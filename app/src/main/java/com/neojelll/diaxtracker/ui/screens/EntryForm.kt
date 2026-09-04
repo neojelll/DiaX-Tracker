@@ -232,7 +232,6 @@ internal fun EntryFormCard(
     onDateClick: () -> Unit,
     onTimeClick: () -> Unit,
     mealPresets: List<MealPreset> = emptyList(),
-    cardTitle: String? = null,
     onReset: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -258,13 +257,9 @@ internal fun EntryFormCard(
         modifier = Modifier
             .fillMaxWidth()
             .card(RoundedCornerShape(24.dp))
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (cardTitle != null) {
-            Text(cardTitle, style = MaterialTheme.typography.titleLarge, color = TextPrimary)
-        }
-
         DateTimeSection(
             date = state.date,
             onDateClick = onDateClick,
@@ -319,14 +314,14 @@ internal fun EntryFormCard(
 
         Column(modifier = Modifier.fillMaxWidth()) {
             FieldLabel(stringResource(R.string.comment_label))
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             PlainTextField(
                 value = state.notes,
                 onValueChange = { onStateChange(state.copy(notes = it)) },
                 placeholder = stringResource(R.string.comment_placeholder),
                 singleLine = false,
-                minLines = 3,
-                maxLines = 5
+                minLines = 1,
+                maxLines = 2
             )
         }
 
@@ -361,7 +356,7 @@ private fun PlainTextField(
         modifier = modifier
             .fillMaxWidth()
             .fieldBox()
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         if (value.isEmpty()) {
             Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = TextSecondary)
@@ -397,7 +392,7 @@ private fun StepperField(
 
     Column(modifier = modifier.fillMaxWidth()) {
         FieldLabel(label)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -489,14 +484,14 @@ private fun FoodField(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         FieldLabel(stringResource(R.string.food_label))
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fieldBox()
                     .clickable { expanded = true }
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -603,7 +598,7 @@ private fun OutlineActionButton(
         modifier = modifier
             .fieldBox()
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -691,7 +686,7 @@ private fun DateTimeButton(
         modifier = modifier
             .fieldBox()
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {

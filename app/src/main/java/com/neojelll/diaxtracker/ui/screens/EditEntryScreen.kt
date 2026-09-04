@@ -138,9 +138,9 @@ fun EditEntryScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(12.dp)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 EntryFormCard(
                     state = formState,
@@ -179,7 +179,7 @@ fun EditEntryScreen(
                                 }
                             } else Modifier
                         )
-                        .padding(vertical = 14.dp),
+                        .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -189,7 +189,7 @@ fun EditEntryScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(96.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

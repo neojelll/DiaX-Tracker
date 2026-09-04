@@ -5,7 +5,6 @@
     <string name="nav_meal_presets">Meals</string>
     <string name="nav_history">History</string>
 
-    <string name="add_entry_title">Add Entry</string>
     <string name="greeting_title">Hi!</string>
     <string name="entry_saved_snackbar">Entry saved!</string>
     <string name="save_entry_button">Save Entry</string>
