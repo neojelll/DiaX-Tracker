@@ -9,7 +9,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -42,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -54,6 +54,7 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.photo.PhotoStore
+import com.neojelll.diaxtracker.ui.theme.AccentDark
 import com.neojelll.diaxtracker.ui.theme.CardBorder
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
@@ -137,10 +138,10 @@ internal fun formatAmount(value: Float): String =
     if (value == value.toInt().toFloat()) value.toInt().toString() else value.toString()
 
 @Composable
-private fun FieldLabel(text: String) {
+private fun SectionLabel(text: String) {
     Text(
         text = text.uppercase(),
-        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.6.sp),
+        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.6.sp, fontWeight = FontWeight.SemiBold),
         color = TextSecondary
     )
 }
@@ -150,7 +151,7 @@ internal fun SensorWarningBanner() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .card(RoundedCornerShape(16.dp))
+            .card()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -194,7 +195,7 @@ internal fun InsulinActiveBanner(entries: List<DiaryEntry>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .card(RoundedCornerShape(16.dp))
+            .card()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -260,12 +261,15 @@ internal fun EntryFormCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .card(RoundedCornerShape(24.dp))
+            .card()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (cardTitle != null) {
-            Text(cardTitle, style = MaterialTheme.typography.titleMedium, color = TextPrimary)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(cardTitle, style = MaterialTheme.typography.titleMedium, color = TextPrimary)
+                HorizontalDivider(color = CardBorder)
+            }
         }
 
         DateTimeSection(
@@ -275,69 +279,64 @@ internal fun EntryFormCard(
             onTimeClick = onTimeClick
         )
 
-        StepperField(
-            label = stringResource(R.string.blood_sugar_label),
-            value = state.bloodSugar,
-            onValueChange = { onStateChange(state.copy(bloodSugar = it)) },
-            step = 0.1f
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            StepperField(
+                label = stringResource(R.string.blood_sugar_label),
+                value = state.bloodSugar,
+                onValueChange = { onStateChange(state.copy(bloodSugar = it)) },
+                step = 0.1f
+            )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
             StepperField(
                 label = stringResource(R.string.short_insulin_short_label),
                 value = state.shortInsulinDose,
                 onValueChange = { onStateChange(state.copy(shortInsulinDose = it)) },
-                step = 0.5f,
-                modifier = Modifier.weight(1f)
+                step = 0.5f
             )
 
             StepperField(
                 label = stringResource(R.string.long_insulin_short_label),
                 value = state.longInsulinDose,
                 onValueChange = { onStateChange(state.copy(longInsulinDose = it)) },
-                step = 0.5f,
-                modifier = Modifier.weight(1f)
+                step = 0.5f
             )
-        }
 
-        HorizontalDivider(color = CardBorder)
+            HorizontalDivider(color = CardBorder)
 
-        val breadUnitsFormat = stringResource(R.string.bread_units_value_format)
-        FoodField(
-            foodLabel = state.foodLabel,
-            mealPresets = mealPresets,
-            onPresetSelected = { preset ->
-                onStateChange(
-                    state.copy(
-                        breadUnits = formatAmount(preset.breadUnits),
-                        foodLabel = preset.name
+            val breadUnitsFormat = stringResource(R.string.bread_units_value_format)
+            FoodField(
+                foodLabel = state.foodLabel,
+                mealPresets = mealPresets,
+                onPresetSelected = { preset ->
+                    onStateChange(
+                        state.copy(
+                            breadUnits = formatAmount(preset.breadUnits),
+                            foodLabel = preset.name
+                        )
                     )
-                )
-            },
-            onManualEntryConfirmed = { value ->
-                onStateChange(
-                    state.copy(
-                        breadUnits = formatAmount(value),
-                        foodLabel = String.format(breadUnitsFormat, formatAmount(value))
+                },
+                onManualEntryConfirmed = { value ->
+                    onStateChange(
+                        state.copy(
+                            breadUnits = formatAmount(value),
+                            foodLabel = String.format(breadUnitsFormat, formatAmount(value))
+                        )
                     )
+                }
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                SectionLabel(stringResource(R.string.comment_label))
+                PlainTextField(
+                    value = state.notes,
+                    onValueChange = { onStateChange(state.copy(notes = it)) },
+                    placeholder = stringResource(R.string.comment_placeholder),
+                    singleLine = false,
+                    minLines = 1,
+                    maxLines = 2,
+                    modifier = Modifier.height(54.dp)
                 )
             }
-        )
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            FieldLabel(stringResource(R.string.comment_label))
-            Spacer(modifier = Modifier.height(4.dp))
-            PlainTextField(
-                value = state.notes,
-                onValueChange = { onStateChange(state.copy(notes = it)) },
-                placeholder = stringResource(R.string.comment_placeholder),
-                singleLine = false,
-                minLines = 1,
-                maxLines = 2
-            )
         }
 
         ActionsRow(
@@ -371,16 +370,16 @@ private fun PlainTextField(
         modifier = modifier
             .fillMaxWidth()
             .fieldBox()
-            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .padding(horizontal = 10.dp, vertical = 10.dp)
     ) {
         if (value.isEmpty()) {
-            Text(placeholder, style = MaterialTheme.typography.bodyLarge, color = TextSecondary)
+            Text(placeholder, style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
         }
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
             cursorBrush = SolidColor(TextPrimary),
             keyboardOptions = keyboardOptions,
             singleLine = singleLine,
@@ -405,27 +404,41 @@ private fun StepperField(
         onValueChange(formatAmount((current + delta).coerceAtLeast(0f)))
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        FieldLabel(label)
-        Spacer(modifier = Modifier.height(4.dp))
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fieldBox(RoundedCornerShape(6.dp))
+                .height(32.dp)
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            StepperButton(icon = Icons.Filled.Remove, onClick = { adjust(-step) })
+            StepperIcon(icon = Icons.Filled.Remove, onClick = { adjust(-step) })
             Text(
                 text = value.ifBlank { "—" },
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = if (value.isBlank()) TextSecondary else TextPrimary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .weight(1f)
+                    .widthIn(min = 28.dp)
                     .clickable { showManualDialog = true }
             )
-            StepperButton(icon = Icons.Filled.Add, onClick = { adjust(step) })
+            StepperIcon(icon = Icons.Filled.Add, onClick = { adjust(step) })
         }
     }
 
@@ -443,14 +456,14 @@ private fun StepperField(
 }
 
 @Composable
-private fun StepperButton(icon: ImageVector, onClick: () -> Unit) {
-    IconButton(
-        onClick = onClick,
+private fun StepperIcon(icon: ImageVector, onClick: () -> Unit) {
+    Box(
         modifier = Modifier
-            .size(28.dp)
-            .border(1.dp, CardBorder, CircleShape)
+            .size(20.dp)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(icon, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(14.dp))
+        Icon(icon, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(12.dp))
     }
 }
 
@@ -499,28 +512,31 @@ private fun FoodField(
     var expanded by remember { mutableStateOf(false) }
     var showManualDialog by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        FieldLabel(stringResource(R.string.food_label))
-        Spacer(modifier = Modifier.height(4.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        SectionLabel(stringResource(R.string.food_label))
         Box(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(38.dp)
                     .fieldBox()
                     .clickable { expanded = true }
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                    .padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = foodLabel.ifBlank { stringResource(R.string.food_placeholder) },
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = if (foodLabel.isBlank()) TextSecondary else TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
                     imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
                     contentDescription = null,
-                    tint = TextSecondary
+                    tint = TextSecondary,
+                    modifier = Modifier.size(14.dp)
                 )
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -574,16 +590,15 @@ private fun ActionsRow(
     onReset: (() -> Unit)?
 ) {
     if (photoPath == null) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlineActionButton(
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedAccentButton(
                 icon = Icons.Filled.AddAPhoto,
                 text = stringResource(R.string.add_photo_short),
                 onClick = onPickPhoto,
                 modifier = Modifier.weight(1f)
             )
             if (onReset != null) {
-                OutlineActionButton(
-                    icon = null,
+                FilledAccentButton(
                     text = stringResource(R.string.cancel),
                     onClick = onReset,
                     modifier = Modifier.weight(1f)
@@ -593,9 +608,8 @@ private fun ActionsRow(
     } else {
         PhotoPreviewRow(photoPath = photoPath, onPickPhoto = onPickPhoto, onRemovePhoto = onRemovePhoto)
         if (onReset != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlineActionButton(
-                icon = null,
+            Spacer(modifier = Modifier.height(8.dp))
+            FilledAccentButton(
                 text = stringResource(R.string.cancel),
                 onClick = onReset,
                 modifier = Modifier.fillMaxWidth()
@@ -605,25 +619,45 @@ private fun ActionsRow(
 }
 
 @Composable
-private fun OutlineActionButton(
-    icon: ImageVector?,
+private fun OutlinedAccentButton(
+    icon: ImageVector,
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
-            .fieldBox()
+            .height(38.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .border(1.dp, AccentDark, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (icon != null) {
-            Icon(icon, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-        Text(text, style = MaterialTheme.typography.bodyLarge, color = TextPrimary)
+        Icon(icon, contentDescription = null, tint = AccentDark, modifier = Modifier.size(14.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = AccentDark)
+    }
+}
+
+@Composable
+private fun FilledAccentButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .height(38.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(AccentDark)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
     }
 }
 
@@ -637,7 +671,7 @@ private fun PhotoPreviewRow(
         modifier = Modifier
             .fillMaxWidth()
             .fieldBox()
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -646,18 +680,23 @@ private fun PhotoPreviewRow(
             contentDescription = stringResource(R.string.entry_photo),
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .size(38.dp)
+                .clip(RoundedCornerShape(8.dp))
                 .clickable(onClick = onPickPhoto)
         )
         Text(
             text = stringResource(R.string.entry_photo),
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = TextPrimary,
             modifier = Modifier.weight(1f)
         )
-        IconButton(onClick = onRemovePhoto, modifier = Modifier.size(32.dp)) {
-            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.remove_photo), tint = TextSecondary)
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clickable(onClick = onRemovePhoto),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.remove_photo), tint = TextSecondary, modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -672,7 +711,7 @@ private fun DateTimeSection(
     val locale = LocalConfiguration.current.locales[0]
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         DateTimeChip(
             icon = Icons.Filled.CalendarMonth,
@@ -680,12 +719,6 @@ private fun DateTimeSection(
             value = date.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)),
             onClick = onDateClick,
             modifier = Modifier.weight(1f)
-        )
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .height(20.dp)
-                .background(CardBorder)
         )
         DateTimeChip(
             icon = Icons.Filled.Schedule,
@@ -707,12 +740,14 @@ private fun DateTimeChip(
 ) {
     Row(
         modifier = modifier
+            .height(36.dp)
+            .fieldBox()
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 10.dp),
+            .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Icon(icon, contentDescription = contentDescription, tint = TextSecondary, modifier = Modifier.size(16.dp))
+        Icon(icon, contentDescription = contentDescription, tint = TextSecondary, modifier = Modifier.size(14.dp))
         Text(
             value,
             style = MaterialTheme.typography.bodyMedium,
@@ -738,7 +773,7 @@ internal fun TimePickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
-            modifier = Modifier.card(RoundedCornerShape(24.dp))
+            modifier = Modifier.card(RoundedCornerShape(16.dp))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -780,7 +815,7 @@ internal fun DatePickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
-            modifier = Modifier.card(RoundedCornerShape(24.dp))
+            modifier = Modifier.card(RoundedCornerShape(16.dp))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),

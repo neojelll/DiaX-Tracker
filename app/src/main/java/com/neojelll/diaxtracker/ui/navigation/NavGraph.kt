@@ -3,11 +3,13 @@ package com.neojelll.diaxtracker.ui.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.annotation.StringRes
@@ -16,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -34,10 +37,12 @@ import com.neojelll.diaxtracker.ui.screens.EditEntryScreen
 import com.neojelll.diaxtracker.ui.screens.HistoryScreen
 import com.neojelll.diaxtracker.ui.screens.InsulinActiveBanner
 import com.neojelll.diaxtracker.ui.screens.MealPresetsScreen
+import com.neojelll.diaxtracker.ui.theme.CardBackground
+import com.neojelll.diaxtracker.ui.theme.CardBorder
+import com.neojelll.diaxtracker.ui.theme.FieldBackground
 import com.neojelll.diaxtracker.ui.theme.PageBackground
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
-import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
 sealed class Screen(val route: String, @StringRes val labelRes: Int, val icon: ImageVector) {
@@ -130,30 +135,39 @@ private fun AppBottomBar(
     currentRoute: String?,
     onSelect: (Screen) -> Unit
 ) {
-    val barShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .card(barShape)
+            .background(CardBackground)
     ) {
+        HorizontalDivider(color = CardBorder)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(60.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(horizontal = 32.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .padding(horizontal = 32.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             bottomNavItems.forEach { screen ->
                 val selected = currentRoute == screen.route
                 val label = stringResource(screen.labelRes)
-                Icon(
-                    imageVector = screen.icon,
-                    contentDescription = label,
-                    tint = if (selected) TextPrimary else TextSecondary,
+                Box(
                     modifier = Modifier
-                        .size(24.dp)
-                        .clickable { onSelect(screen) }
-                )
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .then(if (selected) Modifier.background(FieldBackground) else Modifier)
+                        .clickable { onSelect(screen) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = screen.icon,
+                        contentDescription = label,
+                        tint = if (selected) TextPrimary else TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

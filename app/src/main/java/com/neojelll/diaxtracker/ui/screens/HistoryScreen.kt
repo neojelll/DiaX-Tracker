@@ -153,7 +153,7 @@ private fun CompactEntryRow(entry: DiaryEntry, stat: EntryStat?, onClick: () -> 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .card(RoundedCornerShape(16.dp))
+            .card()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -186,7 +186,7 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .card(RoundedCornerShape(24.dp))
+            .card()
             .clickable(onClick = onClick)
     ) {
         Column(

@@ -132,7 +132,7 @@ fun AddEntryScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(if (formState.isFillable) AccentDark else AccentDark.copy(alpha = 0.4f))
                         .then(
                             if (formState.isFillable) {
@@ -151,7 +151,7 @@ fun AddEntryScreen(
                                 }
                             } else Modifier
                         )
-                        .padding(vertical = 12.dp),
+                        .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

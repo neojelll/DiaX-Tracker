@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -135,7 +134,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .card(RoundedCornerShape(16.dp))
+                                .card()
                                 .clickable { editingPreset = preset }
                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
