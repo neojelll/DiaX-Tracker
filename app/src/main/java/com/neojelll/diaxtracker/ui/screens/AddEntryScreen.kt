@@ -1,5 +1,6 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,7 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -17,9 +20,11 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
-import com.neojelll.diaxtracker.ui.theme.OnGlass
-import com.neojelll.diaxtracker.ui.theme.glassPanel
+import com.neojelll.diaxtracker.ui.theme.AccentDark
+import com.neojelll.diaxtracker.ui.theme.TextPrimary
+import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +39,13 @@ fun AddEntryScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val sensorAvailable by viewModel.sensorAvailable.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
+    val entries by viewModel.entries.collectAsState()
     val entrySavedMessage = stringResource(R.string.entry_saved_snackbar)
+
+    val todayCount = remember(entries) {
+        val today = LocalDate.now()
+        entries.count { it.createdAt.toLocalDate() == today }
+    }
 
     LaunchedEffect(showSuccessSnackbar) {
         if (showSuccessSnackbar) {
@@ -65,7 +76,8 @@ fun AddEntryScreen(
         )
     }
 
-    val topBarState = rememberCollapsibleTopBarState()
+    val topBarState = rememberCollapsibleTopBarState(contentHeight = 68.dp)
+    val scrollState = rememberScrollState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -76,20 +88,35 @@ fun AddEntryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .nestedScroll(topBarState.nestedScrollConnection)
+                .then(
+                    if (scrollState.maxValue > 0) Modifier.nestedScroll(topBarState.nestedScrollConnection) else Modifier
+                )
         ) {
             CollapsibleTopBar(
                 state = topBarState,
-                title = { Text(stringResource(R.string.add_entry_title), color = Color.White) },
+                title = {
+                    Column {
+                        Text(
+                            stringResource(R.string.greeting_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = TextPrimary
+                        )
+                        Text(
+                            pluralStringResource(R.plurals.today_entries_count, todayCount, todayCount),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                    }
+                },
                 actions = { LanguageMenu() }
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(12.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 if (!sensorAvailable) {
                     SensorWarningBanner()
@@ -100,37 +127,44 @@ fun AddEntryScreen(
                     onStateChange = { formState = it },
                     onDateClick = { showDatePicker = true },
                     onTimeClick = { showTimePicker = true },
-                    mealPresets = mealPresets
+                    mealPresets = mealPresets,
+                    cardTitle = stringResource(R.string.add_entry_title),
+                    onReset = { formState = EntryFormState() }
                 )
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .glassPanel(RoundedCornerShape(16.dp))
-                        .clickable(enabled = formState.isFillable) {
-                            viewModel.addEntry(
-                                bloodSugar = formState.bloodSugar.toFloatOrNull(),
-                                breadUnits = formState.breadUnits.toFloatOrNull(),
-                                shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
-                                longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
-                                notes = formState.notes.trim(),
-                                photoPath = formState.photoPath,
-                                createdAt = LocalDateTime.of(formState.date, formState.time)
-                            )
-                            formState = EntryFormState()
-                            showSuccessSnackbar = true
-                        }
-                        .padding(vertical = 14.dp),
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (formState.isFillable) AccentDark else AccentDark.copy(alpha = 0.4f))
+                        .then(
+                            if (formState.isFillable) {
+                                Modifier.clickable {
+                                    viewModel.addEntry(
+                                        bloodSugar = formState.bloodSugar.toFloatOrNull(),
+                                        breadUnits = formState.breadUnits.toFloatOrNull(),
+                                        shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
+                                        longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
+                                        notes = formState.notes.trim(),
+                                        photoPath = formState.photoPath,
+                                        createdAt = LocalDateTime.of(formState.date, formState.time)
+                                    )
+                                    formState = EntryFormState()
+                                    showSuccessSnackbar = true
+                                }
+                            } else Modifier
+                        )
+                        .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         stringResource(R.string.save_entry_button),
-                        color = OnGlass,
+                        color = Color.White,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
 
-                Spacer(modifier = Modifier.height(96.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

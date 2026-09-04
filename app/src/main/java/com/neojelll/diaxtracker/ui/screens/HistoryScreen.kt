@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,10 +25,11 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
-import com.neojelll.diaxtracker.ui.theme.OnGlass
-import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
+import com.neojelll.diaxtracker.ui.theme.CardBorder
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
-import com.neojelll.diaxtracker.ui.theme.glassPanel
+import com.neojelll.diaxtracker.ui.theme.TextPrimary
+import com.neojelll.diaxtracker.ui.theme.TextSecondary
+import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.io.File
 import java.time.format.DateTimeFormatter
@@ -41,15 +43,19 @@ fun HistoryScreen(
 ) {
     val entries by viewModel.entries.collectAsState()
     val topBarState = rememberCollapsibleTopBarState()
+    val listState = rememberLazyListState()
+    val canScroll = listState.canScrollForward || listState.canScrollBackward
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(topBarState.nestedScrollConnection)
+            .then(
+                if (canScroll) Modifier.nestedScroll(topBarState.nestedScrollConnection) else Modifier
+            )
     ) {
         CollapsibleTopBar(
             state = topBarState,
-            title = { Text(stringResource(R.string.history_title), color = Color.White) },
+            title = { Text(stringResource(R.string.history_title), color = TextPrimary) },
             actions = { LanguageMenu() }
         )
 
@@ -63,18 +69,19 @@ fun HistoryScreen(
                         Text(
                             text = stringResource(R.string.no_entries_title),
                             style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
+                            color = TextPrimary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = stringResource(R.string.no_entries_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White
+                            color = TextSecondary
                         )
                     }
                 }
             } else {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -104,7 +111,7 @@ fun HistoryScreen(
 private data class EntryStat(
     val label: String,
     val value: String,
-    val color: Color = OnGlass
+    val color: Color = TextPrimary
 )
 
 @Composable
@@ -152,7 +159,7 @@ private fun CompactEntryRow(entry: DiaryEntry, stat: EntryStat?, onClick: () -> 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(RoundedCornerShape(16.dp))
+            .card()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -161,7 +168,7 @@ private fun CompactEntryRow(entry: DiaryEntry, stat: EntryStat?, onClick: () -> 
         Text(
             text = entry.createdAt.format(formatter),
             style = MaterialTheme.typography.labelMedium,
-            color = OnGlassMuted,
+            color = TextSecondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
@@ -185,7 +192,7 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(RoundedCornerShape(24.dp))
+            .card()
             .clickable(onClick = onClick)
     ) {
         Column(
@@ -202,7 +209,7 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
                 Text(
                     text = entry.createdAt.format(formatter),
                     style = MaterialTheme.typography.labelMedium,
-                    color = OnGlassMuted
+                    color = TextSecondary
                 )
                 entry.photoPath?.let { path ->
                     AsyncImage(
@@ -216,7 +223,7 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
                 }
             }
 
-            HorizontalDivider(color = OnGlass.copy(alpha = 0.12f))
+            HorizontalDivider(color = CardBorder)
 
             stats.chunked(2).forEach { rowStats ->
                 Row(
@@ -228,7 +235,7 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
                             Text(
                                 text = stat.label,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = OnGlassMuted,
+                                color = TextSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -248,12 +255,12 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
                     Text(
                         text = stringResource(R.string.comment_label),
                         style = MaterialTheme.typography.labelSmall,
-                        color = OnGlassMuted
+                        color = TextSecondary
                     )
                     Text(
                         text = entry.notes,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = OnGlass
+                        color = TextPrimary
                     )
                 }
             }

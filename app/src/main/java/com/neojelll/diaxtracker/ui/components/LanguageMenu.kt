@@ -18,11 +18,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.LocaleListCompat
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.ui.theme.TextPrimary
 
 @Composable
 fun LanguageMenu() {
@@ -45,7 +45,7 @@ fun LanguageMenu() {
             Icon(
                 imageVector = Icons.Filled.Language,
                 contentDescription = stringResource(R.string.language),
-                tint = Color.White
+                tint = TextPrimary
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {

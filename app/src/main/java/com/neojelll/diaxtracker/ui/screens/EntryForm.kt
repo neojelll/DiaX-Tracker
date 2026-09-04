@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -12,12 +13,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
@@ -33,24 +36,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.photo.PhotoStore
-import com.neojelll.diaxtracker.ui.theme.OnGlass
-import com.neojelll.diaxtracker.ui.theme.OnGlassMuted
+import com.neojelll.diaxtracker.ui.theme.AccentDark
+import com.neojelll.diaxtracker.ui.theme.CardBorder
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
-import com.neojelll.diaxtracker.ui.theme.glassPanel
+import com.neojelll.diaxtracker.ui.theme.TextPrimary
+import com.neojelll.diaxtracker.ui.theme.TextSecondary
+import com.neojelll.diaxtracker.ui.theme.card
+import com.neojelll.diaxtracker.ui.theme.fieldBox
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -64,8 +74,6 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-internal val DividerColor = OnGlass.copy(alpha = 0.12f)
-
 @Composable
 internal fun transparentFieldColors() = TextFieldDefaults.colors(
     focusedContainerColor = Color.Transparent,
@@ -74,13 +82,13 @@ internal fun transparentFieldColors() = TextFieldDefaults.colors(
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
-    focusedTextColor = OnGlass,
-    unfocusedTextColor = OnGlass,
-    focusedLabelColor = OnGlassMuted,
-    unfocusedLabelColor = OnGlassMuted,
-    focusedPlaceholderColor = OnGlassMuted,
-    unfocusedPlaceholderColor = OnGlassMuted,
-    cursorColor = OnGlass
+    focusedTextColor = TextPrimary,
+    unfocusedTextColor = TextPrimary,
+    focusedLabelColor = TextSecondary,
+    unfocusedLabelColor = TextSecondary,
+    focusedPlaceholderColor = TextSecondary,
+    unfocusedPlaceholderColor = TextSecondary,
+    cursorColor = TextPrimary
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,8 +110,8 @@ internal fun CompactField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = OnGlass),
-        cursorBrush = SolidColor(OnGlass),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary),
+        cursorBrush = SolidColor(TextPrimary),
         keyboardOptions = keyboardOptions,
         singleLine = singleLine,
         minLines = minLines,
@@ -126,16 +134,25 @@ internal fun CompactField(
     }
 }
 
-internal fun formatBreadUnits(value: Float): String =
+internal fun formatAmount(value: Float): String =
     if (value == value.toInt().toFloat()) value.toInt().toString() else value.toString()
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.6.sp, fontWeight = FontWeight.SemiBold),
+        color = TextSecondary
+    )
+}
 
 @Composable
 internal fun SensorWarningBanner() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(RoundedCornerShape(16.dp))
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .card()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -143,7 +160,7 @@ internal fun SensorWarningBanner() {
         Text(
             text = stringResource(R.string.sensor_warning),
             style = MaterialTheme.typography.bodyMedium,
-            color = OnGlass
+            color = TextPrimary
         )
     }
 }
@@ -178,8 +195,8 @@ internal fun InsulinActiveBanner(entries: List<DiaryEntry>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(RoundedCornerShape(16.dp))
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .card()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -188,21 +205,21 @@ internal fun InsulinActiveBanner(entries: List<DiaryEntry>) {
             Text(
                 text = stringResource(R.string.insulin_active_banner, remainingText(entries[0])),
                 style = MaterialTheme.typography.bodyMedium,
-                color = OnGlass
+                color = TextPrimary
             )
         } else {
             Column {
                 Text(
                     text = stringResource(R.string.insulin_active_banner_multi_title),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = OnGlass
+                    color = TextPrimary
                 )
                 entries.forEach { entry ->
                     entry.shortInsulinDose?.let { dose ->
                         Text(
                             text = stringResource(R.string.insulin_active_dose_line, dose.toString(), remainingText(entry)),
                             style = MaterialTheme.typography.bodySmall,
-                            color = OnGlass
+                            color = TextSecondary
                         )
                     }
                 }
@@ -218,7 +235,9 @@ internal fun EntryFormCard(
     onStateChange: (EntryFormState) -> Unit,
     onDateClick: () -> Unit,
     onTimeClick: () -> Unit,
-    mealPresets: List<MealPreset> = emptyList()
+    mealPresets: List<MealPreset> = emptyList(),
+    cardTitle: String? = null,
+    onReset: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -239,28 +258,50 @@ internal fun EntryFormCard(
         }
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .glassPanel(RoundedCornerShape(24.dp))
+            .card()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Column(modifier = Modifier.padding(vertical = 4.dp)) {
-            DateTimeRow(
-                date = state.date,
-                onDateClick = onDateClick,
-                time = state.time,
-                onTimeClick = onTimeClick
-            )
-            HorizontalDivider(color = DividerColor)
+        if (cardTitle != null) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(cardTitle, style = MaterialTheme.typography.titleMedium, color = TextPrimary)
+                HorizontalDivider(color = CardBorder)
+            }
+        }
 
-            CompactField(
-                value = state.bloodSugar,
-                onValueChange = { onStateChange(state.copy(bloodSugar = it.filter { c -> c.isDigit() || c == '.' })) },
+        DateTimeSection(
+            date = state.date,
+            onDateClick = onDateClick,
+            time = state.time,
+            onTimeClick = onTimeClick
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            StepperField(
                 label = stringResource(R.string.blood_sugar_label),
-                placeholder = stringResource(R.string.blood_sugar_placeholder),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                value = state.bloodSugar,
+                onValueChange = { onStateChange(state.copy(bloodSugar = it)) },
+                step = 0.1f
             )
-            HorizontalDivider(color = DividerColor)
+
+            StepperField(
+                label = stringResource(R.string.short_insulin_short_label),
+                value = state.shortInsulinDose,
+                onValueChange = { onStateChange(state.copy(shortInsulinDose = it)) },
+                step = 0.5f
+            )
+
+            StepperField(
+                label = stringResource(R.string.long_insulin_short_label),
+                value = state.longInsulinDose,
+                onValueChange = { onStateChange(state.copy(longInsulinDose = it)) },
+                step = 0.5f
+            )
+
+            HorizontalDivider(color = CardBorder)
 
             val breadUnitsFormat = stringResource(R.string.bread_units_value_format)
             FoodField(
@@ -269,7 +310,7 @@ internal fun EntryFormCard(
                 onPresetSelected = { preset ->
                     onStateChange(
                         state.copy(
-                            breadUnits = formatBreadUnits(preset.breadUnits),
+                            breadUnits = formatAmount(preset.breadUnits),
                             foodLabel = preset.name
                         )
                     )
@@ -277,57 +318,188 @@ internal fun EntryFormCard(
                 onManualEntryConfirmed = { value ->
                     onStateChange(
                         state.copy(
-                            breadUnits = formatBreadUnits(value),
-                            foodLabel = String.format(breadUnitsFormat, formatBreadUnits(value))
+                            breadUnits = formatAmount(value),
+                            foodLabel = String.format(breadUnitsFormat, formatAmount(value))
                         )
                     )
                 }
             )
-            HorizontalDivider(color = DividerColor)
 
-            CompactField(
-                value = state.shortInsulinDose,
-                onValueChange = { onStateChange(state.copy(shortInsulinDose = it.filter { c -> c.isDigit() || c == '.' })) },
-                label = stringResource(R.string.short_insulin_label),
-                placeholder = stringResource(R.string.short_insulin_placeholder),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-            )
-            HorizontalDivider(color = DividerColor)
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                SectionLabel(stringResource(R.string.comment_label))
+                PlainTextField(
+                    value = state.notes,
+                    onValueChange = { onStateChange(state.copy(notes = it)) },
+                    placeholder = stringResource(R.string.comment_placeholder),
+                    singleLine = false,
+                    minLines = 1,
+                    maxLines = 2,
+                    modifier = Modifier.height(54.dp)
+                )
+            }
+        }
 
-            CompactField(
-                value = state.longInsulinDose,
-                onValueChange = { onStateChange(state.copy(longInsulinDose = it.filter { c -> c.isDigit() || c == '.' })) },
-                label = stringResource(R.string.long_insulin_label),
-                placeholder = stringResource(R.string.long_insulin_placeholder),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-            )
-            HorizontalDivider(color = DividerColor)
+        ActionsRow(
+            photoPath = state.photoPath,
+            onPickPhoto = {
+                photoPickerLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            onRemovePhoto = {
+                PhotoStore.deletePhoto(state.photoPath)
+                onStateChange(state.copy(photoPath = null))
+            },
+            onReset = onReset
+        )
+    }
+}
 
-            CompactField(
-                value = state.notes,
-                onValueChange = { onStateChange(state.copy(notes = it)) },
-                label = stringResource(R.string.comment_label),
-                placeholder = stringResource(R.string.comment_placeholder),
-                singleLine = false,
-                minLines = 1,
-                maxLines = 3
-            )
-            HorizontalDivider(color = DividerColor)
+@Composable
+private fun PlainTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .fieldBox()
+            .padding(horizontal = 10.dp, vertical = 10.dp)
+    ) {
+        if (value.isEmpty()) {
+            Text(placeholder, style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+            cursorBrush = SolidColor(TextPrimary),
+            keyboardOptions = keyboardOptions,
+            singleLine = singleLine,
+            minLines = minLines,
+            maxLines = maxLines
+        )
+    }
+}
 
-            PhotoRow(
-                photoPath = state.photoPath,
-                onPickPhoto = {
-                    photoPickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                },
-                onRemovePhoto = {
-                    PhotoStore.deletePhoto(state.photoPath)
-                    onStateChange(state.copy(photoPath = null))
-                }
+@Composable
+private fun StepperField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    step: Float,
+    modifier: Modifier = Modifier
+) {
+    var showManualDialog by remember { mutableStateOf(false) }
+
+    fun adjust(delta: Float) {
+        val current = value.toFloatOrNull() ?: 0f
+        onValueChange(formatAmount((current + delta).coerceAtLeast(0f)))
+    }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Row(
+            modifier = Modifier
+                .fieldBox(RoundedCornerShape(6.dp))
+                .height(32.dp)
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            StepperIcon(icon = Icons.Filled.Remove, onClick = { adjust(-step) })
+            Text(
+                text = value.ifBlank { "—" },
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = if (value.isBlank()) TextSecondary else TextPrimary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .widthIn(min = 28.dp)
+                    .clickable { showManualDialog = true }
             )
+            StepperIcon(icon = Icons.Filled.Add, onClick = { adjust(step) })
         }
     }
+
+    if (showManualDialog) {
+        ManualValueEntryDialog(
+            title = label,
+            initialValue = value,
+            onConfirm = {
+                onValueChange(formatAmount(it))
+                showManualDialog = false
+            },
+            onDismiss = { showManualDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun StepperIcon(icon: ImageVector, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(20.dp)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(12.dp))
+    }
+}
+
+@Composable
+private fun ManualValueEntryDialog(
+    title: String,
+    initialValue: String,
+    onConfirm: (Float) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var text by remember { mutableStateOf(initialValue) }
+    val parsed = text.toFloatOrNull()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            CompactField(
+                value = text,
+                onValueChange = { text = it.filter { c -> c.isDigit() || c == '.' } },
+                label = title,
+                placeholder = "",
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
+        },
+        confirmButton = {
+            TextButton(enabled = parsed != null, onClick = { onConfirm(parsed!!) }) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable
@@ -340,63 +512,67 @@ private fun FoodField(
     var expanded by remember { mutableStateOf(false) }
     var showManualDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = true }
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.food_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = OnGlassMuted
-                )
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        SectionLabel(stringResource(R.string.food_label))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp)
+                    .fieldBox()
+                    .clickable { expanded = true }
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = foodLabel.ifBlank { stringResource(R.string.food_placeholder) },
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (foodLabel.isBlank()) OnGlassMuted else OnGlass
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (foodLabel.isBlank()) TextSecondary else TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                    contentDescription = null,
+                    tint = TextSecondary,
+                    modifier = Modifier.size(14.dp)
                 )
             }
-            Icon(
-                imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
-                contentDescription = null,
-                tint = OnGlassMuted
-            )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            mealPresets.forEach { preset ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            stringResource(
-                                R.string.meal_preset_option_format,
-                                preset.name,
-                                formatBreadUnits(preset.breadUnits)
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                mealPresets.forEach { preset ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                stringResource(
+                                    R.string.meal_preset_option_format,
+                                    preset.name,
+                                    formatAmount(preset.breadUnits)
+                                )
                             )
-                        )
-                    },
+                        },
+                        onClick = {
+                            onPresetSelected(preset)
+                            expanded = false
+                        }
+                    )
+                }
+                if (mealPresets.isNotEmpty()) HorizontalDivider(color = CardBorder)
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.enter_manually)) },
                     onClick = {
-                        onPresetSelected(preset)
                         expanded = false
+                        showManualDialog = true
                     }
                 )
             }
-            if (mealPresets.isNotEmpty()) HorizontalDivider(color = DividerColor)
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.enter_manually)) },
-                onClick = {
-                    expanded = false
-                    showManualDialog = true
-                }
-            )
         }
     }
 
     if (showManualDialog) {
-        ManualFoodEntryDialog(
+        ManualValueEntryDialog(
+            title = stringResource(R.string.bread_units_label),
+            initialValue = "",
             onConfirm = {
                 onManualEntryConfirmed(it)
                 showManualDialog = false
@@ -407,90 +583,126 @@ private fun FoodField(
 }
 
 @Composable
-private fun ManualFoodEntryDialog(
-    onConfirm: (Float) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var breadUnitsText by remember { mutableStateOf("") }
-    val breadUnits = breadUnitsText.toFloatOrNull()
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Color.Black.copy(alpha = 0.75f),
-        titleContentColor = OnGlass,
-        textContentColor = OnGlass,
-        title = { Text(stringResource(R.string.enter_manually)) },
-        text = {
-            CompactField(
-                value = breadUnitsText,
-                onValueChange = { breadUnitsText = it.filter { c -> c.isDigit() || c == '.' } },
-                label = stringResource(R.string.bread_units_label),
-                placeholder = stringResource(R.string.bread_units_placeholder),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-            )
-        },
-        confirmButton = {
-            TextButton(
-                enabled = breadUnits != null,
-                onClick = { onConfirm(breadUnits!!) }
-            ) {
-                Text(stringResource(R.string.save), color = OnGlass)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel), color = OnGlass)
-            }
-        }
-    )
-}
-
-@Composable
-private fun PhotoRow(
+private fun ActionsRow(
     photoPath: String?,
     onPickPhoto: () -> Unit,
-    onRemovePhoto: () -> Unit
+    onRemovePhoto: () -> Unit,
+    onReset: (() -> Unit)?
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(if (photoPath == null) Modifier.clickable(onClick = onPickPhoto) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        if (photoPath != null) {
-            AsyncImage(
-                model = File(photoPath),
-                contentDescription = stringResource(R.string.entry_photo),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable(onClick = onPickPhoto)
-            )
-            Text(
-                text = stringResource(R.string.entry_photo),
-                style = MaterialTheme.typography.bodyLarge,
-                color = OnGlass,
+    if (photoPath == null) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedAccentButton(
+                icon = Icons.Filled.AddAPhoto,
+                text = stringResource(R.string.add_photo_short),
+                onClick = onPickPhoto,
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = onRemovePhoto, modifier = Modifier.size(32.dp)) {
-                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.remove_photo), tint = OnGlassMuted)
+            if (onReset != null) {
+                FilledAccentButton(
+                    text = stringResource(R.string.cancel),
+                    onClick = onReset,
+                    modifier = Modifier.weight(1f)
+                )
             }
-        } else {
-            Icon(Icons.Filled.AddAPhoto, contentDescription = null, tint = OnGlass)
-            Text(
-                text = stringResource(R.string.add_photo),
-                style = MaterialTheme.typography.bodyLarge,
-                color = OnGlass
+        }
+    } else {
+        PhotoPreviewRow(photoPath = photoPath, onPickPhoto = onPickPhoto, onRemovePhoto = onRemovePhoto)
+        if (onReset != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            FilledAccentButton(
+                text = stringResource(R.string.cancel),
+                onClick = onReset,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
 }
 
 @Composable
-private fun DateTimeRow(
+private fun OutlinedAccentButton(
+    icon: ImageVector,
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .height(38.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .border(1.dp, AccentDark, RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = AccentDark, modifier = Modifier.size(14.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = AccentDark)
+    }
+}
+
+@Composable
+private fun FilledAccentButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .height(38.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(AccentDark)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
+    }
+}
+
+@Composable
+private fun PhotoPreviewRow(
+    photoPath: String,
+    onPickPhoto: () -> Unit,
+    onRemovePhoto: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fieldBox()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        AsyncImage(
+            model = File(photoPath),
+            contentDescription = stringResource(R.string.entry_photo),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .clickable(onClick = onPickPhoto)
+        )
+        Text(
+            text = stringResource(R.string.entry_photo),
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextPrimary,
+            modifier = Modifier.weight(1f)
+        )
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clickable(onClick = onRemovePhoto),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.remove_photo), tint = TextSecondary, modifier = Modifier.size(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun DateTimeSection(
     date: LocalDate,
     onDateClick: () -> Unit,
     time: LocalTime,
@@ -499,68 +711,50 @@ private fun DateTimeRow(
     val locale = LocalConfiguration.current.locales[0]
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .clickable(onClick = onDateClick)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f, fill = false)) {
-                Text(
-                    text = stringResource(R.string.entry_date_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = OnGlassMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = date.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = OnGlass,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = OnGlass, modifier = Modifier.size(20.dp))
-        }
-
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .height(36.dp)
-                .background(DividerColor)
+        DateTimeChip(
+            icon = Icons.Filled.CalendarMonth,
+            contentDescription = stringResource(R.string.entry_date_label),
+            value = date.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale)),
+            onClick = onDateClick,
+            modifier = Modifier.weight(1f)
         )
+        DateTimeChip(
+            icon = Icons.Filled.Schedule,
+            contentDescription = stringResource(R.string.entry_time_label),
+            value = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+            onClick = onTimeClick,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
 
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .clickable(onClick = onTimeClick)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f, fill = false)) {
-                Text(
-                    text = stringResource(R.string.entry_time_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = OnGlassMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = OnGlass,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Icon(Icons.Filled.Schedule, contentDescription = null, tint = OnGlass, modifier = Modifier.size(20.dp))
-        }
+@Composable
+private fun DateTimeChip(
+    icon: ImageVector,
+    contentDescription: String,
+    value: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .height(36.dp)
+            .fieldBox()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Icon(icon, contentDescription = contentDescription, tint = TextSecondary, modifier = Modifier.size(14.dp))
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -579,7 +773,7 @@ internal fun TimePickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
-            modifier = Modifier.glassPanel(RoundedCornerShape(24.dp))
+            modifier = Modifier.card(RoundedCornerShape(16.dp))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -593,10 +787,10 @@ internal fun TimePickerDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text(stringResource(R.string.cancel), color = OnGlass)
+                        Text(stringResource(R.string.cancel))
                     }
                     TextButton(onClick = { onConfirm(LocalTime.of(state.hour, state.minute)) }) {
-                        Text(stringResource(R.string.ok), color = OnGlass)
+                        Text(stringResource(R.string.ok))
                     }
                 }
             }
@@ -621,7 +815,7 @@ internal fun DatePickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
-            modifier = Modifier.glassPanel(RoundedCornerShape(24.dp))
+            modifier = Modifier.card(RoundedCornerShape(16.dp))
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -635,7 +829,7 @@ internal fun DatePickerDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text(stringResource(R.string.cancel), color = OnGlass)
+                        Text(stringResource(R.string.cancel))
                     }
                     TextButton(onClick = {
                         val millis = state.selectedDateMillis
@@ -644,7 +838,7 @@ internal fun DatePickerDialog(
                         }
                         onDismiss()
                     }) {
-                        Text(stringResource(R.string.ok), color = OnGlass)
+                        Text(stringResource(R.string.ok))
                     }
                 }
             }
