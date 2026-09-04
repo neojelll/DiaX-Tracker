@@ -5,9 +5,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -440,10 +442,10 @@ private fun StepperButton(icon: ImageVector, onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
-            .size(32.dp)
-            .fieldBox(RoundedCornerShape(9.dp))
+            .size(28.dp)
+            .border(1.dp, CardBorder, CircleShape)
     ) {
-        Icon(icon, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(16.dp))
+        Icon(icon, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(14.dp))
     }
 }
 
