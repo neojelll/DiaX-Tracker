@@ -7,7 +7,10 @@
     <string name="nav_settings">Настройки</string>
 
     <string name="add_entry_title">Добавить запись</string>
-    <string name="greeting_title">Привет!</string>
+    <string name="greeting_morning">Доброе утро!</string>
+    <string name="greeting_afternoon">Добрый день!</string>
+    <string name="greeting_evening">Добрый вечер!</string>
+    <string name="greeting_night">Доброй ночи!</string>
     <string name="entry_saved_snackbar">Запись сохранена!</string>
     <string name="save_entry_button">Сохранить запись</string>
 
