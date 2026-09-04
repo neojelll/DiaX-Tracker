@@ -105,7 +105,8 @@ fun EditEntryScreen(
     val topBarState = rememberCollapsibleTopBarState()
 
     Scaffold(
-        containerColor = Color.Transparent
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Column(
             modifier = Modifier
