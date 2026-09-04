@@ -77,6 +77,7 @@ fun AddEntryScreen(
     }
 
     val topBarState = rememberCollapsibleTopBarState(contentHeight = 68.dp)
+    val scrollState = rememberScrollState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -87,7 +88,9 @@ fun AddEntryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .nestedScroll(topBarState.nestedScrollConnection)
+                .then(
+                    if (scrollState.maxValue > 0) Modifier.nestedScroll(topBarState.nestedScrollConnection) else Modifier
+                )
         ) {
             CollapsibleTopBar(
                 state = topBarState,
@@ -112,7 +115,7 @@ fun AddEntryScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(12.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 if (!sensorAvailable) {
