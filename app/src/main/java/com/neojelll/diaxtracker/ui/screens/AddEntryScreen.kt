@@ -75,7 +75,7 @@ fun AddEntryScreen(
         )
     }
 
-    val topBarState = rememberCollapsibleTopBarState(contentHeight = 68.dp)
+    val topBarState = rememberCollapsibleTopBarState(contentHeight = 44.dp)
     val scrollState = rememberScrollState()
     var canScroll by remember { mutableStateOf(false) }
     LaunchedEffect(scrollState.maxValue) {
