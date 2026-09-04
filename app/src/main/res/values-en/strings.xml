@@ -49,6 +49,8 @@
     <string name="entry_photo">Entry Photo</string>
 
     <string name="history_title">Entry History</string>
+    <string name="today_label">Today</string>
+    <string name="yesterday_label">Yesterday</string>
     <string name="no_entries_title">No entries yet</string>
     <string name="no_entries_subtitle">Add your first entry</string>
     <string name="sugar_label">Sugar</string>
