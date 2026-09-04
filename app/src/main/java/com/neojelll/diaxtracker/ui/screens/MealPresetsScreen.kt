@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -33,6 +34,8 @@ import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 fun MealPresetsScreen(viewModel: DiaryViewModel) {
     val mealPresets by viewModel.mealPresets.collectAsState()
     val topBarState = rememberCollapsibleTopBarState()
+    val listState = rememberLazyListState()
+    val canScroll = listState.canScrollForward || listState.canScrollBackward
     var editingPreset by remember { mutableStateOf<MealPreset?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var presetPendingDelete by remember { mutableStateOf<MealPreset?>(null) }
@@ -87,7 +90,9 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(topBarState.nestedScrollConnection)
+            .then(
+                if (canScroll) Modifier.nestedScroll(topBarState.nestedScrollConnection) else Modifier
+            )
     ) {
         CollapsibleTopBar(
             state = topBarState,
@@ -126,6 +131,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
                 }
             } else {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
