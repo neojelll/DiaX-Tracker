@@ -61,6 +61,7 @@ import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.theme.fieldBox
+import kotlin.math.round
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -401,7 +402,8 @@ private fun StepperField(
 
     fun adjust(delta: Float) {
         val current = value.toFloatOrNull() ?: 0f
-        onValueChange(formatAmount((current + delta).coerceAtLeast(0f)))
+        val next = (current + delta).coerceAtLeast(0f)
+        onValueChange(formatAmount(round(next * 100) / 100f))
     }
 
     Row(
