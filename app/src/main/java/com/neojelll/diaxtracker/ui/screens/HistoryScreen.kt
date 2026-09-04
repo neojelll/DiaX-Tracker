@@ -23,7 +23,6 @@ import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
-import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.CardBorder
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
@@ -55,8 +54,7 @@ fun HistoryScreen(
     ) {
         CollapsibleTopBar(
             state = topBarState,
-            title = { Text(stringResource(R.string.history_title), color = TextPrimary) },
-            actions = { LanguageMenu() }
+            title = { Text(stringResource(R.string.history_title), color = TextPrimary) }
         )
 
         Box(modifier = Modifier.weight(1f)) {

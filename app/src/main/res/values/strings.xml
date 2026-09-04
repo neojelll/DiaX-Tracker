@@ -4,6 +4,7 @@
     <string name="nav_entry">Запись</string>
     <string name="nav_meal_presets">Приёмы</string>
     <string name="nav_history">История</string>
+    <string name="nav_settings">Настройки</string>
 
     <string name="add_entry_title">Добавить запись</string>
     <string name="greeting_title">Привет!</string>
@@ -81,4 +82,6 @@
     <string name="food_label">Еда</string>
     <string name="food_placeholder">Выберите приём пищи</string>
     <string name="enter_manually">Ввести вручную</string>
+
+    <string name="settings_title">Настройки</string>
 </resources>

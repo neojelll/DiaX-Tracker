@@ -4,6 +4,7 @@
     <string name="nav_entry">Entry</string>
     <string name="nav_meal_presets">Meals</string>
     <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
 
     <string name="add_entry_title">Add Entry</string>
     <string name="greeting_title">Hi!</string>
@@ -79,4 +80,6 @@
     <string name="food_label">Food</string>
     <string name="food_placeholder">Pick a meal</string>
     <string name="enter_manually">Enter manually</string>
+
+    <string name="settings_title">Settings</string>
 </resources>

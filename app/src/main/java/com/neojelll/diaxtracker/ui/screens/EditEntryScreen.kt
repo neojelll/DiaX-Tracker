@@ -21,7 +21,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
-import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.AccentDark
 import com.neojelll.diaxtracker.ui.theme.DangerRed
@@ -134,7 +133,6 @@ fun EditEntryScreen(
                     IconButton(onClick = { showDeleteConfirm = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete), tint = TextPrimary)
                     }
-                    LanguageMenu()
                 }
             )
 

@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
-import com.neojelll.diaxtracker.ui.components.LanguageMenu
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.AccentDark
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
@@ -107,8 +106,7 @@ fun AddEntryScreen(
                             color = TextSecondary
                         )
                     }
-                },
-                actions = { LanguageMenu() }
+                }
             )
 
             Column(
