@@ -34,7 +34,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel) {
     val mealPresets by viewModel.mealPresets.collectAsState()
     val topBarState = rememberCollapsibleTopBarState()
     val listState = rememberLazyListState()
-    val canScroll = listState.canScrollForward || listState.canScrollBackward
+    val canScroll = listState.canScrollForward || listState.canScrollBackward || !topBarState.isFullyExpanded
     var editingPreset by remember { mutableStateOf<MealPreset?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var presetPendingDelete by remember { mutableStateOf<MealPreset?>(null) }

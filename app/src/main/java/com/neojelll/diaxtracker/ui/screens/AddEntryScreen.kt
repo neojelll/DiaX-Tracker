@@ -75,8 +75,9 @@ fun AddEntryScreen(
         )
     }
 
-    val topBarState = rememberCollapsibleTopBarState(contentHeight = 68.dp)
+    val topBarState = rememberCollapsibleTopBarState(contentHeight = 44.dp)
     val scrollState = rememberScrollState()
+    val canScroll = scrollState.maxValue > 0 || !topBarState.isFullyExpanded
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -88,7 +89,7 @@ fun AddEntryScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .then(
-                    if (scrollState.maxValue > 0) Modifier.nestedScroll(topBarState.nestedScrollConnection) else Modifier
+                    if (canScroll) Modifier.nestedScroll(topBarState.nestedScrollConnection) else Modifier
                 )
         ) {
             CollapsibleTopBar(
@@ -111,7 +112,8 @@ fun AddEntryScreen(
 
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .weight(1f)
+                    .fillMaxWidth()
                     .padding(12.dp)
                     .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -161,8 +163,6 @@ fun AddEntryScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
