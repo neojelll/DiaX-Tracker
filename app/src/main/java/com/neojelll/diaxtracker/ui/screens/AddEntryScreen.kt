@@ -25,6 +25,7 @@ import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +45,15 @@ fun AddEntryScreen(
     val todayCount = remember(entries) {
         val today = LocalDate.now()
         entries.count { it.createdAt.toLocalDate() == today }
+    }
+
+    val greetingRes = remember {
+        when (LocalTime.now().hour) {
+            in 5..10 -> R.string.greeting_morning
+            in 11..16 -> R.string.greeting_afternoon
+            in 17..22 -> R.string.greeting_evening
+            else -> R.string.greeting_night
+        }
     }
 
     LaunchedEffect(showSuccessSnackbar) {
@@ -97,7 +107,7 @@ fun AddEntryScreen(
                 title = {
                     Column {
                         Text(
-                            stringResource(R.string.greeting_title),
+                            stringResource(greetingRes),
                             style = MaterialTheme.typography.headlineSmall,
                             color = TextPrimary
                         )
