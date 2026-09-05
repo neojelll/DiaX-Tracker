@@ -8,5 +8,5 @@ data class MealPreset(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val name: String,
-    val breadUnits: Float
+    val comment: String = ""
 )

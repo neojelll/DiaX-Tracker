@@ -7,6 +7,8 @@ import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryRepository
 import com.neojelll.diaxtracker.data.MealPreset
+import com.neojelll.diaxtracker.data.MealPresetProduct
+import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.sensor.PostMealScheduler
@@ -36,7 +38,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         initialValue = emptyList()
     )
 
-    val mealPresets: StateFlow<List<MealPreset>> = repository.allMealPresets.stateIn(
+    val mealPresets: StateFlow<List<MealPresetWithProducts>> = repository.allMealPresets.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList()
@@ -124,15 +126,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addMealPreset(name: String, breadUnits: Float) {
+    fun saveMealPreset(id: Long, name: String, comment: String, products: List<MealPresetProduct>) {
         viewModelScope.launch {
-            repository.insertMealPreset(MealPreset(name = name, breadUnits = breadUnits))
-        }
-    }
-
-    fun updateMealPreset(preset: MealPreset) {
-        viewModelScope.launch {
-            repository.updateMealPreset(preset)
+            repository.saveMealPreset(MealPreset(id = id, name = name, comment = comment), products)
         }
     }
 
