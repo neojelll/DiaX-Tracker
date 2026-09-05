@@ -82,6 +82,11 @@
     <string name="no_meal_presets_title">Приёмов пищи пока нет</string>
     <string name="no_meal_presets_subtitle">Добавьте часто повторяющийся приём пищи</string>
     <string name="delete_meal_preset_confirm_title">Удалить приём пищи?</string>
+    <string name="meal_preset_product_name_label">Продукт</string>
+    <string name="meal_preset_product_name_placeholder">Например: Хлеб</string>
+    <string name="add_product">Добавить продукт</string>
+    <string name="remove_product">Удалить продукт</string>
+    <string name="meal_preset_total_format">Итого: %1$s ХЕ</string>
     <string name="save">Сохранить</string>
 
     <string name="food_label">Еда</string>
