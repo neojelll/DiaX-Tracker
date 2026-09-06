@@ -85,6 +85,7 @@
     <string name="add_product">Add product</string>
     <string name="remove_product">Remove product</string>
     <string name="meal_preset_total_format">Total: %1$s BU</string>
+    <string name="meal_breakdown_total_label">Total</string>
     <string name="save">Save</string>
 
     <string name="food_label">Food</string>

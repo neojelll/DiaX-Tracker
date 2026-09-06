@@ -87,6 +87,7 @@
     <string name="add_product">Добавить продукт</string>
     <string name="remove_product">Удалить продукт</string>
     <string name="meal_preset_total_format">Итого: %1$s ХЕ</string>
+    <string name="meal_breakdown_total_label">Итого</string>
     <string name="save">Сохранить</string>
 
     <string name="food_label">Еда</string>

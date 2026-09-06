@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
@@ -51,9 +52,10 @@ fun EditEntryScreen(
                 time = entry.createdAt.toLocalTime(),
                 bloodSugar = initialBloodSugarText,
                 breadUnits = entry.breadUnits?.let { formatAmount(it) } ?: "",
-                foodLabel = entry.breadUnits?.let {
+                foodLabel = entry.mealLabel ?: entry.breadUnits?.let {
                     String.format(breadUnitsValueFormat, formatAmount(it))
                 } ?: "",
+                mealLabel = entry.mealLabel,
                 shortInsulinDose = entry.shortInsulinDose?.toString() ?: "",
                 longInsulinDose = entry.longInsulinDose?.toString() ?: "",
                 notes = entry.notes,
@@ -64,6 +66,19 @@ fun EditEntryScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    LaunchedEffect(entryId) {
+        if (entry.mealLabel != null) {
+            val products = viewModel.getEntryProducts(entryId)
+            if (products.isNotEmpty()) {
+                formState = formState.copy(
+                    mealProducts = products.sortedBy { it.sortOrder }.map {
+                        MealProductEntry(name = it.name, breadUnits = formatAmount(it.breadUnits))
+                    }
+                )
+            }
+        }
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -188,12 +203,21 @@ fun EditEntryScreen(
                                             bloodSugar = newBloodSugar,
                                             sugarSource = newSugarSource,
                                             breadUnits = formState.breadUnits.toFloatOrNull(),
+                                            mealLabel = formState.mealLabel,
                                             shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
                                             longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
                                             notes = formState.notes.trim(),
                                             photoPath = formState.photoPath,
                                             createdAt = newCreatedAt
-                                        )
+                                        ),
+                                        formState.mealProducts.mapIndexed { index, product ->
+                                            DiaryEntryProduct(
+                                                diaryEntryId = entry.id,
+                                                name = product.name,
+                                                breadUnits = product.breadUnits.toFloatOrNull() ?: 0f,
+                                                sortOrder = index
+                                            )
+                                        }
                                     )
                                     onDone()
                                 }

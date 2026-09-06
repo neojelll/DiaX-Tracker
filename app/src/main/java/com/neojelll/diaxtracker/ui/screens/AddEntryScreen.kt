@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.AccentDark
@@ -153,6 +154,15 @@ fun AddEntryScreen(
                                     viewModel.addEntry(
                                         bloodSugar = formState.bloodSugar.toFloatOrNull(),
                                         breadUnits = formState.breadUnits.toFloatOrNull(),
+                                        mealLabel = formState.mealLabel,
+                                        mealProducts = formState.mealProducts.mapIndexed { index, product ->
+                                            DiaryEntryProduct(
+                                                diaryEntryId = 0,
+                                                name = product.name,
+                                                breadUnits = product.breadUnits.toFloatOrNull() ?: 0f,
+                                                sortOrder = index
+                                            )
+                                        },
                                         shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
                                         longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
                                         notes = formState.notes.trim(),
