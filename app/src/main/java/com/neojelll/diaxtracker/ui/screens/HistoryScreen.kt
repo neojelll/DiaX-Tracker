@@ -1,10 +1,14 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,15 +26,18 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.CardBorder
+import com.neojelll.diaxtracker.ui.theme.FieldBackground
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.theme.glucoseColor
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import kotlinx.coroutines.launch
 import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -97,7 +104,7 @@ fun HistoryScreen(
                         }
                         item(key = entry.id) {
                             val stats = entryStats(entry, glucoseRange)
-                            if (stats.size <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
+                            if (entry.mealLabel == null && stats.size <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
                                 CompactEntryRow(
                                     entry = entry,
                                     stat = stats.firstOrNull(),
@@ -107,7 +114,8 @@ fun HistoryScreen(
                                 DiaryEntryCard(
                                     entry = entry,
                                     stats = stats,
-                                    onClick = { onEntryClick(entry.id) }
+                                    onClick = { onEntryClick(entry.id) },
+                                    fetchMealProducts = viewModel::getEntryProducts
                                 )
                             }
                         }
@@ -135,13 +143,15 @@ private fun entryStats(entry: DiaryEntry, glucoseRange: GlucoseRange): List<Entr
             )
         )
     }
-    entry.breadUnits?.let {
-        add(
-            EntryStat(
-                label = stringResource(R.string.bread_units_short_label),
-                value = stringResource(R.string.bread_units_value_format, String.format(Locale.US, "%.1f", it))
+    if (entry.mealLabel == null) {
+        entry.breadUnits?.let {
+            add(
+                EntryStat(
+                    label = stringResource(R.string.bread_units_short_label),
+                    value = stringResource(R.string.bread_units_value_format, String.format(Locale.US, "%.1f", it))
+                )
             )
-        )
+        }
     }
     entry.shortInsulinDose?.let {
         add(
@@ -212,7 +222,12 @@ private fun CompactEntryRow(entry: DiaryEntry, stat: EntryStat?, onClick: () -> 
 }
 
 @Composable
-private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: () -> Unit) {
+private fun DiaryEntryCard(
+    entry: DiaryEntry,
+    stats: List<EntryStat>,
+    onClick: () -> Unit,
+    fetchMealProducts: suspend (Long) -> List<DiaryEntryProduct>
+) {
     val locale = LocalConfiguration.current.locales[0]
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", locale)
 
@@ -252,6 +267,15 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
 
             HorizontalDivider(color = CardBorder)
 
+            entry.mealLabel?.let { label ->
+                MealBreakdownBox(
+                    entryId = entry.id,
+                    mealLabel = label,
+                    totalBreadUnits = entry.breadUnits ?: 0f,
+                    fetchProducts = fetchMealProducts
+                )
+            }
+
             stats.chunked(2).forEach { rowStats ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -288,6 +312,87 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
                         text = entry.notes,
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextPrimary
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MealBreakdownBox(
+    entryId: Long,
+    mealLabel: String,
+    totalBreadUnits: Float,
+    fetchProducts: suspend (Long) -> List<DiaryEntryProduct>
+) {
+    var expanded by remember(entryId) { mutableStateOf(false) }
+    var products by remember(entryId) { mutableStateOf<List<DiaryEntryProduct>?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(FieldBackground)
+            .clickable {
+                expanded = !expanded
+                if (expanded && products == null) {
+                    coroutineScope.launch {
+                        products = fetchProducts(entryId)
+                    }
+                }
+            }
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = mealLabel,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.bread_units_value_format, formatAmount(totalBreadUnits)),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+            )
+            Icon(
+                imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = TextSecondary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+
+        if (expanded) {
+            products?.sortedBy { it.sortOrder }?.forEach { product ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = product.name,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = stringResource(R.string.bread_units_value_format, formatAmount(product.breadUnits)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
                     )
                 }
             }
