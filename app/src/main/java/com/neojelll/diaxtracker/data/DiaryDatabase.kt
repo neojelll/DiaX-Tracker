@@ -9,8 +9,13 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [DiaryEntry::class, MealPreset::class, MealPresetProduct::class],
-    version = 8,
+    entities = [
+        DiaryEntry::class,
+        MealPreset::class,
+        MealPresetProduct::class,
+        DiaryEntryProduct::class
+    ],
+    version = 9,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -86,6 +91,25 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE diary_entries ADD COLUMN mealLabel TEXT")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS diary_entry_products (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "diaryEntryId INTEGER NOT NULL, " +
+                        "name TEXT NOT NULL, " +
+                        "breadUnits REAL NOT NULL, " +
+                        "sortOrder INTEGER NOT NULL, " +
+                        "FOREIGN KEY(diaryEntryId) REFERENCES diary_entries(id) ON DELETE CASCADE)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_diary_entry_products_diaryEntryId " +
+                        "ON diary_entry_products(diaryEntryId)"
+                )
+            }
+        }
+
         fun getDatabase(context: Context): DiaryDatabase {
             return INSTANCE ?: synchronized(this) {
                 Room.databaseBuilder(
@@ -97,7 +121,8 @@ abstract class DiaryDatabase : RoomDatabase() {
                     MIGRATION_4_5,
                     MIGRATION_5_6,
                     MIGRATION_6_7,
-                    MIGRATION_7_8
+                    MIGRATION_7_8,
+                    MIGRATION_8_9
                 ).build().also { INSTANCE = it }
             }
         }

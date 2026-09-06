@@ -13,6 +13,7 @@ data class DiaryEntry(
     val bloodSugar: Float?,
     val sugarSource: SugarSource? = null,
     val breadUnits: Float? = null,
+    val mealLabel: String? = null,
     val shortInsulinDose: Float?,
     val longInsulinDose: Float?,
     val notes: String,
