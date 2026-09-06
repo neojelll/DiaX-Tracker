@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryRepository
+import com.neojelll.diaxtracker.data.GlucoseRange
+import com.neojelll.diaxtracker.data.GlucoseRangeStore
 import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.data.MealPresetProduct
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
@@ -31,6 +33,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         DiaryDatabase.getDatabase(application).mealPresetDao()
     )
     private val sensorReadingStore = SensorReadingStore(application)
+    private val glucoseRangeStore = GlucoseRangeStore(application)
 
     val entries: StateFlow<List<DiaryEntry>> = repository.allEntries.stateIn(
         scope = viewModelScope,
@@ -46,6 +49,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _sensorAvailable = MutableStateFlow(sensorReadingStore.getLatestReading() != null)
     val sensorAvailable: StateFlow<Boolean> = _sensorAvailable.asStateFlow()
+
+    private val _glucoseRange = MutableStateFlow(glucoseRangeStore.getRange())
+    val glucoseRange: StateFlow<GlucoseRange> = _glucoseRange.asStateFlow()
 
     private val insulinTicker = flow {
         while (true) {
@@ -136,6 +142,12 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.deleteMealPreset(preset)
         }
+    }
+
+    fun setGlucoseRange(low: Float, high: Float) {
+        val range = GlucoseRange(low, high)
+        glucoseRangeStore.saveRange(range)
+        _glucoseRange.value = range
     }
 
     private companion object {

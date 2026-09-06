@@ -22,13 +22,14 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.CardBorder
-import com.neojelll.diaxtracker.ui.theme.SproutGreen
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.theme.card
+import com.neojelll.diaxtracker.ui.theme.glucoseColor
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.io.File
 import java.time.LocalDate
@@ -42,6 +43,7 @@ fun HistoryScreen(
     onEntryClick: (Long) -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
+    val glucoseRange by viewModel.glucoseRange.collectAsState()
     val topBarState = rememberCollapsibleTopBarState()
     val listState = rememberLazyListState()
     val canScroll = listState.canScrollForward || listState.canScrollBackward || !topBarState.isFullyExpanded
@@ -94,7 +96,7 @@ fun HistoryScreen(
                             }
                         }
                         item(key = entry.id) {
-                            val stats = entryStats(entry)
+                            val stats = entryStats(entry, glucoseRange)
                             if (stats.size <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
                                 CompactEntryRow(
                                     entry = entry,
@@ -123,13 +125,13 @@ private data class EntryStat(
 )
 
 @Composable
-private fun entryStats(entry: DiaryEntry): List<EntryStat> = buildList {
+private fun entryStats(entry: DiaryEntry, glucoseRange: GlucoseRange): List<EntryStat> = buildList {
     entry.bloodSugar?.let {
         add(
             EntryStat(
                 label = stringResource(R.string.sugar_label),
                 value = stringResource(R.string.sugar_value_format, String.format(Locale.US, "%.1f", it)),
-                color = sugarColor(it)
+                color = glucoseColor(it, glucoseRange.low, glucoseRange.high)
             )
         )
     }
@@ -291,12 +293,4 @@ private fun DiaryEntryCard(entry: DiaryEntry, stats: List<EntryStat>, onClick: (
             }
         }
     }
-}
-
-@Composable
-private fun sugarColor(value: Float) = when {
-    value < 3.9f -> MaterialTheme.colorScheme.error
-    value > 10.0f -> MaterialTheme.colorScheme.error
-    value > 7.8f -> MaterialTheme.colorScheme.tertiary
-    else -> SproutGreen
 }

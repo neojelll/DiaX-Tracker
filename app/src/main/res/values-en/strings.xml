@@ -92,4 +92,10 @@
     <string name="enter_manually">Enter manually</string>
 
     <string name="settings_title">Settings</string>
+    <string name="glucose_range_label">Target glucose range</string>
+    <string name="glucose_range_value_format">%1$s–%2$s mmol/L</string>
+    <string name="glucose_range_title">Target glucose range</string>
+    <string name="glucose_range_low_label">Low bound</string>
+    <string name="glucose_range_high_label">High bound</string>
+    <string name="glucose_range_hint">In range shows green. Up to 3-4 mmol/L above shows yellow, further above shows red. Below 3.9 always shows red.</string>
 </resources>
