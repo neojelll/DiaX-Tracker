@@ -99,5 +99,5 @@
     <string name="glucose_range_title">Целевой диапазон сахара</string>
     <string name="glucose_range_low_label">Нижняя граница</string>
     <string name="glucose_range_high_label">Верхняя граница</string>
-    <string name="glucose_range_hint">В диапазоне — зелёный. Выше на 3–4 ммоль/л — жёлтый, дальше — красный. Ниже 3.9 — всегда красный.</string>
+    <string name="glucose_range_hint">В диапазоне — зелёный. Выше на 3–4 ммоль/л — жёлтый, дальше — оранжевый. Ниже 3.9 — всегда красный, ниже 3.0 — тёмно-красный.</string>
 </resources>

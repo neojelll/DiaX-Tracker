@@ -13,4 +13,6 @@ val TextSecondary = Color(0xFF6B7280)
 
 val SproutGreen = Color(0xFF15803D)
 val DangerRed = Color(0xFFDC2626)
+val CriticalRed = Color(0xFF991B1B)
 val WarningOrange = Color(0xFFD97706)
+val WarningYellow = Color(0xFFEAB308)

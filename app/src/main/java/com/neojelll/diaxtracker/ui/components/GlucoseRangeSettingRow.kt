@@ -33,7 +33,8 @@ import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.theme.card
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
-private const val MIN_BOUND_MMOL = 2f
+// A personal target can't start below the fixed clinical hypoglycemia threshold.
+private const val MIN_BOUND_MMOL = 3.9f
 private const val MAX_BOUND_MMOL = 20f
 
 @Composable
