@@ -41,12 +41,15 @@ fun EditEntryScreen(
     val mealPresets by viewModel.mealPresets.collectAsState()
     val breadUnitsValueFormat = stringResource(R.string.bread_units_value_format)
 
+    val initialBloodSugarText = remember(entryId) {
+        entry.bloodSugar?.let { String.format(Locale.US, "%.1f", it) } ?: ""
+    }
     var formState by remember(entryId) {
         mutableStateOf(
             EntryFormState(
                 date = entry.createdAt.toLocalDate(),
                 time = entry.createdAt.toLocalTime(),
-                bloodSugar = entry.bloodSugar?.let { String.format(Locale.US, "%.1f", it) } ?: "",
+                bloodSugar = initialBloodSugarText,
                 breadUnits = entry.breadUnits?.let { formatAmount(it) } ?: "",
                 foodLabel = entry.breadUnits?.let {
                     String.format(breadUnitsValueFormat, formatAmount(it))
@@ -161,21 +164,35 @@ fun EditEntryScreen(
                         .then(
                             if (formState.isFillable) {
                                 Modifier.clickable {
-                                    val newBloodSugar = formState.bloodSugar.toFloatOrNull()
+                                    val newCreatedAt = LocalDateTime.of(formState.date, formState.time)
+                                    val typedBloodSugar = formState.bloodSugar.toFloatOrNull()
+                                    val sugarFieldUntouched = formState.bloodSugar == initialBloodSugarText
+                                    val timeChanged = newCreatedAt != entry.createdAt
+
+                                    val newBloodSugar: Float?
+                                    val newSugarSource: SugarSource?
+                                    if (entry.sugarSource == SugarSource.SENSOR && sugarFieldUntouched && timeChanged) {
+                                        val resynced = viewModel.sensorReadingNear(newCreatedAt)
+                                        newBloodSugar = resynced
+                                        newSugarSource = resynced?.let { SugarSource.SENSOR }
+                                    } else if (sugarFieldUntouched) {
+                                        newBloodSugar = typedBloodSugar
+                                        newSugarSource = entry.sugarSource
+                                    } else {
+                                        newBloodSugar = typedBloodSugar
+                                        newSugarSource = typedBloodSugar?.let { SugarSource.MANUAL }
+                                    }
+
                                     viewModel.updateEntry(
                                         entry.copy(
                                             bloodSugar = newBloodSugar,
-                                            sugarSource = if (newBloodSugar != entry.bloodSugar) {
-                                                newBloodSugar?.let { SugarSource.MANUAL }
-                                            } else {
-                                                entry.sugarSource
-                                            },
+                                            sugarSource = newSugarSource,
                                             breadUnits = formState.breadUnits.toFloatOrNull(),
                                             shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
                                             longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
                                             notes = formState.notes.trim(),
                                             photoPath = formState.photoPath,
-                                            createdAt = LocalDateTime.of(formState.date, formState.time)
+                                            createdAt = newCreatedAt
                                         )
                                     )
                                     onDone()

@@ -90,7 +90,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         createdAt: LocalDateTime
     ) {
         viewModelScope.launch {
-            val sensorReading = sensorReadingStore.getLatestReading()
+            val sensorReading = sensorReadingNear(createdAt)
             val entryId = repository.insert(
                 DiaryEntry(
                     bloodSugar = bloodSugar ?: sensorReading,
@@ -110,6 +110,15 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
             if (shortInsulinDose != null || longInsulinDose != null) {
                 PostMealScheduler.scheduleFollowUps(getApplication(), entryId)
             }
+        }
+    }
+
+    fun sensorReadingNear(referenceTime: LocalDateTime): Float? {
+        val minutesFromNow = kotlin.math.abs(Duration.between(referenceTime, LocalDateTime.now()).toMinutes())
+        return if (minutesFromNow <= SENSOR_FALLBACK_TOLERANCE_MINUTES) {
+            sensorReadingStore.getLatestReading()
+        } else {
+            null
         }
     }
 
@@ -153,5 +162,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private companion object {
         const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
         const val INSULIN_CHECK_INTERVAL_MILLIS = 30_000L
+        const val SENSOR_FALLBACK_TOLERANCE_MINUTES = 5L
     }
 }
