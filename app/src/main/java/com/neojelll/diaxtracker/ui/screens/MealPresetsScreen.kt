@@ -247,7 +247,7 @@ private fun MealPresetEditorDialog(
     val total = products.sumOf { (it.amount.toFloatOrNull() ?: 0f).toDouble() }.toFloat()
     val isValid = name.isNotBlank() &&
         products.isNotEmpty() &&
-        products.all { it.name.isNotBlank() && it.amount.toFloatOrNull() != null }
+        products.all { it.name.isNotBlank() && (it.amount.isBlank() || it.amount.toFloatOrNull() != null) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -336,7 +336,7 @@ private fun MealPresetEditorDialog(
                             MealPresetProduct(
                                 mealPresetId = 0,
                                 name = draft.name.trim(),
-                                breadUnits = draft.amount.toFloat(),
+                                breadUnits = draft.amount.toFloatOrNull() ?: 0f,
                                 sortOrder = index
                             )
                         }
