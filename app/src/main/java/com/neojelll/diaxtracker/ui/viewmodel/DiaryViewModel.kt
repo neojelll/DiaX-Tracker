@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.DiaryRepository
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.GlucoseRangeStore
@@ -83,6 +84,8 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun addEntry(
         bloodSugar: Float?,
         breadUnits: Float?,
+        mealLabel: String?,
+        mealProducts: List<DiaryEntryProduct>,
         shortInsulinDose: Float?,
         longInsulinDose: Float?,
         notes: String,
@@ -91,7 +94,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         viewModelScope.launch {
             val sensorReading = sensorReadingNear(createdAt)
-            val entryId = repository.insert(
+            val entryId = repository.insertWithProducts(
                 DiaryEntry(
                     bloodSugar = bloodSugar ?: sensorReading,
                     sugarSource = when {
@@ -100,12 +103,14 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                         else -> null
                     },
                     breadUnits = breadUnits,
+                    mealLabel = mealLabel,
                     shortInsulinDose = shortInsulinDose,
                     longInsulinDose = longInsulinDose,
                     notes = notes,
                     photoPath = photoPath,
                     createdAt = createdAt
-                )
+                ),
+                mealProducts
             )
             if (shortInsulinDose != null || longInsulinDose != null) {
                 PostMealScheduler.scheduleFollowUps(getApplication(), entryId)
@@ -122,9 +127,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateEntry(entry: DiaryEntry) {
+    fun updateEntry(entry: DiaryEntry, mealProducts: List<DiaryEntryProduct>) {
         viewModelScope.launch {
-            repository.update(entry)
+            repository.updateWithProducts(entry, mealProducts)
             if (entry.shortInsulinDose != null || entry.longInsulinDose != null) {
                 PostMealScheduler.scheduleFollowUps(getApplication(), entry.id)
             } else {
@@ -132,6 +137,8 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    suspend fun getEntryProducts(entryId: Long): List<DiaryEntryProduct> = repository.getEntryProducts(entryId)
 
     fun deleteEntry(entry: DiaryEntry) {
         viewModelScope.launch {

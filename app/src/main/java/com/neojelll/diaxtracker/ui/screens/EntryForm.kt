@@ -9,7 +9,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -308,11 +310,13 @@ internal fun EntryFormCard(
             FoodField(
                 foodLabel = state.foodLabel,
                 mealPresets = mealPresets,
-                onPresetSelected = { preset ->
+                onPresetConfirmed = { mealLabel, breadUnits, products ->
                     onStateChange(
                         state.copy(
-                            breadUnits = formatAmount(preset.totalBreadUnits),
-                            foodLabel = preset.preset.name
+                            breadUnits = formatAmount(breadUnits),
+                            foodLabel = mealLabel,
+                            mealLabel = mealLabel,
+                            mealProducts = products
                         )
                     )
                 },
@@ -320,7 +324,9 @@ internal fun EntryFormCard(
                     onStateChange(
                         state.copy(
                             breadUnits = formatAmount(value),
-                            foodLabel = String.format(breadUnitsFormat, formatAmount(value))
+                            foodLabel = String.format(breadUnitsFormat, formatAmount(value)),
+                            mealLabel = null,
+                            mealProducts = emptyList()
                         )
                     )
                 }
@@ -508,11 +514,12 @@ private fun ManualValueEntryDialog(
 private fun FoodField(
     foodLabel: String,
     mealPresets: List<MealPresetWithProducts>,
-    onPresetSelected: (MealPresetWithProducts) -> Unit,
+    onPresetConfirmed: (mealLabel: String, breadUnits: Float, products: List<MealProductEntry>) -> Unit,
     onManualEntryConfirmed: (Float) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var showManualDialog by remember { mutableStateOf(false) }
+    var presetForBreakdown by remember { mutableStateOf<MealPresetWithProducts?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         SectionLabel(stringResource(R.string.food_label))
@@ -554,7 +561,7 @@ private fun FoodField(
                             )
                         },
                         onClick = {
-                            onPresetSelected(preset)
+                            presetForBreakdown = preset
                             expanded = false
                         }
                     )
@@ -571,6 +578,17 @@ private fun FoodField(
         }
     }
 
+    presetForBreakdown?.let { preset ->
+        PresetBreakdownDialog(
+            preset = preset,
+            onConfirm = { breadUnits, products ->
+                onPresetConfirmed(preset.preset.name, breadUnits, products)
+                presetForBreakdown = null
+            },
+            onDismiss = { presetForBreakdown = null }
+        )
+    }
+
     if (showManualDialog) {
         ManualValueEntryDialog(
             title = stringResource(R.string.bread_units_label),
@@ -582,6 +600,106 @@ private fun FoodField(
             onDismiss = { showManualDialog = false }
         )
     }
+}
+
+@Composable
+private fun PresetBreakdownDialog(
+    preset: MealPresetWithProducts,
+    onConfirm: (breadUnits: Float, products: List<MealProductEntry>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sortedProducts = remember(preset) { preset.products.sortedBy { it.sortOrder } }
+    var productAmounts by remember(preset) {
+        mutableStateOf(sortedProducts.map { formatAmount(it.breadUnits) })
+    }
+    var totalOverride by remember(preset) { mutableStateOf<String?>(null) }
+
+    val liveSum = productAmounts.sumOf { (it.toFloatOrNull() ?: 0f).toDouble() }.toFloat()
+    val totalFieldValue = totalOverride ?: formatAmount(liveSum)
+    val useTotalOverride = totalOverride != null
+
+    val isValid = if (useTotalOverride) {
+        totalFieldValue.toFloatOrNull() != null
+    } else {
+        productAmounts.all { it.toFloatOrNull() != null }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(preset.preset.name) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                sortedProducts.forEachIndexed { index, product ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = product.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = TextPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        CompactField(
+                            value = productAmounts[index],
+                            onValueChange = { text ->
+                                productAmounts = productAmounts.toMutableList().also {
+                                    it[index] = text.filter { c -> c.isDigit() || c == '.' }
+                                }
+                                totalOverride = null
+                            },
+                            label = stringResource(R.string.bread_units_short_label),
+                            placeholder = "",
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.width(90.dp)
+                        )
+                    }
+                }
+
+                HorizontalDivider(color = CardBorder)
+
+                CompactField(
+                    value = totalFieldValue,
+                    onValueChange = { text ->
+                        totalOverride = text.filter { c -> c.isDigit() || c == '.' }
+                    },
+                    label = stringResource(R.string.meal_breakdown_total_label),
+                    placeholder = "",
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = isValid,
+                onClick = {
+                    if (useTotalOverride) {
+                        onConfirm(totalFieldValue.toFloat(), emptyList())
+                    } else {
+                        val products = sortedProducts.mapIndexed { index, product ->
+                            MealProductEntry(name = product.name, breadUnits = productAmounts[index])
+                        }
+                        onConfirm(liveSum, products)
+                    }
+                }
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable
