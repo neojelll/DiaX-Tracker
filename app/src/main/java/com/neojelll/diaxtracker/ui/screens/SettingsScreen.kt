@@ -12,13 +12,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
+import com.neojelll.diaxtracker.ui.components.GlucoseRangeSettingRow
 import com.neojelll.diaxtracker.ui.components.LanguageSettingRow
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
+import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(viewModel: DiaryViewModel) {
     val topBarState = rememberCollapsibleTopBarState()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -34,6 +36,7 @@ fun SettingsScreen() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             LanguageSettingRow()
+            GlucoseRangeSettingRow(viewModel = viewModel)
         }
     }
 }

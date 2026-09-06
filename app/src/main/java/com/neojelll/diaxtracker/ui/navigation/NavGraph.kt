@@ -119,7 +119,7 @@ fun NavGraph(navController: NavHostController) {
                     )
                 }
                 composable(Screen.Settings.route) {
-                    SettingsScreen()
+                    SettingsScreen(viewModel = viewModel)
                 }
                 composable(
                     route = EDIT_ENTRY_ROUTE,
