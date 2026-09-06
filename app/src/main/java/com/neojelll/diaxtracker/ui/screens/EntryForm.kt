@@ -52,7 +52,7 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
-import com.neojelll.diaxtracker.data.MealPreset
+import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.ui.theme.AccentDark
 import com.neojelll.diaxtracker.ui.theme.CardBorder
@@ -236,7 +236,7 @@ internal fun EntryFormCard(
     onStateChange: (EntryFormState) -> Unit,
     onDateClick: () -> Unit,
     onTimeClick: () -> Unit,
-    mealPresets: List<MealPreset> = emptyList(),
+    mealPresets: List<MealPresetWithProducts> = emptyList(),
     cardTitle: String? = null,
     onReset: (() -> Unit)? = null
 ) {
@@ -311,8 +311,8 @@ internal fun EntryFormCard(
                 onPresetSelected = { preset ->
                     onStateChange(
                         state.copy(
-                            breadUnits = formatAmount(preset.breadUnits),
-                            foodLabel = preset.name
+                            breadUnits = formatAmount(preset.totalBreadUnits),
+                            foodLabel = preset.preset.name
                         )
                     )
                 },
@@ -507,8 +507,8 @@ private fun ManualValueEntryDialog(
 @Composable
 private fun FoodField(
     foodLabel: String,
-    mealPresets: List<MealPreset>,
-    onPresetSelected: (MealPreset) -> Unit,
+    mealPresets: List<MealPresetWithProducts>,
+    onPresetSelected: (MealPresetWithProducts) -> Unit,
     onManualEntryConfirmed: (Float) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -548,8 +548,8 @@ private fun FoodField(
                             Text(
                                 stringResource(
                                     R.string.meal_preset_option_format,
-                                    preset.name,
-                                    formatAmount(preset.breadUnits)
+                                    preset.preset.name,
+                                    formatAmount(preset.totalBreadUnits)
                                 )
                             )
                         },

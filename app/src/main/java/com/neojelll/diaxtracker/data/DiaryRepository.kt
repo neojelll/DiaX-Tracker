@@ -7,13 +7,13 @@ class DiaryRepository(
     private val mealPresetDao: MealPresetDao
 ) {
     val allEntries: Flow<List<DiaryEntry>> = dao.getAllEntries()
-    val allMealPresets: Flow<List<MealPreset>> = mealPresetDao.getAllPresets()
+    val allMealPresets: Flow<List<MealPresetWithProducts>> = mealPresetDao.getAllPresetsWithProducts()
 
     suspend fun insert(entry: DiaryEntry): Long = dao.insert(entry)
     suspend fun update(entry: DiaryEntry) = dao.update(entry)
     suspend fun delete(entry: DiaryEntry) = dao.delete(entry)
 
-    suspend fun insertMealPreset(preset: MealPreset): Long = mealPresetDao.insert(preset)
-    suspend fun updateMealPreset(preset: MealPreset) = mealPresetDao.update(preset)
+    suspend fun saveMealPreset(preset: MealPreset, products: List<MealPresetProduct>): Long =
+        mealPresetDao.upsertPresetWithProducts(preset, products)
     suspend fun deleteMealPreset(preset: MealPreset) = mealPresetDao.delete(preset)
 }

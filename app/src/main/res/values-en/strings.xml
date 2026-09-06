@@ -80,6 +80,11 @@
     <string name="no_meal_presets_title">No meal presets yet</string>
     <string name="no_meal_presets_subtitle">Add a meal you eat often</string>
     <string name="delete_meal_preset_confirm_title">Delete meal preset?</string>
+    <string name="meal_preset_product_name_label">Product</string>
+    <string name="meal_preset_product_name_placeholder">E.g. Bread</string>
+    <string name="add_product">Add product</string>
+    <string name="remove_product">Remove product</string>
+    <string name="meal_preset_total_format">Total: %1$s BU</string>
     <string name="save">Save</string>
 
     <string name="food_label">Food</string>

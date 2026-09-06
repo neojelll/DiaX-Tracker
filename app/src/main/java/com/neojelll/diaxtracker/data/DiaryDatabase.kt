@@ -8,7 +8,11 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [DiaryEntry::class, MealPreset::class], version = 7, exportSchema = true)
+@Database(
+    entities = [DiaryEntry::class, MealPreset::class, MealPresetProduct::class],
+    version = 8,
+    exportSchema = true
+)
 @TypeConverters(Converters::class)
 abstract class DiaryDatabase : RoomDatabase() {
     abstract fun diaryDao(): DiaryDao
@@ -47,14 +51,54 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS meal_preset_products (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "mealPresetId INTEGER NOT NULL, " +
+                        "name TEXT NOT NULL, " +
+                        "breadUnits REAL NOT NULL, " +
+                        "sortOrder INTEGER NOT NULL, " +
+                        "FOREIGN KEY(mealPresetId) REFERENCES meal_presets(id) ON DELETE CASCADE)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_meal_preset_products_mealPresetId " +
+                        "ON meal_preset_products(mealPresetId)"
+                )
+                db.execSQL(
+                    "INSERT INTO meal_preset_products (mealPresetId, name, breadUnits, sortOrder) " +
+                        "SELECT id, name, breadUnits, 0 FROM meal_presets"
+                )
+
+                db.execSQL(
+                    "CREATE TABLE meal_presets_new (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "name TEXT NOT NULL, " +
+                        "comment TEXT NOT NULL DEFAULT '')"
+                )
+                db.execSQL(
+                    "INSERT INTO meal_presets_new (id, name, comment) " +
+                        "SELECT id, name, '' FROM meal_presets"
+                )
+                db.execSQL("DROP TABLE meal_presets")
+                db.execSQL("ALTER TABLE meal_presets_new RENAME TO meal_presets")
+            }
+        }
+
         fun getDatabase(context: Context): DiaryDatabase {
             return INSTANCE ?: synchronized(this) {
                 Room.databaseBuilder(
                     context.applicationContext,
                     DiaryDatabase::class.java,
                     "diary_database"
-                ).addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
-                    .build().also { INSTANCE = it }
+                ).addMigrations(
+                    MIGRATION_3_4,
+                    MIGRATION_4_5,
+                    MIGRATION_5_6,
+                    MIGRATION_6_7,
+                    MIGRATION_7_8
+                ).build().also { INSTANCE = it }
             }
         }
     }
