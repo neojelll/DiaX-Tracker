@@ -58,6 +58,10 @@
     <string name="yesterday_label">Вчера</string>
     <string name="no_entries_title">Записей пока нет</string>
     <string name="no_entries_subtitle">Добавьте первую запись</string>
+    <string name="history_search_placeholder">Поиск по комментарию и еде…</string>
+    <string name="clear_search">Очистить поиск</string>
+    <string name="search_by_date">Найти по дате</string>
+    <string name="no_search_results">Ничего не найдено</string>
     <string name="sugar_label">Сахар</string>
     <string name="sugar_value_format">%1$s ммоль/л</string>
     <string name="bread_units_short_label">ХЕ</string>

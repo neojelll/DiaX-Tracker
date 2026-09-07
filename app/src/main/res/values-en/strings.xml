@@ -56,6 +56,10 @@
     <string name="yesterday_label">Yesterday</string>
     <string name="no_entries_title">No entries yet</string>
     <string name="no_entries_subtitle">Add your first entry</string>
+    <string name="history_search_placeholder">Search comments and food…</string>
+    <string name="clear_search">Clear search</string>
+    <string name="search_by_date">Find by date</string>
+    <string name="no_search_results">Nothing found</string>
     <string name="sugar_label">Sugar</string>
     <string name="sugar_value_format">%1$s mmol/L</string>
     <string name="bread_units_short_label">Bread Units</string>
