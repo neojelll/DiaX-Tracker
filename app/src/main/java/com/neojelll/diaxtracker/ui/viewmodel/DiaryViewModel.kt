@@ -119,13 +119,12 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun sensorReadingNear(referenceTime: LocalDateTime): Float? {
-        val minutesFromNow = kotlin.math.abs(Duration.between(referenceTime, LocalDateTime.now()).toMinutes())
-        return if (minutesFromNow <= SENSOR_FALLBACK_TOLERANCE_MINUTES) {
-            sensorReadingStore.getLatestReading()
-        } else {
-            null
-        }
+    suspend fun sensorReadingNear(referenceTime: LocalDateTime): Float? {
+        val windowStart = referenceTime.minusMinutes(SENSOR_FALLBACK_TOLERANCE_MINUTES)
+        val windowEnd = referenceTime.plusMinutes(SENSOR_FALLBACK_TOLERANCE_MINUTES)
+        return repository.getSensorReadingsBetween(windowStart, windowEnd)
+            .minByOrNull { kotlin.math.abs(Duration.between(referenceTime, it.timestamp).toMinutes()) }
+            ?.bloodSugar
     }
 
     fun updateEntry(entry: DiaryEntry, mealProducts: List<DiaryEntryProduct>) {
@@ -170,6 +169,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private companion object {
         const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
         const val INSULIN_CHECK_INTERVAL_MILLIS = 30_000L
-        const val SENSOR_FALLBACK_TOLERANCE_MINUTES = 5L
+        const val SENSOR_FALLBACK_TOLERANCE_MINUTES = 10L
     }
 }
