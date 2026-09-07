@@ -27,6 +27,7 @@ import com.neojelll.diaxtracker.ui.theme.AccentDark
 import com.neojelll.diaxtracker.ui.theme.DangerRed
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.Locale
 
@@ -127,6 +128,7 @@ fun EditEntryScreen(
     val topBarState = rememberCollapsibleTopBarState()
     val scrollState = rememberScrollState()
     val canScroll = scrollState.maxValue > 0 || !topBarState.isFullyExpanded
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -184,42 +186,44 @@ fun EditEntryScreen(
                                     val sugarFieldUntouched = formState.bloodSugar == initialBloodSugarText
                                     val timeChanged = newCreatedAt != entry.createdAt
 
-                                    val newBloodSugar: Float?
-                                    val newSugarSource: SugarSource?
-                                    if (entry.sugarSource == SugarSource.SENSOR && sugarFieldUntouched && timeChanged) {
-                                        val resynced = viewModel.sensorReadingNear(newCreatedAt)
-                                        newBloodSugar = resynced
-                                        newSugarSource = resynced?.let { SugarSource.SENSOR }
-                                    } else if (sugarFieldUntouched) {
-                                        newBloodSugar = typedBloodSugar
-                                        newSugarSource = entry.sugarSource
-                                    } else {
-                                        newBloodSugar = typedBloodSugar
-                                        newSugarSource = typedBloodSugar?.let { SugarSource.MANUAL }
-                                    }
-
-                                    viewModel.updateEntry(
-                                        entry.copy(
-                                            bloodSugar = newBloodSugar,
-                                            sugarSource = newSugarSource,
-                                            breadUnits = formState.breadUnits.toFloatOrNull(),
-                                            mealLabel = formState.mealLabel,
-                                            shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
-                                            longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
-                                            notes = formState.notes.trim(),
-                                            photoPath = formState.photoPath,
-                                            createdAt = newCreatedAt
-                                        ),
-                                        formState.mealProducts.mapIndexed { index, product ->
-                                            DiaryEntryProduct(
-                                                diaryEntryId = entry.id,
-                                                name = product.name,
-                                                breadUnits = product.breadUnits.toFloatOrNull() ?: 0f,
-                                                sortOrder = index
-                                            )
+                                    coroutineScope.launch {
+                                        val newBloodSugar: Float?
+                                        val newSugarSource: SugarSource?
+                                        if (entry.sugarSource == SugarSource.SENSOR && sugarFieldUntouched && timeChanged) {
+                                            val resynced = viewModel.sensorReadingNear(newCreatedAt)
+                                            newBloodSugar = resynced
+                                            newSugarSource = resynced?.let { SugarSource.SENSOR }
+                                        } else if (sugarFieldUntouched) {
+                                            newBloodSugar = typedBloodSugar
+                                            newSugarSource = entry.sugarSource
+                                        } else {
+                                            newBloodSugar = typedBloodSugar
+                                            newSugarSource = typedBloodSugar?.let { SugarSource.MANUAL }
                                         }
-                                    )
-                                    onDone()
+
+                                        viewModel.updateEntry(
+                                            entry.copy(
+                                                bloodSugar = newBloodSugar,
+                                                sugarSource = newSugarSource,
+                                                breadUnits = formState.breadUnits.toFloatOrNull(),
+                                                mealLabel = formState.mealLabel,
+                                                shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
+                                                longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
+                                                notes = formState.notes.trim(),
+                                                photoPath = formState.photoPath,
+                                                createdAt = newCreatedAt
+                                            ),
+                                            formState.mealProducts.mapIndexed { index, product ->
+                                                DiaryEntryProduct(
+                                                    diaryEntryId = entry.id,
+                                                    name = product.name,
+                                                    breadUnits = product.breadUnits.toFloatOrNull() ?: 0f,
+                                                    sortOrder = index
+                                                )
+                                            }
+                                        )
+                                        onDone()
+                                    }
                                 }
                             } else Modifier
                         )
