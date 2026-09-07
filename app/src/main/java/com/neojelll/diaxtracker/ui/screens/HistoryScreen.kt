@@ -4,17 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -35,13 +41,21 @@ import com.neojelll.diaxtracker.ui.theme.FieldBackground
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.theme.card
+import com.neojelll.diaxtracker.ui.theme.fieldBox
 import com.neojelll.diaxtracker.ui.theme.glucoseColor
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import kotlinx.coroutines.launch
 import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
+import kotlin.math.abs
+
+private sealed interface HistoryRow {
+    data class DayHeader(val date: LocalDate) : HistoryRow
+    data class Entry(val entry: DiaryEntry) : HistoryRow
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +68,54 @@ fun HistoryScreen(
     val topBarState = rememberCollapsibleTopBarState()
     val listState = rememberLazyListState()
     val canScroll = listState.canScrollForward || listState.canScrollBackward || !topBarState.isFullyExpanded
+    val coroutineScope = rememberCoroutineScope()
+
+    var searchQuery by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val filteredEntries = remember(entries, searchQuery) {
+        if (searchQuery.isBlank()) {
+            entries
+        } else {
+            entries.filter { entry ->
+                entry.notes.contains(searchQuery, ignoreCase = true) ||
+                    entry.mealLabel?.contains(searchQuery, ignoreCase = true) == true
+            }
+        }
+    }
+
+    val rows = remember(filteredEntries) {
+        buildList {
+            filteredEntries.forEachIndexed { index, entry ->
+                val entryDate = entry.createdAt.toLocalDate()
+                val previousDate = filteredEntries.getOrNull(index - 1)?.createdAt?.toLocalDate()
+                if (entryDate != previousDate) add(HistoryRow.DayHeader(entryDate))
+                add(HistoryRow.Entry(entry))
+            }
+        }
+    }
+
+    val dayRowIndex = remember(rows) {
+        rows.withIndex().mapNotNull { (index, row) ->
+            (row as? HistoryRow.DayHeader)?.let { it.date to index }
+        }.toMap()
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            initialDate = LocalDate.now(),
+            onConfirm = { pickedDate ->
+                showDatePicker = false
+                val nearestDate = dayRowIndex.keys.minByOrNull { abs(ChronoUnit.DAYS.between(it, pickedDate)) }
+                nearestDate?.let { date ->
+                    coroutineScope.launch {
+                        listState.animateScrollToItem(dayRowIndex.getValue(date))
+                    }
+                }
+            },
+            onDismiss = { showDatePicker = false }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -65,6 +127,12 @@ fun HistoryScreen(
         CollapsibleTopBar(
             state = topBarState,
             title = { Text(stringResource(R.string.history_title), color = TextPrimary) }
+        )
+
+        HistorySearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            onDatePick = { showDatePicker = true }
         )
 
         Box(modifier = Modifier.weight(1f)) {
@@ -87,6 +155,17 @@ fun HistoryScreen(
                         )
                     }
                 }
+            } else if (rows.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_search_results),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary
+                    )
+                }
             } else {
                 LazyColumn(
                     state = listState,
@@ -94,35 +173,94 @@ fun HistoryScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    entries.forEachIndexed { index, entry ->
-                        val entryDate = entry.createdAt.toLocalDate()
-                        val previousDate = entries.getOrNull(index - 1)?.createdAt?.toLocalDate()
-                        if (entryDate != previousDate) {
-                            item(key = "day-$entryDate") {
-                                DayDivider(date = entryDate)
+                    items(
+                        rows,
+                        key = { row ->
+                            when (row) {
+                                is HistoryRow.DayHeader -> "day-${row.date}"
+                                is HistoryRow.Entry -> row.entry.id
                             }
                         }
-                        item(key = entry.id) {
-                            val stats = entryStats(entry, glucoseRange)
-                            if (entry.mealLabel == null && stats.size <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
-                                CompactEntryRow(
-                                    entry = entry,
-                                    stat = stats.firstOrNull(),
-                                    onClick = { onEntryClick(entry.id) }
-                                )
-                            } else {
-                                DiaryEntryCard(
-                                    entry = entry,
-                                    stats = stats,
-                                    onClick = { onEntryClick(entry.id) },
-                                    fetchMealProducts = viewModel::getEntryProducts
-                                )
+                    ) { row ->
+                        when (row) {
+                            is HistoryRow.DayHeader -> DayDivider(date = row.date)
+                            is HistoryRow.Entry -> {
+                                val entry = row.entry
+                                val stats = entryStats(entry, glucoseRange)
+                                if (entry.mealLabel == null && stats.size <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
+                                    CompactEntryRow(
+                                        entry = entry,
+                                        stat = stats.firstOrNull(),
+                                        onClick = { onEntryClick(entry.id) }
+                                    )
+                                } else {
+                                    DiaryEntryCard(
+                                        entry = entry,
+                                        stats = stats,
+                                        onClick = { onEntryClick(entry.id) },
+                                        fetchMealProducts = viewModel::getEntryProducts
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun HistorySearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onDatePick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fieldBox()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(Icons.Filled.Search, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(16.dp))
+        Box(modifier = Modifier.weight(1f)) {
+            if (query.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.history_search_placeholder),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+            }
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                cursorBrush = SolidColor(TextPrimary),
+                singleLine = true
+            )
+        }
+        if (query.isNotEmpty()) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = stringResource(R.string.clear_search),
+                tint = TextSecondary,
+                modifier = Modifier
+                    .size(16.dp)
+                    .clickable { onQueryChange("") }
+            )
+        }
+        Icon(
+            imageVector = Icons.Filled.CalendarMonth,
+            contentDescription = stringResource(R.string.search_by_date),
+            tint = TextSecondary,
+            modifier = Modifier
+                .size(18.dp)
+                .clickable(onClick = onDatePick)
+        )
     }
 }
 
