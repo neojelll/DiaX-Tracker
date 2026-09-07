@@ -12,15 +12,35 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.DiaryDatabase
+import com.neojelll.diaxtracker.data.SensorReadingLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
 
 class SensorForegroundService : Service() {
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, -1.0)
             if (mgdl <= 0.0) return
             val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
-            SensorReadingStore(applicationContext).save(mgdlToMmol(mgdl), timestamp)
+            val bloodSugar = mgdlToMmol(mgdl)
+            SensorReadingStore(applicationContext).save(bloodSugar, timestamp)
+            serviceScope.launch {
+                DiaryDatabase.getDatabase(applicationContext).sensorReadingLogDao().insert(
+                    SensorReadingLog(
+                        timestamp = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                        bloodSugar = bloodSugar
+                    )
+                )
+            }
         }
     }
 
@@ -39,6 +59,7 @@ class SensorForegroundService : Service() {
 
     override fun onDestroy() {
         unregisterReceiver(receiver)
+        serviceScope.cancel()
         super.onDestroy()
     }
 
