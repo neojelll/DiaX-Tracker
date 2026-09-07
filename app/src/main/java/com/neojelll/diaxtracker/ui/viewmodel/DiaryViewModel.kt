@@ -31,7 +31,8 @@ import java.time.LocalDateTime
 class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = DiaryRepository(
         DiaryDatabase.getDatabase(application).diaryDao(),
-        DiaryDatabase.getDatabase(application).mealPresetDao()
+        DiaryDatabase.getDatabase(application).mealPresetDao(),
+        DiaryDatabase.getDatabase(application).sensorReadingLogDao()
     )
     private val sensorReadingStore = SensorReadingStore(application)
     private val glucoseRangeStore = GlucoseRangeStore(application)

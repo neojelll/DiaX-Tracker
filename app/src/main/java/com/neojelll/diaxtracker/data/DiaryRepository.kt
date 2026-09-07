@@ -1,10 +1,12 @@
 package com.neojelll.diaxtracker.data
 
+import java.time.LocalDateTime
 import kotlinx.coroutines.flow.Flow
 
 class DiaryRepository(
     private val dao: DiaryDao,
-    private val mealPresetDao: MealPresetDao
+    private val mealPresetDao: MealPresetDao,
+    private val sensorReadingLogDao: SensorReadingLogDao
 ) {
     val allEntries: Flow<List<DiaryEntry>> = dao.getAllEntries()
     val allMealPresets: Flow<List<MealPresetWithProducts>> = mealPresetDao.getAllPresetsWithProducts()
@@ -22,4 +24,8 @@ class DiaryRepository(
     suspend fun saveMealPreset(preset: MealPreset, products: List<MealPresetProduct>): Long =
         mealPresetDao.upsertPresetWithProducts(preset, products)
     suspend fun deleteMealPreset(preset: MealPreset) = mealPresetDao.delete(preset)
+
+    suspend fun logSensorReading(reading: SensorReadingLog) = sensorReadingLogDao.insert(reading)
+    suspend fun getSensorReadingsBetween(from: LocalDateTime, to: LocalDateTime): List<SensorReadingLog> =
+        sensorReadingLogDao.getReadingsBetween(from, to)
 }

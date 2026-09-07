@@ -13,15 +13,17 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         DiaryEntry::class,
         MealPreset::class,
         MealPresetProduct::class,
-        DiaryEntryProduct::class
+        DiaryEntryProduct::class,
+        SensorReadingLog::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class DiaryDatabase : RoomDatabase() {
     abstract fun diaryDao(): DiaryDao
     abstract fun mealPresetDao(): MealPresetDao
+    abstract fun sensorReadingLogDao(): SensorReadingLogDao
 
     companion object {
         @Volatile
@@ -110,6 +112,21 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS sensor_readings_log (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "timestamp TEXT NOT NULL, " +
+                        "bloodSugar REAL NOT NULL)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_sensor_readings_log_timestamp " +
+                        "ON sensor_readings_log(timestamp)"
+                )
+            }
+        }
+
         fun getDatabase(context: Context): DiaryDatabase {
             return INSTANCE ?: synchronized(this) {
                 Room.databaseBuilder(
@@ -122,7 +139,8 @@ abstract class DiaryDatabase : RoomDatabase() {
                     MIGRATION_5_6,
                     MIGRATION_6_7,
                     MIGRATION_7_8,
-                    MIGRATION_8_9
+                    MIGRATION_8_9,
+                    MIGRATION_9_10
                 ).build().also { INSTANCE = it }
             }
         }
