@@ -105,4 +105,8 @@
     <string name="glucose_range_hint">In range shows green. Up to 3-4 mmol/L above shows yellow, further above shows orange. Below 3.9 always shows red, below 3.0 shows dark red.</string>
 
     <string name="error_generic">Something went wrong. Please try again.</string>
+
+    <string name="backup_export_title">Export data</string>
+    <string name="backup_export_success">Backup saved</string>
+    <string name="backup_export_failed">Failed to save backup</string>
 </resources>
