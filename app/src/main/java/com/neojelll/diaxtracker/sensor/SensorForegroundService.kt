@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.neojelll.diaxtracker.R
@@ -28,18 +29,31 @@ class SensorForegroundService : Service() {
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, -1.0)
-            if (mgdl <= 0.0) return
-            val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
-            val bloodSugar = mgdlToMmol(mgdl)
-            SensorReadingStore(applicationContext).save(bloodSugar, timestamp)
-            serviceScope.launch {
-                DiaryDatabase.getDatabase(applicationContext).sensorReadingLogDao().insert(
-                    SensorReadingLog(
-                        timestamp = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                        bloodSugar = bloodSugar
-                    )
-                )
+            // This receiver is RECEIVER_EXPORTED, so any app on the device can send this
+            // broadcast with malformed extras (wrong type -> ClassCastException). Never let
+            // that crash the app.
+            try {
+                val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, -1.0)
+                if (mgdl <= 0.0) return
+                val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
+                val bloodSugar = mgdlToMmol(mgdl)
+                SensorReadingStore(applicationContext).save(bloodSugar, timestamp)
+                serviceScope.launch {
+                    try {
+                        DiaryDatabase.getDatabase(applicationContext).sensorReadingLogDao().insert(
+                            SensorReadingLog(
+                                timestamp = Instant.ofEpochMilli(timestamp)
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDateTime(),
+                                bloodSugar = bloodSugar
+                            )
+                        )
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to persist sensor reading", e)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Ignoring malformed sensor broadcast", e)
             }
         }
     }
@@ -86,6 +100,7 @@ class SensorForegroundService : Service() {
             .build()
 
     companion object {
+        private const val TAG = "SensorForegroundService"
         private const val CHANNEL_ID = "sensor_listener"
         private const val NOTIFICATION_ID = 1
         const val ACTION_BG_ESTIMATE = "com.eveningoutpost.dexdrip.BgEstimate"

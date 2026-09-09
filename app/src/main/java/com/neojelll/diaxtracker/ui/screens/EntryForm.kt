@@ -498,7 +498,7 @@ private fun ManualValueEntryDialog(
             )
         },
         confirmButton = {
-            TextButton(enabled = parsed != null, onClick = { onConfirm(parsed!!) }) {
+            TextButton(enabled = parsed != null, onClick = { parsed?.let(onConfirm) }) {
                 Text(stringResource(R.string.save))
             }
         },
@@ -682,7 +682,7 @@ private fun PresetBreakdownDialog(
                 enabled = isValid,
                 onClick = {
                     if (useTotalOverride) {
-                        onConfirm(totalFieldValue.toFloat(), emptyList())
+                        totalFieldValue.toFloatOrNull()?.let { onConfirm(it, emptyList()) }
                     } else {
                         val products = sortedProducts.mapIndexed { index, product ->
                             MealProductEntry(name = product.name, breadUnits = productAmounts[index])
