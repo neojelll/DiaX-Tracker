@@ -107,4 +107,8 @@
     <string name="glucose_range_hint">В диапазоне — зелёный. Выше на 3–4 ммоль/л — жёлтый, дальше — оранжевый. Ниже 3.9 — всегда красный, ниже 3.0 — тёмно-красный.</string>
 
     <string name="error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
+
+    <string name="backup_export_title">Экспортировать данные</string>
+    <string name="backup_export_success">Бэкап сохранён</string>
+    <string name="backup_export_failed">Не удалось сохранить бэкап</string>
 </resources>
