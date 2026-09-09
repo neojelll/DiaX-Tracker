@@ -1,8 +1,10 @@
 package com.neojelll.diaxtracker.ui.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
@@ -16,10 +18,14 @@ import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.sensor.PostMealScheduler
 import com.neojelll.diaxtracker.sensor.SensorReadingStore
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -54,6 +60,22 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _glucoseRange = MutableStateFlow(glucoseRangeStore.getRange())
     val glucoseRange: StateFlow<GlucoseRange> = _glucoseRange.asStateFlow()
+
+    private val _errorEvents = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+    val errorEvents: SharedFlow<Int> = _errorEvents.asSharedFlow()
+
+    private fun launchSafely(block: suspend () -> Unit) {
+        viewModelScope.launch {
+            try {
+                block()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Operation failed", e)
+                _errorEvents.tryEmit(R.string.error_generic)
+            }
+        }
+    }
 
     private val insulinTicker = flow {
         while (true) {
@@ -93,7 +115,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         photoPath: String?,
         createdAt: LocalDateTime
     ) {
-        viewModelScope.launch {
+        launchSafely {
             val sensorReading = sensorReadingNear(createdAt)
             val entryId = repository.insertWithProducts(
                 DiaryEntry(
@@ -128,7 +150,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateEntry(entry: DiaryEntry, mealProducts: List<DiaryEntryProduct>) {
-        viewModelScope.launch {
+        launchSafely {
             repository.updateWithProducts(entry, mealProducts)
             if (entry.shortInsulinDose != null || entry.longInsulinDose != null) {
                 PostMealScheduler.scheduleFollowUps(getApplication(), entry.id)
@@ -141,7 +163,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun getEntryProducts(entryId: Long): List<DiaryEntryProduct> = repository.getEntryProducts(entryId)
 
     fun deleteEntry(entry: DiaryEntry) {
-        viewModelScope.launch {
+        launchSafely {
             PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
             repository.delete(entry)
             PhotoStore.deletePhoto(entry.photoPath)
@@ -149,13 +171,13 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun saveMealPreset(id: Long, name: String, comment: String, products: List<MealPresetProduct>) {
-        viewModelScope.launch {
+        launchSafely {
             repository.saveMealPreset(MealPreset(id = id, name = name, comment = comment), products)
         }
     }
 
     fun deleteMealPreset(preset: MealPreset) {
-        viewModelScope.launch {
+        launchSafely {
             repository.deleteMealPreset(preset)
         }
     }
@@ -167,6 +189,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private companion object {
+        const val TAG = "DiaryViewModel"
         const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
         const val INSULIN_CHECK_INTERVAL_MILLIS = 30_000L
         const val SENSOR_FALLBACK_TOLERANCE_MINUTES = 10L

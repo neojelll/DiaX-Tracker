@@ -134,7 +134,7 @@ private fun GlucoseRangeEditorDialog(
         confirmButton = {
             TextButton(
                 enabled = isValid,
-                onClick = { onConfirm(low!!, high!!) }
+                onClick = { if (low != null && high != null) onConfirm(low, high) }
             ) {
                 Text(stringResource(R.string.save))
             }
