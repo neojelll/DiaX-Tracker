@@ -23,8 +23,9 @@ import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
-import com.neojelll.diaxtracker.ui.theme.AccentDark
+import com.neojelll.diaxtracker.ui.theme.AccentGreen
 import com.neojelll.diaxtracker.ui.theme.DangerRed
+import com.neojelll.diaxtracker.ui.theme.OnAccent
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import kotlinx.coroutines.launch
@@ -176,8 +177,9 @@ fun EditEntryScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (formState.isFillable) AccentDark else AccentDark.copy(alpha = 0.4f))
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(if (formState.isFillable) AccentGreen else AccentGreen.copy(alpha = 0.4f))
                         .then(
                             if (formState.isFillable) {
                                 Modifier.clickable {
@@ -226,13 +228,12 @@ fun EditEntryScreen(
                                     }
                                 }
                             } else Modifier
-                        )
-                        .padding(vertical = 10.dp),
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         stringResource(R.string.save_changes_button),
-                        color = Color.White,
+                        color = OnAccent,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }

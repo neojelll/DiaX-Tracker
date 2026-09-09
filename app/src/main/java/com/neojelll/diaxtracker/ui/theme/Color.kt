@@ -2,14 +2,20 @@ package com.neojelll.diaxtracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PageBackground = Color(0xFFF3F4F6)
-val CardBackground = Color(0xFFFFFFFF)
-val CardBorder = Color(0xFFE5E7EB)
-val FieldBackground = Color(0xFFF9FAFB)
+val PageBackgroundTop = Color(0xFF20301C)
+val PageBackgroundMid = Color(0xFF141414)
+val PageBackground = Color(0xFF111111)
 
-val AccentDark = Color(0xFF4B5563)
-val TextPrimary = Color(0xFF111827)
-val TextSecondary = Color(0xFF6B7280)
+val CardBackground = Color(0xFF1E1F1D)
+val CardBorder = Color(0x0FFFFFFF)
+val FieldBackground = Color(0xFF262825)
+val FieldBorder = Color(0x1AFFFFFF)
+
+val AccentGreen = Color(0xFFDBFF9A)
+val OnAccent = Color(0xFF16200C)
+val TextPrimary = Color(0xFFF6F6F6)
+val TextSecondary = Color(0x80F6F6F6)
+val TextTertiary = Color(0x66F6F6F6)
 
 val SproutGreen = Color(0xFF15803D)
 val DangerRed = Color(0xFFDC2626)
