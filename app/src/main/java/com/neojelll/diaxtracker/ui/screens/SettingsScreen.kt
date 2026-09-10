@@ -2,6 +2,7 @@ package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,10 +27,13 @@ import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: DiaryViewModel) {
-    val topBarState = rememberCollapsibleTopBarState()
+    val topBarState = rememberCollapsibleTopBarState(contentHeight = 40.dp)
     val snackbarHostState = remember { SnackbarHostState() }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { scaffoldPadding ->
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { scaffoldPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

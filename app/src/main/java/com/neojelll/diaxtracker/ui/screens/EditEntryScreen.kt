@@ -126,7 +126,7 @@ fun EditEntryScreen(
         )
     }
 
-    val topBarState = rememberCollapsibleTopBarState()
+    val topBarState = rememberCollapsibleTopBarState(contentHeight = 48.dp)
     val scrollState = rememberScrollState()
     val canScroll = scrollState.maxValue > 0 || !topBarState.isFullyExpanded
     val coroutineScope = rememberCoroutineScope()

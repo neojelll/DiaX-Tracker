@@ -40,7 +40,7 @@ private const val MAX_PRESET_PRODUCTS = 10
 @Composable
 fun MealPresetsScreen(viewModel: DiaryViewModel) {
     val mealPresets by viewModel.mealPresets.collectAsState()
-    val topBarState = rememberCollapsibleTopBarState()
+    val topBarState = rememberCollapsibleTopBarState(contentHeight = 48.dp)
     val listState = rememberLazyListState()
     val canScroll = listState.canScrollForward || listState.canScrollBackward || !topBarState.isFullyExpanded
     var editingPreset by remember { mutableStateOf<MealPresetWithProducts?>(null) }

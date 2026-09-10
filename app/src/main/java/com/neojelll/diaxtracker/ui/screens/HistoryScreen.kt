@@ -64,7 +64,7 @@ fun HistoryScreen(
 ) {
     val entries by viewModel.entries.collectAsState()
     val glucoseRange by viewModel.glucoseRange.collectAsState()
-    val topBarState = rememberCollapsibleTopBarState()
+    val topBarState = rememberCollapsibleTopBarState(contentHeight = 40.dp)
     val listState = rememberLazyListState()
     val canScroll = listState.canScrollForward || listState.canScrollBackward || !topBarState.isFullyExpanded
     val coroutineScope = rememberCoroutineScope()
