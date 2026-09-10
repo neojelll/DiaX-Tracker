@@ -1,11 +1,15 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +24,8 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
-import com.neojelll.diaxtracker.ui.theme.AccentDark
+import com.neojelll.diaxtracker.ui.theme.AccentGreen
+import com.neojelll.diaxtracker.ui.theme.OnAccent
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -118,7 +123,8 @@ fun AddEntryScreen(
                             color = TextSecondary
                         )
                     }
-                }
+                },
+                actions = { GreetingBadge() }
             )
 
             Column(
@@ -146,8 +152,9 @@ fun AddEntryScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (formState.isFillable) AccentDark else AccentDark.copy(alpha = 0.4f))
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(if (formState.isFillable) AccentGreen else AccentGreen.copy(alpha = 0.4f))
                         .then(
                             if (formState.isFillable) {
                                 Modifier.clickable {
@@ -173,17 +180,35 @@ fun AddEntryScreen(
                                     showSuccessSnackbar = true
                                 }
                             } else Modifier
-                        )
-                        .padding(vertical = 10.dp),
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         stringResource(R.string.save_entry_button),
-                        color = Color.White,
+                        color = OnAccent,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun GreetingBadge() {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(AccentGreen.copy(alpha = 0.12f))
+            .border(1.dp, AccentGreen.copy(alpha = 0.28f), CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Schedule,
+            contentDescription = null,
+            tint = AccentGreen,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

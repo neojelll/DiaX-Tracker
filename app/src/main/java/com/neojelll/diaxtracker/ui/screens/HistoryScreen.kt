@@ -37,7 +37,6 @@ import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.CardBorder
-import com.neojelll.diaxtracker.ui.theme.FieldBackground
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
 import com.neojelll.diaxtracker.ui.theme.card
@@ -65,7 +64,7 @@ fun HistoryScreen(
 ) {
     val entries by viewModel.entries.collectAsState()
     val glucoseRange by viewModel.glucoseRange.collectAsState()
-    val topBarState = rememberCollapsibleTopBarState()
+    val topBarState = rememberCollapsibleTopBarState(contentHeight = 40.dp)
     val listState = rememberLazyListState()
     val canScroll = listState.canScrollForward || listState.canScrollBackward || !topBarState.isFullyExpanded
     val coroutineScope = rememberCoroutineScope()
@@ -471,8 +470,7 @@ private fun MealBreakdownBox(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(FieldBackground)
+            .fieldBox()
             .clickable {
                 expanded = !expanded
                 if (expanded && products == null) {

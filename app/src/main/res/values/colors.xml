@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="deep_forest">#FF073B22</color>
-    <color name="moss_green">#FF477A42</color>
-    <color name="sprout_green">#FFA9D96B</color>
-    <color name="pale_lime">#FFD5F58A</color>
+    <color name="page_black">#FF0E0E0E</color>
+    <color name="card_dark">#FF1E1F1D</color>
+    <color name="accent_lime">#FFDBFF9A</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

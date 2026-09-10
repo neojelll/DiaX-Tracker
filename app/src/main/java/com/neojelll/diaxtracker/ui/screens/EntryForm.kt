@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
@@ -56,8 +57,10 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import com.neojelll.diaxtracker.photo.PhotoStore
-import com.neojelll.diaxtracker.ui.theme.AccentDark
+import com.neojelll.diaxtracker.ui.theme.AccentGreen
 import com.neojelll.diaxtracker.ui.theme.CardBorder
+import com.neojelll.diaxtracker.ui.theme.FieldBorder
+import com.neojelll.diaxtracker.ui.theme.OnAccent
 import com.neojelll.diaxtracker.ui.theme.SproutGreen
 import com.neojelll.diaxtracker.ui.theme.TextPrimary
 import com.neojelll.diaxtracker.ui.theme.TextSecondary
@@ -421,32 +424,28 @@ private fun StepperField(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = TextPrimary,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
+            modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Row(
-            modifier = Modifier
-                .fieldBox(RoundedCornerShape(6.dp))
-                .height(32.dp)
-                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(9.dp)
         ) {
-            StepperIcon(icon = Icons.Filled.Remove, onClick = { adjust(-step) })
+            StepperIcon(icon = Icons.Filled.Remove, onClick = { adjust(-step) }, filled = false)
             Text(
                 text = value.ifBlank { "—" },
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (value.isBlank()) TextSecondary else TextPrimary,
+                style = MaterialTheme.typography.titleMedium,
+                color = if ((value.toFloatOrNull() ?: 0f) > 0f) AccentGreen else TextPrimary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .widthIn(min = 28.dp)
+                    .widthIn(min = 40.dp)
                     .clickable { showManualDialog = true }
             )
-            StepperIcon(icon = Icons.Filled.Add, onClick = { adjust(step) })
+            StepperIcon(icon = Icons.Filled.Add, onClick = { adjust(step) }, filled = true)
         }
     }
 
@@ -464,14 +463,27 @@ private fun StepperField(
 }
 
 @Composable
-private fun StepperIcon(icon: ImageVector, onClick: () -> Unit) {
+private fun StepperIcon(icon: ImageVector, onClick: () -> Unit, filled: Boolean) {
     Box(
         modifier = Modifier
-            .size(20.dp)
+            .size(30.dp)
+            .clip(CircleShape)
+            .then(
+                if (filled) {
+                    Modifier.background(AccentGreen)
+                } else {
+                    Modifier.border(1.dp, FieldBorder, CircleShape)
+                }
+            )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(icon, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(12.dp))
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = if (filled) OnAccent else TextSecondary,
+            modifier = Modifier.size(16.dp)
+        )
     }
 }
 
@@ -749,15 +761,15 @@ private fun OutlinedAccentButton(
         modifier = modifier
             .height(38.dp)
             .clip(RoundedCornerShape(8.dp))
-            .border(1.dp, AccentDark, RoundedCornerShape(8.dp))
+            .border(1.dp, AccentGreen, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = AccentDark, modifier = Modifier.size(14.dp))
+        Icon(icon, contentDescription = null, tint = AccentGreen, modifier = Modifier.size(14.dp))
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = AccentDark)
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = AccentGreen)
     }
 }
 
@@ -771,13 +783,13 @@ private fun FilledAccentButton(
         modifier = modifier
             .height(38.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(AccentDark)
+            .background(AccentGreen)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = OnAccent)
     }
 }
 

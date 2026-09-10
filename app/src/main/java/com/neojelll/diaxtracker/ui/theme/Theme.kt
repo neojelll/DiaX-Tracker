@@ -1,17 +1,17 @@
 package com.neojelll.diaxtracker.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DiaXTrackerColorScheme = lightColorScheme(
-    primary = AccentDark,
-    onPrimary = Color.White,
+private val DiaXTrackerColorScheme = darkColorScheme(
+    primary = AccentGreen,
+    onPrimary = OnAccent,
     primaryContainer = FieldBackground,
     onPrimaryContainer = TextPrimary,
-    secondary = AccentDark,
-    onSecondary = Color.White,
+    secondary = AccentGreen,
+    onSecondary = OnAccent,
     secondaryContainer = FieldBackground,
     onSecondaryContainer = TextPrimary,
     tertiary = WarningOrange,
