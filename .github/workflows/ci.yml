@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +28,21 @@ jobs:
 
       - name: Lint
         run: ./gradlew lintDebug
+
+      - name: Coverage report
+        run: ./gradlew jacocoTestReport
+
+      - name: Update coverage badge
+        run: python3 .github/scripts/generate_coverage_badge.py
+
+      - name: Commit coverage badge
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/badges/coverage.json
+          git diff --staged --quiet || git commit -m "chore: update coverage badge"
+          git push
 
       - name: Upload test results
         if: always()
