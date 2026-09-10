@@ -144,5 +144,14 @@ abstract class DiaryDatabase : RoomDatabase() {
                 ).build().also { INSTANCE = it }
             }
         }
+
+        // Used before swapping the underlying DB file (e.g. restoring a backup) so the next
+        // getDatabase() call opens a fresh connection instead of one pointing at stale state.
+        fun closeAndResetInstance() {
+            synchronized(this) {
+                INSTANCE?.close()
+                INSTANCE = null
+            }
+        }
     }
 }
