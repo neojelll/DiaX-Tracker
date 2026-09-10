@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.ui.components.BackupExportRow
+import com.neojelll.diaxtracker.ui.components.BackupImportRow
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
 import com.neojelll.diaxtracker.ui.components.GlucoseRangeSettingRow
 import com.neojelll.diaxtracker.ui.components.LanguageSettingRow
@@ -53,6 +54,7 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
                 LanguageSettingRow()
                 GlucoseRangeSettingRow(viewModel = viewModel)
                 BackupExportRow(snackbarHostState = snackbarHostState)
+                BackupImportRow(snackbarHostState = snackbarHostState)
             }
         }
     }

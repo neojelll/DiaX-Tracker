@@ -111,4 +111,10 @@
     <string name="backup_export_title">Экспортировать данные</string>
     <string name="backup_export_success">Бэкап сохранён</string>
     <string name="backup_export_failed">Не удалось сохранить бэкап</string>
+    <string name="backup_import_title">Импортировать данные</string>
+    <string name="backup_import_confirm_title">Восстановить из бэкапа?</string>
+    <string name="backup_import_confirm_text">Это действие заменит ВСЕ текущие данные данными из выбранного файла. Отменить это будет нельзя.</string>
+    <string name="backup_import_confirm_action">Восстановить</string>
+    <string name="backup_import_invalid_file">Файл повреждён или не является бэкапом</string>
+    <string name="backup_import_failed">Не удалось восстановить данные</string>
 </resources>

@@ -7,14 +7,16 @@ import com.neojelll.diaxtracker.data.DiaryDatabase
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object BackupExporter {
     private const val TAG = "BackupExporter"
     private const val DB_NAME = "diary_database"
     private const val PHOTOS_DIR_NAME = "entry_photos"
 
-    suspend fun export(context: Context, destination: Uri): Boolean {
-        return try {
+    suspend fun export(context: Context, destination: Uri): Boolean = withContext(Dispatchers.IO) {
+        try {
             // Flushes the write-ahead log into the main DB file so it alone is a complete,
             // self-contained snapshot inside the zip (no separate -wal/-shm to lose track of).
             DiaryDatabase.getDatabase(context).openHelper.writableDatabase
@@ -22,7 +24,7 @@ object BackupExporter {
 
             val dbFile = context.getDatabasePath(DB_NAME)
             val photosDir = File(context.filesDir, PHOTOS_DIR_NAME)
-            val stream = context.contentResolver.openOutputStream(destination) ?: return false
+            val stream = context.contentResolver.openOutputStream(destination) ?: return@withContext false
 
             stream.use { out ->
                 ZipOutputStream(out).use { zip ->
