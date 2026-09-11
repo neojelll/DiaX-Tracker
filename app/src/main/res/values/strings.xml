@@ -117,4 +117,7 @@
     <string name="backup_import_confirm_action">Восстановить</string>
     <string name="backup_import_invalid_file">Файл повреждён или не является бэкапом</string>
     <string name="backup_import_failed">Не удалось восстановить данные</string>
+
+    <string name="yesterday_summary_title">Вчера в это время</string>
+    <string name="yesterday_summary_dismiss">Скрыть</string>
 </resources>

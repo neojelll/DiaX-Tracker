@@ -115,4 +115,7 @@
     <string name="backup_import_confirm_action">Restore</string>
     <string name="backup_import_invalid_file">File is corrupted or not a valid backup</string>
     <string name="backup_import_failed">Failed to restore data</string>
+
+    <string name="yesterday_summary_title">Yesterday at this time</string>
+    <string name="yesterday_summary_dismiss">Dismiss</string>
 </resources>

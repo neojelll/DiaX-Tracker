@@ -23,6 +23,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.ui.components.CollapsibleTopBar
+import com.neojelll.diaxtracker.ui.components.YesterdaySummaryCard
 import com.neojelll.diaxtracker.ui.components.rememberCollapsibleTopBarState
 import com.neojelll.diaxtracker.ui.theme.AccentGreen
 import com.neojelll.diaxtracker.ui.theme.OnAccent
@@ -51,6 +52,13 @@ fun AddEntryScreen(
     val todayCount = remember(entries) {
         val today = LocalDate.now()
         entries.count { it.createdAt.toLocalDate() == today }
+    }
+
+    val yesterdaySameTimeEntries = remember(entries) {
+        val now = LocalDateTime.now()
+        val from = now.minusHours(25)
+        val to = now.minusHours(23)
+        entries.filter { it.createdAt in from..to }.sortedBy { it.createdAt }
     }
 
     val greetingRes = remember {
@@ -135,6 +143,8 @@ fun AddEntryScreen(
                     .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                YesterdaySummaryCard(entries = yesterdaySameTimeEntries)
+
                 if (!sensorAvailable) {
                     SensorWarningBanner()
                 }
