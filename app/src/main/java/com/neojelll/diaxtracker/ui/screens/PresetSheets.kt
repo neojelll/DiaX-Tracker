@@ -1,6 +1,7 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,17 +39,17 @@ import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.MealPresetProduct
 import com.neojelll.diaxtracker.ui.components.BottomSheetSurface
+import com.neojelll.diaxtracker.ui.components.KickerLabel
 import com.neojelll.diaxtracker.ui.components.OutlinedPillButton
 import com.neojelll.diaxtracker.ui.components.PrimaryPillButton
-import com.neojelll.diaxtracker.ui.components.RoundIconButton
 import com.neojelll.diaxtracker.ui.components.SheetHandle
 import com.neojelll.diaxtracker.ui.components.SheetHeader
 import com.neojelll.diaxtracker.ui.components.SheetScrollColumn
+import com.neojelll.diaxtracker.ui.theme.BorderLight
 import com.neojelll.diaxtracker.ui.theme.CardDivider
 import com.neojelll.diaxtracker.ui.theme.FieldTile
 import com.neojelll.diaxtracker.ui.theme.GlucoIcons
 import com.neojelll.diaxtracker.ui.theme.Ink
-import com.neojelll.diaxtracker.ui.theme.Kicker
 import com.neojelll.diaxtracker.ui.theme.PlaceholderText
 import com.neojelll.diaxtracker.ui.theme.TextLabel
 import com.neojelll.diaxtracker.ui.theme.TextTertiary
@@ -79,7 +82,7 @@ fun PresetDetailSheet(
                     Text(stringResource(R.string.bread_units_value_format, formatAmount(preset.totalBreadUnits)), fontSize = 19.sp, color = Ink)
                 }
 
-                Text(stringResource(R.string.composition_kicker), style = Kicker, color = TextLabel, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
+                KickerLabel(stringResource(R.string.composition_kicker), modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
                 preset.products.sortedBy { it.sortOrder }.forEach { product ->
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = 11.dp),
@@ -160,11 +163,11 @@ fun PresetEditorSheet(
                 onClose = onClose
             )
             SheetScrollColumn {
-                Text(stringResource(R.string.meal_preset_name_kicker), style = Kicker, color = TextLabel, modifier = Modifier.padding(bottom = 8.dp))
+                KickerLabel(stringResource(R.string.meal_preset_name_kicker), modifier = Modifier.padding(bottom = 8.dp))
                 PlainTile(value = name, onValueChange = { name = it }, placeholder = stringResource(R.string.meal_preset_name_placeholder))
 
                 Row(Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(stringResource(R.string.products_kicker), style = Kicker, color = TextLabel)
+                    KickerLabel(stringResource(R.string.products_kicker))
                     Text(stringResource(R.string.bread_units_short_label), fontSize = 11.sp, color = TextTertiary)
                 }
                 products.forEachIndexed { index, draft ->
@@ -177,7 +180,8 @@ fun PresetEditorSheet(
                             value = draft.name,
                             onValueChange = { products[index] = draft.copy(name = it) },
                             placeholder = stringResource(R.string.meal_preset_product_name_placeholder),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            verticalPadding = 12.dp
                         )
                         PlainTile(
                             value = draft.amount,
@@ -185,15 +189,21 @@ fun PresetEditorSheet(
                             placeholder = "0",
                             keyboardType = KeyboardType.Decimal,
                             modifier = Modifier.width(64.dp),
+                            horizontalPadding = 8.dp,
+                            verticalPadding = 12.dp,
                             centered = true
                         )
-                        RoundIconButton(
-                            icon = GlucoIcons.Close,
-                            contentDescription = stringResource(R.string.remove_product),
-                            onClick = { if (products.size > 1) products.removeAt(index) },
-                            size = 34.dp,
-                            background = Color.White
-                        )
+                        Box(
+                            Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .border(1.dp, BorderLight, CircleShape)
+                                .clickable { products.removeAt(index) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(GlucoIcons.Minus, contentDescription = stringResource(R.string.remove_product), tint = TextLabel, modifier = Modifier.size(13.dp))
+                        }
                     }
                 }
 
@@ -205,7 +215,12 @@ fun PresetEditorSheet(
                         .padding(top = 2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    RoundIconButton(icon = GlucoIcons.Plus, contentDescription = null, onClick = { }, size = 26.dp)
+                    Box(
+                        Modifier.size(26.dp).clip(CircleShape).background(FieldTile),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(GlucoIcons.Plus, contentDescription = null, tint = Ink, modifier = Modifier.size(13.dp))
+                    }
                     Text(stringResource(R.string.add_product), fontSize = 13.sp, color = Ink, modifier = Modifier.padding(start = 8.dp))
                 }
 
@@ -217,7 +232,7 @@ fun PresetEditorSheet(
                     Text(stringResource(R.string.bread_units_value_format, formatAmount(total)), fontSize = 19.sp, color = Ink)
                 }
 
-                Text(stringResource(R.string.comment_kicker), style = Kicker, color = TextLabel, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
+                KickerLabel(stringResource(R.string.comment_kicker), modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
                 PlainTile(
                     value = comment,
                     onValueChange = { comment = it },
@@ -266,13 +281,15 @@ private fun PlainTile(
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
     minLines: Int = 1,
-    centered: Boolean = false
+    centered: Boolean = false,
+    horizontalPadding: androidx.compose.ui.unit.Dp = 14.dp,
+    verticalPadding: androidx.compose.ui.unit.Dp = 13.dp
 ) {
     Box(
         modifier
             .clip(RoundedCornerShape(14.dp))
             .background(FieldTile)
-            .padding(horizontal = 14.dp, vertical = 13.dp),
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         contentAlignment = if (centered) Alignment.Center else Alignment.CenterStart
     ) {
         if (value.isEmpty()) {

@@ -53,7 +53,6 @@ import com.neojelll.diaxtracker.ui.theme.CarouselCubeBorder
 import com.neojelll.diaxtracker.ui.theme.FieldTile
 import com.neojelll.diaxtracker.ui.theme.GlucoIcons
 import com.neojelll.diaxtracker.ui.theme.Ink
-import com.neojelll.diaxtracker.ui.theme.Kicker
 import com.neojelll.diaxtracker.ui.theme.PageBackground
 import com.neojelll.diaxtracker.ui.theme.PlaceholderText
 import com.neojelll.diaxtracker.ui.theme.TextLabel
@@ -105,7 +104,7 @@ fun MealFoodField(
             var manualXe by remember { mutableStateOf("") }
             Column(Modifier.padding(top = 12.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(stringResource(R.string.presets_kicker), style = Kicker, color = TextLabel)
+                    KickerLabel(stringResource(R.string.presets_kicker))
                     Text(
                         pluralStringResource(R.plurals.preset_count, mealPresets.size, mealPresets.size),
                         fontSize = 11.sp,
@@ -129,12 +128,7 @@ fun MealFoodField(
 
                 Box(Modifier.fillMaxWidth().padding(vertical = 14.dp).height(1.dp).background(CardDivider))
 
-                Text(
-                    stringResource(R.string.xe_no_preset_kicker),
-                    style = Kicker,
-                    color = TextLabel,
-                    modifier = Modifier.padding(bottom = 9.dp)
-                )
+                KickerLabel(stringResource(R.string.xe_no_preset_kicker), modifier = Modifier.padding(bottom = 9.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Box(
                         Modifier

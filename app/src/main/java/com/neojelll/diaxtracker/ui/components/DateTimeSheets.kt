@@ -229,7 +229,7 @@ private fun WheelColumn(
     }
 
     Column(modifier) {
-        Text(label, style = Kicker, color = com.neojelll.diaxtracker.ui.theme.TextLabel, modifier = Modifier.padding(bottom = 8.dp))
+        KickerLabel(label, modifier = Modifier.padding(bottom = 8.dp))
         LazyColumn(
             modifier = Modifier
                 .height(184.dp)

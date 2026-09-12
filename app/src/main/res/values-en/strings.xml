@@ -24,6 +24,7 @@
     <string name="mmol_unit">mmol/L</string>
     <string name="units_short">u</string>
     <string name="blood_sugar_field_label">Blood sugar level</string>
+    <string name="blood_sugar_kicker">Blood sugar, mmol/L</string>
     <string name="short_insulin_tile_label">Fast-acting insulin</string>
     <string name="long_insulin_tile_label">Long-acting insulin</string>
     <string name="food_section_label">Food</string>

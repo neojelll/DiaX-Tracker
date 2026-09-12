@@ -26,6 +26,7 @@
     <string name="mmol_unit">ммоль/л</string>
     <string name="units_short">ед</string>
     <string name="blood_sugar_field_label">Уровень сахара в крови</string>
+    <string name="blood_sugar_kicker">Уровень сахара, ммоль/л</string>
     <string name="short_insulin_tile_label">Короткий инсулин</string>
     <string name="long_insulin_tile_label">Длинный инсулин</string>
     <string name="food_section_label">Еда</string>

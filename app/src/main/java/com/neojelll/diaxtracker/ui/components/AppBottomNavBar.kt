@@ -60,13 +60,14 @@ fun AppBottomNavBar(currentTab: AppTab, onSelect: (AppTab) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(18.dp))
+                    .background(if (selected) Ink else Color.Transparent)
                     .clickable { onSelect(item.tab) }
                     .padding(vertical = 11.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                Icon(item.icon, contentDescription = label, tint = if (selected) Ink else TextLabel)
-                Text(label, style = NavLabel, color = if (selected) Ink else TextLabel)
+                Icon(item.icon, contentDescription = label, tint = if (selected) Color.White else TextLabel)
+                Text(label, style = NavLabel, color = if (selected) Color.White else TextLabel)
             }
         }
     }

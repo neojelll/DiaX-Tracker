@@ -35,8 +35,10 @@ import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.ui.components.BottomSheetSurface
 import com.neojelll.diaxtracker.ui.components.DateSheet
 import com.neojelll.diaxtracker.ui.components.DateTimeButtonsRow
+import com.neojelll.diaxtracker.ui.components.KickerLabel
 import com.neojelll.diaxtracker.ui.components.MealFoodField
 import com.neojelll.diaxtracker.ui.components.OutlinedPillButton
+import com.neojelll.diaxtracker.ui.components.PhotoPickerButton
 import com.neojelll.diaxtracker.ui.components.PrimaryPillButton
 import com.neojelll.diaxtracker.ui.components.SheetBackdrop
 import com.neojelll.diaxtracker.ui.components.SheetHandle
@@ -46,7 +48,6 @@ import com.neojelll.diaxtracker.ui.components.TimeSheet
 import com.neojelll.diaxtracker.ui.theme.FieldTile
 import com.neojelll.diaxtracker.ui.theme.GlucoIcons
 import com.neojelll.diaxtracker.ui.theme.Ink
-import com.neojelll.diaxtracker.ui.theme.Kicker
 import com.neojelll.diaxtracker.ui.theme.TextLabel
 import com.neojelll.diaxtracker.ui.theme.TextTertiary
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -117,7 +118,7 @@ fun EditEntrySheet(
 
                 Row(Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(GlucoIcons.Droplet, contentDescription = null, tint = TextLabel, modifier = Modifier.padding(end = 7.dp).size(14.dp))
-                    Text(stringResource(R.string.blood_sugar_field_label), style = Kicker, color = TextLabel)
+                    KickerLabel(stringResource(R.string.blood_sugar_kicker))
                 }
                 PlainFieldTile(
                     value = formState.bloodSugar,
@@ -126,31 +127,16 @@ fun EditEntrySheet(
 
                 Row(Modifier.fillMaxWidth().padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                     Column(Modifier.weight(1f)) {
-                        Text(
-                            stringResource(R.string.short_insulin_stat_label),
-                            style = Kicker,
-                            color = TextLabel,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
+                        KickerLabel(stringResource(R.string.short_insulin_stat_label), modifier = Modifier.padding(bottom = 8.dp))
                         PlainFieldTile(value = formState.shortInsulinDose, onValueChange = { formState = formState.copy(shortInsulinDose = it) })
                     }
                     Column(Modifier.weight(1f)) {
-                        Text(
-                            stringResource(R.string.long_insulin_stat_label),
-                            style = Kicker,
-                            color = TextLabel,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
+                        KickerLabel(stringResource(R.string.long_insulin_stat_label), modifier = Modifier.padding(bottom = 8.dp))
                         PlainFieldTile(value = formState.longInsulinDose, onValueChange = { formState = formState.copy(longInsulinDose = it) })
                     }
                 }
 
-                Text(
-                    stringResource(R.string.food_section_label),
-                    style = Kicker,
-                    color = TextLabel,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                )
+                KickerLabel(stringResource(R.string.food_section_label), modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
                 MealFoodField(
                     label = formState.foodLabel,
                     placeholder = stringResource(R.string.food_placeholder_edit),
@@ -176,12 +162,7 @@ fun EditEntrySheet(
                     onCreatePreset = { }
                 )
 
-                Text(
-                    stringResource(R.string.comment_kicker),
-                    style = Kicker,
-                    color = TextLabel,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                )
+                KickerLabel(stringResource(R.string.comment_kicker), modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -206,11 +187,10 @@ fun EditEntrySheet(
                     )
                 }
 
-                OutlinedPillButton(
-                    text = stringResource(R.string.add_photo_short),
-                    leadingIcon = GlucoIcons.Camera,
-                    onClick = { },
-                    modifier = Modifier.fillMaxWidth().padding(top = 14.dp)
+                PhotoPickerButton(
+                    photoPath = formState.photoPath,
+                    onPhotoPicked = { formState = formState.copy(photoPath = it) },
+                    modifier = Modifier.padding(top = 14.dp)
                 )
 
                 PrimaryPillButton(

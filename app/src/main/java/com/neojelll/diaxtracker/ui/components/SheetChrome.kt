@@ -71,11 +71,12 @@ fun BottomSheetSurface(
     val screenHeightDp = LocalConfiguration.current.screenHeightDp
     AnimatedVisibility(
         visible = true,
+        modifier = modifier,
         enter = slideInVertically(tween(220)) { it } + fadeIn(tween(220)),
         exit = slideOutVertically(tween(220)) { it } + fadeOut(tween(160))
     ) {
         Column(
-            modifier
+            Modifier
                 .fillMaxWidth()
                 .heightIn(max = (maxHeightFraction * screenHeightDp).dp)
                 .clip(SheetShape)
