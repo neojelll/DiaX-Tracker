@@ -16,8 +16,6 @@ import com.neojelll.diaxtracker.data.MealPresetProduct
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.photo.PhotoStore
-import com.neojelll.diaxtracker.sensor.PostMealScheduler
-import com.neojelll.diaxtracker.sensor.SensorReadingStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -40,7 +38,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         DiaryDatabase.getDatabase(application).mealPresetDao(),
         DiaryDatabase.getDatabase(application).sensorReadingLogDao()
     )
-    private val sensorReadingStore = SensorReadingStore(application)
     private val glucoseRangeStore = GlucoseRangeStore(application)
 
     val entries: StateFlow<List<DiaryEntry>> = repository.allEntries.stateIn(
@@ -54,9 +51,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList()
     )
-
-    private val _sensorAvailable = MutableStateFlow(sensorReadingStore.getLatestReading() != null)
-    val sensorAvailable: StateFlow<Boolean> = _sensorAvailable.asStateFlow()
 
     private val _glucoseRange = MutableStateFlow(glucoseRangeStore.getRange())
     val glucoseRange: StateFlow<GlucoseRange> = _glucoseRange.asStateFlow()
@@ -84,25 +78,16 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    val activeInsulinEntries: StateFlow<List<DiaryEntry>> = combine(entries, insulinTicker) { list, _ ->
+    val activeInsulinEntry: StateFlow<DiaryEntry?> = combine(entries, insulinTicker) { list, _ ->
         val now = LocalDateTime.now()
         list
             .filter { it.shortInsulinDose != null && Duration.between(it.createdAt, now) < Duration.ofHours(4) }
-            .sortedByDescending { it.createdAt }
+            .maxByOrNull { it.createdAt }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = emptyList()
+        initialValue = null
     )
-
-    init {
-        viewModelScope.launch {
-            while (true) {
-                _sensorAvailable.value = sensorReadingStore.getLatestReading() != null
-                delay(SENSOR_POLL_INTERVAL_MILLIS)
-            }
-        }
-    }
 
     fun addEntry(
         bloodSugar: Float?,
@@ -117,7 +102,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         launchSafely {
             val sensorReading = sensorReadingNear(createdAt)
-            val entryId = repository.insertWithProducts(
+            repository.insertWithProducts(
                 DiaryEntry(
                     bloodSugar = bloodSugar ?: sensorReading,
                     sugarSource = when {
@@ -135,9 +120,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                 ),
                 mealProducts
             )
-            if (shortInsulinDose != null || longInsulinDose != null) {
-                PostMealScheduler.scheduleFollowUps(getApplication(), entryId)
-            }
         }
     }
 
@@ -152,11 +134,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun updateEntry(entry: DiaryEntry, mealProducts: List<DiaryEntryProduct>) {
         launchSafely {
             repository.updateWithProducts(entry, mealProducts)
-            if (entry.shortInsulinDose != null || entry.longInsulinDose != null) {
-                PostMealScheduler.scheduleFollowUps(getApplication(), entry.id)
-            } else {
-                PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
-            }
         }
     }
 
@@ -164,7 +141,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteEntry(entry: DiaryEntry) {
         launchSafely {
-            PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
             repository.delete(entry)
             PhotoStore.deletePhoto(entry.photoPath)
         }
@@ -190,7 +166,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     private companion object {
         const val TAG = "DiaryViewModel"
-        const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
         const val INSULIN_CHECK_INTERVAL_MILLIS = 30_000L
         const val SENSOR_FALLBACK_TOLERANCE_MINUTES = 10L
     }

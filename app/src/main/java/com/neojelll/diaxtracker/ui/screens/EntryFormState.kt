@@ -3,7 +3,16 @@ package com.neojelll.diaxtracker.ui.screens
 import java.time.LocalDate
 import java.time.LocalTime
 
-internal data class MealProductEntry(val name: String, val breadUnits: String)
+internal fun formatAmount(value: Float): String =
+    if (value == value.toInt().toFloat()) value.toInt().toString() else value.toString()
+
+data class MealProductEntry(val name: String, val breadUnits: String)
+
+data class PendingFoodPick(
+    val mealLabel: String,
+    val breadUnits: Float,
+    val products: List<MealProductEntry>
+)
 
 internal data class EntryFormState(
     val date: LocalDate = LocalDate.now(),

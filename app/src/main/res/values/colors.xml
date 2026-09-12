@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="page_black">#FF0E0E0E</color>
-    <color name="card_dark">#FF1E1F1D</color>
-    <color name="accent_lime">#FFDBFF9A</color>
+    <color name="page_background">#FFF7F6F5</color>
+    <color name="card_surface">#FFFFFFFF</color>
+    <color name="ink">#FF0D0D0D</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

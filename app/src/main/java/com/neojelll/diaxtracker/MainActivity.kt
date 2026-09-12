@@ -6,10 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.core.view.WindowCompat
-import androidx.navigation.compose.rememberNavController
 import androidx.work.WorkManager
 import com.neojelll.diaxtracker.sensor.SensorForegroundService
-import com.neojelll.diaxtracker.ui.navigation.NavGraph
+import com.neojelll.diaxtracker.ui.navigation.AppRoot
 import com.neojelll.diaxtracker.ui.theme.DiaXTrackerTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,8 +27,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             DiaXTrackerTheme {
                 Surface {
-                    val navController = rememberNavController()
-                    NavGraph(navController = navController)
+                    AppRoot()
                 }
             }
         }
