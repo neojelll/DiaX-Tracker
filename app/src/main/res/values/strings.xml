@@ -1,120 +1,194 @@
 <resources>
     <string name="app_name">DiaX-Tracker</string>
 
-    <string name="nav_entry">Запись</string>
-    <string name="nav_meal_presets">Приёмы</string>
+    <string name="nav_home">Главная</string>
+    <string name="nav_food">Еда</string>
     <string name="nav_history">История</string>
     <string name="nav_settings">Настройки</string>
 
-    <string name="add_entry_title">Добавить запись</string>
-    <string name="greeting_morning">Доброе утро!</string>
-    <string name="greeting_afternoon">Добрый день!</string>
-    <string name="greeting_evening">Добрый вечер!</string>
-    <string name="greeting_night">Доброй ночи!</string>
-    <string name="entry_saved_snackbar">Запись сохранена!</string>
-    <string name="save_entry_button">Сохранить запись</string>
+    <string name="cancel">Отмена</string>
+    <string name="save">Сохранить</string>
+    <string name="delete">Удалить</string>
+    <string name="done">Готово</string>
+    <string name="close">Закрыть</string>
+    <string name="ok">ОК</string>
 
+    <string name="greeting">Привет!</string>
     <plurals name="today_entries_count">
         <item quantity="one">Сегодня у тебя %d запись</item>
         <item quantity="few">Сегодня у тебя %d записи</item>
         <item quantity="many">Сегодня у тебя %d записей</item>
         <item quantity="other">Сегодня у тебя %d записей</item>
     </plurals>
-
-    <string name="edit_entry_title">Редактирование</string>
-    <string name="back">Назад</string>
-    <string name="delete">Удалить</string>
-    <string name="delete_entry_confirm_title">Удалить запись?</string>
-    <string name="delete_entry_confirm_text">Это действие нельзя отменить.</string>
-    <string name="cancel">Отмена</string>
-    <string name="ok">ОК</string>
-    <string name="save_changes_button">Сохранить изменения</string>
-
-    <string name="sensor_warning">Нет свежих данных с датчика — сахар нужно ввести вручную</string>
-    <string name="insulin_active_banner">Короткий инсулин ещё действует — осталось %1$s</string>
-    <string name="insulin_active_banner_multi_title">Несколько доз короткого инсулина ещё активны</string>
-    <string name="insulin_active_dose_line">%1$s ед. — осталось %2$s</string>
-    <string name="duration_hours_minutes">%1$d ч %2$d мин</string>
-    <string name="duration_minutes">%1$d мин</string>
+    <string name="notifications_cd">Уведомления</string>
     <string name="entry_date_label">Дата</string>
     <string name="entry_time_label">Время</string>
-    <string name="blood_sugar_label">Уровень сахара (ммоль/л)</string>
-    <string name="blood_sugar_placeholder">Например: 5.6</string>
-    <string name="bread_units_label">Хлебные единицы (ХЕ)</string>
-    <string name="bread_units_placeholder">Например: 3</string>
-    <string name="short_insulin_label">Короткий инсулин (ед.)</string>
-    <string name="short_insulin_placeholder">Например: 4</string>
-    <string name="long_insulin_label">Длинный инсулин (ед.)</string>
-    <string name="long_insulin_placeholder">Например: 10</string>
-    <string name="comment_label">Комментарий</string>
-    <string name="comment_placeholder">Дополнительный комментарий...</string>
-    <string name="add_photo">Добавить фото</string>
+    <string name="mmol_unit">ммоль/л</string>
+    <string name="units_short">ед</string>
+    <string name="blood_sugar_field_label">Уровень сахара в крови</string>
+    <string name="short_insulin_tile_label">Короткий инсулин</string>
+    <string name="long_insulin_tile_label">Длинный инсулин</string>
+    <string name="food_section_label">Еда</string>
+    <plurals name="preset_count">
+        <item quantity="one">%d пресет</item>
+        <item quantity="few">%d пресета</item>
+        <item quantity="many">%d пресетов</item>
+        <item quantity="other">%d пресетов</item>
+    </plurals>
+    <string name="food_placeholder_home">Что ты ел</string>
+    <string name="food_placeholder_edit">Выбрать приём пищи</string>
+    <string name="meal_label_with_preset_format">%1$s · %2$s ХЕ</string>
+    <string name="meal_label_manual_format">%1$s ХЕ (вручную)</string>
+    <string name="presets_kicker">Пресеты</string>
+    <string name="create_preset_label">Создать\nпресет</string>
+    <string name="xe_no_preset_kicker">Кол-во ХЕ без пресета</string>
+    <string name="xe_enter_button">Ввести</string>
+    <string name="add_details_title">Добавить детали</string>
+    <string name="add_details_hint">комментарий, фото — необязательно</string>
+    <string name="note_placeholder">Самочувствие, активность…</string>
     <string name="add_photo_short">Фото</string>
     <string name="remove_photo">Удалить фото</string>
     <string name="entry_photo">Фото записи</string>
+    <string name="save_entry_button">Сохранить запись</string>
+    <string name="entry_saved_snackbar">Запись сохранена!</string>
 
-    <string name="history_title">История записей</string>
-    <string name="today_label">Сегодня</string>
-    <string name="yesterday_label">Вчера</string>
-    <string name="no_entries_title">Записей пока нет</string>
-    <string name="no_entries_subtitle">Добавьте первую запись</string>
-    <string name="history_search_placeholder">Поиск по комментарию и еде…</string>
-    <string name="clear_search">Очистить поиск</string>
-    <string name="search_by_date">Найти по дате</string>
-    <string name="no_search_results">Ничего не найдено</string>
-    <string name="sugar_label">Сахар</string>
-    <string name="sugar_value_format">%1$s ммоль/л</string>
-    <string name="bread_units_short_label">ХЕ</string>
-    <string name="bread_units_value_format">%1$s ХЕ</string>
-    <string name="short_insulin_short_label">Короткий инсулин</string>
-    <string name="long_insulin_short_label">Длинный инсулин</string>
-    <string name="dose_value_format">%1$s ед.</string>
-
-    <string name="sensor_notification_channel">Датчик глюкозы</string>
-    <string name="sensor_notification_text">Слушает данные с датчика</string>
-
-    <string name="language">Язык</string>
-    <string name="language_russian">Русский</string>
-    <string name="language_english">English</string>
-
-    <string name="meal_presets_title">Приёмы пищи</string>
+    <string name="food_screen_title">Приёмы пищи</string>
     <string name="add_meal_preset">Добавить приём пищи</string>
-    <string name="edit_meal_preset">Изменить приём пищи</string>
-    <string name="meal_preset_name_label">Название</string>
-    <string name="meal_preset_name_placeholder">Например: Овсянка</string>
-    <string name="meal_preset_option_format">%1$s — %2$s ХЕ</string>
+    <string name="edit_meal_preset">Редактировать приём пищи</string>
+    <string name="bread_units_value_format">%1$s ХЕ</string>
+    <string name="select_for_entry">Выбрать для записи</string>
+    <string name="edit_action">Редактировать</string>
+    <string name="total_carbs_label">Всего углеводов</string>
+    <string name="composition_kicker">Состав</string>
+    <string name="composition_label">состав</string>
+    <string name="meal_preset_name_kicker">Название</string>
+    <string name="meal_preset_name_placeholder">Например, завтрак</string>
+    <string name="products_kicker">Продукты</string>
+    <string name="bread_units_short_label">ХЕ</string>
+    <string name="meal_preset_product_name_placeholder">Продукт</string>
+    <string name="add_product">Добавить продукт</string>
+    <string name="remove_product">Удалить продукт</string>
+    <string name="meal_breakdown_total_label">Итого</string>
+    <string name="comment_kicker">Комментарий</string>
+    <string name="comment_placeholder_meal">Когда обычно едите это</string>
     <string name="no_meal_presets_title">Приёмов пищи пока нет</string>
     <string name="no_meal_presets_subtitle">Добавьте часто повторяющийся приём пищи</string>
     <string name="delete_meal_preset_confirm_title">Удалить приём пищи?</string>
-    <string name="meal_preset_product_name_label">Продукт</string>
-    <string name="meal_preset_product_name_placeholder">Например: Хлеб</string>
-    <string name="add_product">Добавить продукт</string>
-    <string name="remove_product">Удалить продукт</string>
-    <string name="meal_preset_total_format">Итого: %1$s ХЕ</string>
-    <string name="meal_breakdown_total_label">Итого</string>
-    <string name="save">Сохранить</string>
+    <string name="delete_entry_confirm_text">Это действие нельзя отменить.</string>
 
-    <string name="food_label">Еда</string>
-    <string name="food_placeholder">Выберите приём пищи</string>
-    <string name="enter_manually">Ввести вручную</string>
+    <string name="history_title">История записей</string>
+    <plurals name="entries_plural">
+        <item quantity="one">%d запись</item>
+        <item quantity="few">%d записи</item>
+        <item quantity="many">%d записей</item>
+        <item quantity="other">%d записей</item>
+    </plurals>
+    <plurals name="days_plural">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дней</item>
+    </plurals>
+    <string name="history_summary_format">%1$s за %2$s</string>
+    <string name="history_search_placeholder">Поиск: еда, комментарий, значение</string>
+    <string name="clear_search">Очистить поиск</string>
+    <string name="date_filter_all">Все дни</string>
+    <string name="today_label">Сегодня</string>
+    <string name="yesterday_label">Вчера</string>
+    <string name="date_filter_week">Неделя</string>
+    <string name="date_filter_month">Месяц</string>
+    <string name="date_filter_period">Период…</string>
+    <string name="history_shown_count">показано: %1$d</string>
+    <string name="history_match_count">совпадений: %1$d</string>
+    <string name="sort_newest">сначала новые</string>
+    <string name="sort_oldest">сначала старые</string>
+    <string name="day_group_count_format">%1$d зап.</string>
+    <string name="tag_breakfast">завтрак</string>
+    <string name="tag_lunch">обед</string>
+    <string name="tag_dinner">ужин</string>
+    <string name="tag_snack">перекус</string>
+    <string name="tag_measurement">замер</string>
+    <string name="sugar_stat_label">сахар</string>
+    <string name="insulin_column_kicker">инсулин, ед</string>
+    <string name="short_insulin_stat_label">короткий</string>
+    <string name="long_insulin_stat_label">длинный</string>
+    <string name="dose_placeholder">—</string>
+    <string name="no_photo_label">без\nфото</string>
+    <string name="no_earlier_records">Раньше записей нет</string>
+    <string name="no_entries_title">Записей пока нет</string>
+    <string name="no_entries_subtitle">Добавьте первую запись</string>
+    <string name="no_search_results">Ничего не найдено</string>
+    <string name="edit_entry_sheet_title">Редактировать запись</string>
+    <string name="delete_entry_button">Удалить запись</string>
+    <string name="photo_caption_format">%1$s, %2$s</string>
 
     <string name="settings_title">Настройки</string>
-    <string name="glucose_range_label">Диапазон сахара</string>
-    <string name="glucose_range_value_format">%1$s–%2$s ммоль/л</string>
-    <string name="glucose_range_title">Целевой диапазон сахара</string>
-    <string name="glucose_range_low_label">Нижняя граница</string>
-    <string name="glucose_range_high_label">Верхняя граница</string>
-    <string name="glucose_range_hint">В диапазоне — зелёный. Выше на 3–4 ммоль/л — жёлтый, дальше — оранжевый. Ниже 3.9 — всегда красный, ниже 3.0 — тёмно-красный.</string>
-
-    <string name="error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
-
-    <string name="backup_export_title">Экспортировать данные</string>
+    <string name="settings_subtitle">Версия 1.0 · данные только на устройстве</string>
+    <string name="language">Язык</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_english">English</string>
+    <string name="target_range_title">Целевой диапазон сахара</string>
+    <string name="range_value_format">%1$s — %2$s</string>
+    <string name="range_out_of_range_hint">Записи вне диапазона будут помечаться в истории.</string>
+    <string name="lower_bound_label">Нижняя граница</string>
+    <string name="upper_bound_label">Верхняя граница</string>
+    <string name="data_section_kicker">Данные</string>
+    <string name="export_records_title">Экспорт записей</string>
+    <string name="export_records_subtitle">Архив ZIP: записи и фото</string>
+    <string name="import_data_title">Импорт данных</string>
+    <string name="import_data_subtitle">Из архива ZIP</string>
+    <string name="backup_toggle_title">Резервная копия</string>
+    <string name="backup_hint_on">Каждый вечер, локально</string>
+    <string name="backup_hint_off">Выключена</string>
+    <string name="delete_all_title">Удалить все записи</string>
+    <string name="delete_all_subtitle">Отменить будет нельзя</string>
+    <string name="delete_all_confirm_title">Удалить все записи?</string>
     <string name="backup_export_success">Бэкап сохранён</string>
     <string name="backup_export_failed">Не удалось сохранить бэкап</string>
-    <string name="backup_import_title">Импортировать данные</string>
     <string name="backup_import_confirm_title">Восстановить из бэкапа?</string>
     <string name="backup_import_confirm_text">Это действие заменит ВСЕ текущие данные данными из выбранного файла. Отменить это будет нельзя.</string>
     <string name="backup_import_confirm_action">Восстановить</string>
     <string name="backup_import_invalid_file">Файл повреждён или не является бэкапом</string>
     <string name="backup_import_failed">Не удалось восстановить данные</string>
+
+    <string name="notifications_title">Уведомления</string>
+    <string name="notif_1_kicker">Отчёт</string>
+    <string name="notif_1_time">сегодня</string>
+    <string name="notif_1_text">Есть отчёт о том, что вы ели в это время на прошлой неделе.</string>
+    <string name="notif_1_cta">Подробный отчёт</string>
+    <string name="notif_2_kicker">Закономерность</string>
+    <string name="notif_2_time">вчера</string>
+    <string name="notif_2_text">После обедов с 5 ХЕ сахар держится выше обычного.</string>
+    <string name="notif_2_cta">Посмотреть разбор</string>
+    <string name="notif_3_kicker">Напоминание</string>
+    <string name="notif_3_time">2 дня назад</string>
+    <string name="notif_3_text">Вы не записали длинный инсулин за вечер вторника.</string>
+    <string name="notif_3_cta">Дополнить запись</string>
+    <string name="notif_footer">Это всё за неделю</string>
+
+    <string name="insulin_active_title">Инсулин ещё действует</string>
+    <string name="insulin_units_active">ед активны</string>
+    <string name="insulin_time_left_format">осталось %1$s</string>
+    <string name="insulin_from_format">с записи %1$s</string>
+    <string name="duration_hours_minutes">%1$d ч %2$d мин</string>
+    <string name="duration_minutes">%1$d мин</string>
+
+    <string name="date_sheet_title_format">%1$s %2$d</string>
+    <string name="time_sheet_title">Время</string>
+    <string name="hours_kicker">Часы</string>
+    <string name="minutes_kicker">Минуты</string>
+    <string-array name="weekday_short_labels">
+        <item>Пн</item>
+        <item>Вт</item>
+        <item>Ср</item>
+        <item>Чт</item>
+        <item>Пт</item>
+        <item>Сб</item>
+        <item>Вс</item>
+    </string-array>
+
+    <string name="sensor_notification_channel">Датчик глюкозы</string>
+    <string name="sensor_notification_text">Слушает данные с датчика</string>
+
+    <string name="error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
 </resources>

@@ -5,40 +5,31 @@ import android.app.LocaleManager
 import android.os.Build
 import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.neojelll.diaxtracker.R
-import com.neojelll.diaxtracker.ui.theme.TextPrimary
-import com.neojelll.diaxtracker.ui.theme.TextSecondary
-import com.neojelll.diaxtracker.ui.theme.card
+import com.neojelll.diaxtracker.ui.theme.FieldTile
+import com.neojelll.diaxtracker.ui.theme.Ink
 import java.util.Locale
 
 @Composable
 fun LanguageSettingRow() {
-    var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     fun setLocale(tag: String) {
@@ -48,54 +39,38 @@ fun LanguageSettingRow() {
         } else {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
         }
-        expanded = false
         (context as? Activity)?.recreate()
     }
 
     val currentLocale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-    val currentLanguageLabel = if (currentLocale.language == "en") {
-        stringResource(R.string.language_english)
-    } else {
-        stringResource(R.string.language_russian)
-    }
+    val isEnglish = currentLocale.language == "en"
 
-    Box(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .card()
-                .clickable { expanded = true }
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.language),
-                style = MaterialTheme.typography.bodyLarge,
-                color = TextPrimary
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = currentLanguageLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary
-                )
-                Icon(
-                    imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
-                    contentDescription = null,
-                    tint = TextSecondary
-                )
-            }
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.language_russian)) },
-                onClick = { setLocale("ru") }
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.language_english)) },
-                onClick = { setLocale("en") }
-            )
-        }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        LanguageTile(
+            label = stringResource(R.string.language_russian),
+            selected = !isEnglish,
+            onClick = { setLocale("ru") },
+            modifier = Modifier.weight(1f)
+        )
+        LanguageTile(
+            label = stringResource(R.string.language_english),
+            selected = isEnglish,
+            onClick = { setLocale("en") },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun LanguageTile(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (selected) Ink else FieldTile)
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 10.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(label, fontSize = 13.5.sp, color = if (selected) Color.White else Ink)
     }
 }

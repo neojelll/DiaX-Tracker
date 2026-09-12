@@ -1,118 +1,186 @@
 <resources>
     <string name="app_name">DiaX-Tracker</string>
 
-    <string name="nav_entry">Entry</string>
-    <string name="nav_meal_presets">Meals</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_food">Food</string>
     <string name="nav_history">History</string>
     <string name="nav_settings">Settings</string>
 
-    <string name="add_entry_title">Add Entry</string>
-    <string name="greeting_morning">Good morning!</string>
-    <string name="greeting_afternoon">Good afternoon!</string>
-    <string name="greeting_evening">Good evening!</string>
-    <string name="greeting_night">Good night!</string>
-    <string name="entry_saved_snackbar">Entry saved!</string>
-    <string name="save_entry_button">Save Entry</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="done">Done</string>
+    <string name="close">Close</string>
+    <string name="ok">OK</string>
 
+    <string name="greeting">Hi!</string>
     <plurals name="today_entries_count">
         <item quantity="one">You have %d entry today</item>
         <item quantity="other">You have %d entries today</item>
     </plurals>
-
-    <string name="edit_entry_title">Edit Entry</string>
-    <string name="back">Back</string>
-    <string name="delete">Delete</string>
-    <string name="delete_entry_confirm_title">Delete entry?</string>
-    <string name="delete_entry_confirm_text">This action cannot be undone.</string>
-    <string name="cancel">Cancel</string>
-    <string name="ok">OK</string>
-    <string name="save_changes_button">Save Changes</string>
-
-    <string name="sensor_warning">No recent sensor data — enter blood sugar manually</string>
-    <string name="insulin_active_banner">Fast-acting insulin still active — %1$s left</string>
-    <string name="insulin_active_banner_multi_title">Multiple fast-acting insulin doses still active</string>
-    <string name="insulin_active_dose_line">%1$s units — %2$s left</string>
-    <string name="duration_hours_minutes">%1$dh %2$dm</string>
-    <string name="duration_minutes">%1$dm</string>
+    <string name="notifications_cd">Notifications</string>
     <string name="entry_date_label">Date</string>
     <string name="entry_time_label">Time</string>
-    <string name="blood_sugar_label">Blood Sugar (mmol/L)</string>
-    <string name="blood_sugar_placeholder">E.g. 5.6</string>
-    <string name="bread_units_label">Bread Units (BU)</string>
-    <string name="bread_units_placeholder">E.g. 3</string>
-    <string name="short_insulin_label">Fast-Acting Insulin (units)</string>
-    <string name="short_insulin_placeholder">E.g. 4</string>
-    <string name="long_insulin_label">Long-Acting Insulin (units)</string>
-    <string name="long_insulin_placeholder">E.g. 10</string>
-    <string name="comment_label">Comment</string>
-    <string name="comment_placeholder">Additional comment...</string>
-    <string name="add_photo">Add Photo</string>
+    <string name="mmol_unit">mmol/L</string>
+    <string name="units_short">u</string>
+    <string name="blood_sugar_field_label">Blood sugar level</string>
+    <string name="short_insulin_tile_label">Fast-acting insulin</string>
+    <string name="long_insulin_tile_label">Long-acting insulin</string>
+    <string name="food_section_label">Food</string>
+    <plurals name="preset_count">
+        <item quantity="one">%d preset</item>
+        <item quantity="other">%d presets</item>
+    </plurals>
+    <string name="food_placeholder_home">What did you eat</string>
+    <string name="food_placeholder_edit">Pick a meal</string>
+    <string name="meal_label_with_preset_format">%1$s · %2$s BU</string>
+    <string name="meal_label_manual_format">%1$s BU (manual)</string>
+    <string name="presets_kicker">Presets</string>
+    <string name="create_preset_label">Create\npreset</string>
+    <string name="xe_no_preset_kicker">Bread units without a preset</string>
+    <string name="xe_enter_button">Enter</string>
+    <string name="add_details_title">Add details</string>
+    <string name="add_details_hint">comment, photo — optional</string>
+    <string name="note_placeholder">How you feel, activity…</string>
     <string name="add_photo_short">Photo</string>
-    <string name="remove_photo">Remove Photo</string>
-    <string name="entry_photo">Entry Photo</string>
+    <string name="remove_photo">Remove photo</string>
+    <string name="entry_photo">Entry photo</string>
+    <string name="save_entry_button">Save entry</string>
+    <string name="entry_saved_snackbar">Entry saved!</string>
 
-    <string name="history_title">Entry History</string>
-    <string name="today_label">Today</string>
-    <string name="yesterday_label">Yesterday</string>
-    <string name="no_entries_title">No entries yet</string>
-    <string name="no_entries_subtitle">Add your first entry</string>
-    <string name="history_search_placeholder">Search comments and food…</string>
-    <string name="clear_search">Clear search</string>
-    <string name="search_by_date">Find by date</string>
-    <string name="no_search_results">Nothing found</string>
-    <string name="sugar_label">Sugar</string>
-    <string name="sugar_value_format">%1$s mmol/L</string>
-    <string name="bread_units_short_label">Bread Units</string>
+    <string name="food_screen_title">Meal presets</string>
+    <string name="add_meal_preset">Add meal preset</string>
+    <string name="edit_meal_preset">Edit meal preset</string>
     <string name="bread_units_value_format">%1$s BU</string>
-    <string name="short_insulin_short_label">Fast-Acting Insulin</string>
-    <string name="long_insulin_short_label">Long-Acting Insulin</string>
-    <string name="dose_value_format">%1$s units</string>
-
-    <string name="sensor_notification_channel">Glucose Sensor</string>
-    <string name="sensor_notification_text">Listening for sensor data</string>
-
-    <string name="language">Language</string>
-    <string name="language_russian">Русский</string>
-    <string name="language_english">English</string>
-
-    <string name="meal_presets_title">Meal Presets</string>
-    <string name="add_meal_preset">Add Meal Preset</string>
-    <string name="edit_meal_preset">Edit Meal Preset</string>
-    <string name="meal_preset_name_label">Name</string>
-    <string name="meal_preset_name_placeholder">E.g. Oatmeal</string>
-    <string name="meal_preset_option_format">%1$s — %2$s BU</string>
+    <string name="select_for_entry">Select for entry</string>
+    <string name="edit_action">Edit</string>
+    <string name="total_carbs_label">Total carbs</string>
+    <string name="composition_kicker">Composition</string>
+    <string name="composition_label">composition</string>
+    <string name="meal_preset_name_kicker">Name</string>
+    <string name="meal_preset_name_placeholder">E.g. breakfast</string>
+    <string name="products_kicker">Products</string>
+    <string name="bread_units_short_label">BU</string>
+    <string name="meal_preset_product_name_placeholder">Product</string>
+    <string name="add_product">Add product</string>
+    <string name="remove_product">Remove product</string>
+    <string name="meal_breakdown_total_label">Total</string>
+    <string name="comment_kicker">Comment</string>
+    <string name="comment_placeholder_meal">When you usually eat this</string>
     <string name="no_meal_presets_title">No meal presets yet</string>
     <string name="no_meal_presets_subtitle">Add a meal you eat often</string>
     <string name="delete_meal_preset_confirm_title">Delete meal preset?</string>
-    <string name="meal_preset_product_name_label">Product</string>
-    <string name="meal_preset_product_name_placeholder">E.g. Bread</string>
-    <string name="add_product">Add product</string>
-    <string name="remove_product">Remove product</string>
-    <string name="meal_preset_total_format">Total: %1$s BU</string>
-    <string name="meal_breakdown_total_label">Total</string>
-    <string name="save">Save</string>
+    <string name="delete_entry_confirm_text">This action cannot be undone.</string>
 
-    <string name="food_label">Food</string>
-    <string name="food_placeholder">Pick a meal</string>
-    <string name="enter_manually">Enter manually</string>
+    <string name="history_title">Entry history</string>
+    <plurals name="entries_plural">
+        <item quantity="one">%d entry</item>
+        <item quantity="other">%d entries</item>
+    </plurals>
+    <plurals name="days_plural">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="history_summary_format">%1$s over %2$s</string>
+    <string name="history_search_placeholder">Search: food, comment, value</string>
+    <string name="clear_search">Clear search</string>
+    <string name="date_filter_all">All days</string>
+    <string name="today_label">Today</string>
+    <string name="yesterday_label">Yesterday</string>
+    <string name="date_filter_week">Week</string>
+    <string name="date_filter_month">Month</string>
+    <string name="date_filter_period">Period…</string>
+    <string name="history_shown_count">shown: %1$d</string>
+    <string name="history_match_count">matches: %1$d</string>
+    <string name="sort_newest">newest first</string>
+    <string name="sort_oldest">oldest first</string>
+    <string name="day_group_count_format">%1$d entries</string>
+    <string name="tag_breakfast">breakfast</string>
+    <string name="tag_lunch">lunch</string>
+    <string name="tag_dinner">dinner</string>
+    <string name="tag_snack">snack</string>
+    <string name="tag_measurement">reading</string>
+    <string name="sugar_stat_label">sugar</string>
+    <string name="insulin_column_kicker">insulin, units</string>
+    <string name="short_insulin_stat_label">fast-acting</string>
+    <string name="long_insulin_stat_label">long-acting</string>
+    <string name="dose_placeholder">—</string>
+    <string name="no_photo_label">no\nphoto</string>
+    <string name="no_earlier_records">No earlier records</string>
+    <string name="no_entries_title">No entries yet</string>
+    <string name="no_entries_subtitle">Add your first entry</string>
+    <string name="no_search_results">Nothing found</string>
+    <string name="edit_entry_sheet_title">Edit entry</string>
+    <string name="delete_entry_button">Delete entry</string>
+    <string name="photo_caption_format">%1$s, %2$s</string>
 
     <string name="settings_title">Settings</string>
-    <string name="glucose_range_label">Target glucose range</string>
-    <string name="glucose_range_value_format">%1$s–%2$s mmol/L</string>
-    <string name="glucose_range_title">Target glucose range</string>
-    <string name="glucose_range_low_label">Low bound</string>
-    <string name="glucose_range_high_label">High bound</string>
-    <string name="glucose_range_hint">In range shows green. Up to 3-4 mmol/L above shows yellow, further above shows orange. Below 3.9 always shows red, below 3.0 shows dark red.</string>
-
-    <string name="error_generic">Something went wrong. Please try again.</string>
-
-    <string name="backup_export_title">Export data</string>
+    <string name="settings_subtitle">Version 1.0 · data stays on this device</string>
+    <string name="language">Language</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_english">English</string>
+    <string name="target_range_title">Target glucose range</string>
+    <string name="range_value_format">%1$s — %2$s</string>
+    <string name="range_out_of_range_hint">Out-of-range entries will be flagged in History.</string>
+    <string name="lower_bound_label">Low bound</string>
+    <string name="upper_bound_label">High bound</string>
+    <string name="data_section_kicker">Data</string>
+    <string name="export_records_title">Export records</string>
+    <string name="export_records_subtitle">ZIP archive: records and photos</string>
+    <string name="import_data_title">Import data</string>
+    <string name="import_data_subtitle">From a ZIP archive</string>
+    <string name="backup_toggle_title">Backup</string>
+    <string name="backup_hint_on">Every night, locally</string>
+    <string name="backup_hint_off">Off</string>
+    <string name="delete_all_title">Delete all records</string>
+    <string name="delete_all_subtitle">This cannot be undone</string>
+    <string name="delete_all_confirm_title">Delete all records?</string>
     <string name="backup_export_success">Backup saved</string>
     <string name="backup_export_failed">Failed to save backup</string>
-    <string name="backup_import_title">Import data</string>
     <string name="backup_import_confirm_title">Restore from backup?</string>
     <string name="backup_import_confirm_text">This will replace ALL current data with the data from the selected file. This cannot be undone.</string>
     <string name="backup_import_confirm_action">Restore</string>
     <string name="backup_import_invalid_file">File is corrupted or not a valid backup</string>
     <string name="backup_import_failed">Failed to restore data</string>
+
+    <string name="notifications_title">Notifications</string>
+    <string name="notif_1_kicker">Report</string>
+    <string name="notif_1_time">today</string>
+    <string name="notif_1_text">There\'s a report on what you ate at this time last week.</string>
+    <string name="notif_1_cta">Full report</string>
+    <string name="notif_2_kicker">Pattern</string>
+    <string name="notif_2_time">yesterday</string>
+    <string name="notif_2_text">After lunches with 5 BU, your sugar tends to stay higher than usual.</string>
+    <string name="notif_2_cta">See breakdown</string>
+    <string name="notif_3_kicker">Reminder</string>
+    <string name="notif_3_time">2 days ago</string>
+    <string name="notif_3_text">You didn\'t log long-acting insulin for Tuesday evening.</string>
+    <string name="notif_3_cta">Complete entry</string>
+    <string name="notif_footer">That\'s everything for the week</string>
+
+    <string name="insulin_active_title">Insulin still active</string>
+    <string name="insulin_units_active">units active</string>
+    <string name="insulin_time_left_format">%1$s left</string>
+    <string name="insulin_from_format">from %1$s</string>
+    <string name="duration_hours_minutes">%1$dh %2$dm</string>
+    <string name="duration_minutes">%1$dm</string>
+
+    <string name="date_sheet_title_format">%1$s %2$d</string>
+    <string name="time_sheet_title">Time</string>
+    <string name="hours_kicker">Hours</string>
+    <string name="minutes_kicker">Minutes</string>
+    <string-array name="weekday_short_labels">
+        <item>Mo</item>
+        <item>Tu</item>
+        <item>We</item>
+        <item>Th</item>
+        <item>Fr</item>
+        <item>Sa</item>
+        <item>Su</item>
+    </string-array>
+
+    <string name="sensor_notification_channel">Glucose sensor</string>
+    <string name="sensor_notification_text">Listening for sensor data</string>
+
+    <string name="error_generic">Something went wrong. Please try again.</string>
 </resources>

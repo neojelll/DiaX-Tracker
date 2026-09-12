@@ -1,148 +1,154 @@
 package com.neojelll.diaxtracker.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
-import com.neojelll.diaxtracker.ui.screens.CompactField
 import com.neojelll.diaxtracker.ui.screens.formatAmount
-import com.neojelll.diaxtracker.ui.theme.TextPrimary
-import com.neojelll.diaxtracker.ui.theme.TextSecondary
-import com.neojelll.diaxtracker.ui.theme.card
+import com.neojelll.diaxtracker.ui.theme.CardDivider
+import com.neojelll.diaxtracker.ui.theme.FieldTile
+import com.neojelll.diaxtracker.ui.theme.GlucoIcons
+import com.neojelll.diaxtracker.ui.theme.Ink
+import com.neojelll.diaxtracker.ui.theme.TextLabel
+import com.neojelll.diaxtracker.ui.theme.TextTertiary
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import kotlin.math.round
 
 // A personal target can't start below the fixed clinical hypoglycemia threshold.
 private const val MIN_BOUND_MMOL = 3.9f
-private const val MAX_BOUND_MMOL = 20f
+private const val MAX_BOUND_MMOL = 15f
+private const val SCALE_MIN = 3.0f
+private const val SCALE_MAX = 15.0f
+private const val STEP = 0.1f
+private const val MIN_GAP = 0.5f
 
 @Composable
 fun GlucoseRangeSettingRow(viewModel: DiaryViewModel) {
     val range by viewModel.glucoseRange.collectAsState()
-    var showDialog by remember { mutableStateOf(false) }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .card()
-            .clickable { showDialog = true }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(R.string.glucose_range_label),
-            style = MaterialTheme.typography.bodyLarge,
-            color = TextPrimary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = stringResource(
-                R.string.glucose_range_value_format,
-                formatAmount(range.low),
-                formatAmount(range.high)
-            ),
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+    fun setLow(newLow: Float) {
+        val clamped = newLow.coerceIn(MIN_BOUND_MMOL, range.high - MIN_GAP)
+        viewModel.setGlucoseRange(round(clamped * 10) / 10f, range.high)
+    }
+    fun setHigh(newHigh: Float) {
+        val clamped = newHigh.coerceIn(range.low + MIN_GAP, MAX_BOUND_MMOL)
+        viewModel.setGlucoseRange(range.low, round(clamped * 10) / 10f)
     }
 
-    if (showDialog) {
-        GlucoseRangeEditorDialog(
-            initialLow = range.low,
-            initialHigh = range.high,
-            onConfirm = { low, high ->
-                viewModel.setGlucoseRange(low, high)
-                showDialog = false
-            },
-            onDismiss = { showDialog = false }
+    Column {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(stringResource(R.string.target_range_title), fontSize = 13.sp, color = TextLabel)
+            Text(stringResource(R.string.mmol_unit), fontSize = 11.5.sp, color = TextTertiary)
+        }
+        Text(
+            stringResource(R.string.range_value_format, formatAmount(range.low), formatAmount(range.high)),
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Medium,
+            color = Ink,
+            modifier = Modifier.padding(top = 14.dp, bottom = 14.dp)
+        )
+
+        val leftFraction = ((range.low - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)).coerceIn(0f, 1f)
+        val rightFraction = ((range.high - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)).coerceIn(0f, 1f)
+        BoxWithConstraints(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 2.dp)
+                .height(6.dp)
+                .clip(RoundedCornerShape(50))
+                .background(CardDivider)
+        ) {
+            Box(
+                Modifier
+                    .offset(x = maxWidth * leftFraction)
+                    .width(maxWidth * (rightFraction - leftFraction))
+                    .height(6.dp)
+                    .background(Ink)
+            )
+        }
+
+        Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+            BoundTile(
+                label = stringResource(R.string.lower_bound_label),
+                value = range.low,
+                onDecrement = { setLow(range.low - STEP) },
+                onIncrement = { setLow(range.low + STEP) },
+                modifier = Modifier.weight(1f)
+            )
+            BoundTile(
+                label = stringResource(R.string.upper_bound_label),
+                value = range.high,
+                onDecrement = { setHigh(range.high - STEP) },
+                onIncrement = { setHigh(range.high + STEP) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Text(
+            stringResource(R.string.range_out_of_range_hint),
+            fontSize = 11.5.sp,
+            color = TextTertiary,
+            lineHeight = 16.sp,
+            modifier = Modifier.padding(top = 11.dp)
         )
     }
 }
 
 @Composable
-private fun GlucoseRangeEditorDialog(
-    initialLow: Float,
-    initialHigh: Float,
-    onConfirm: (low: Float, high: Float) -> Unit,
-    onDismiss: () -> Unit
+private fun BoundTile(
+    label: String,
+    value: Float,
+    onDecrement: () -> Unit,
+    onIncrement: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var lowText by remember { mutableStateOf(formatAmount(initialLow)) }
-    var highText by remember { mutableStateOf(formatAmount(initialHigh)) }
-    val low = lowText.toFloatOrNull()
-    val high = highText.toFloatOrNull()
-    val isValid = low != null && high != null &&
-        low < high &&
-        low >= MIN_BOUND_MMOL && high <= MAX_BOUND_MMOL
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.glucose_range_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CompactField(
-                        value = lowText,
-                        onValueChange = { lowText = it.filter { c -> c.isDigit() || c == '.' } },
-                        label = stringResource(R.string.glucose_range_low_label),
-                        placeholder = "",
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.width(120.dp)
-                    )
-                    CompactField(
-                        value = highText,
-                        onValueChange = { highText = it.filter { c -> c.isDigit() || c == '.' } },
-                        label = stringResource(R.string.glucose_range_high_label),
-                        placeholder = "",
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.width(120.dp)
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.glucose_range_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = isValid,
-                onClick = { if (low != null && high != null) onConfirm(low, high) }
-            ) {
-                Text(stringResource(R.string.save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
+    Column(
+        modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(FieldTile)
+            .padding(horizontal = 13.dp, vertical = 11.dp)
+    ) {
+        Text(label, fontSize = 11.sp, color = TextLabel, modifier = Modifier.padding(bottom = 7.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            StepperCircle(icon = GlucoIcons.Minus, onClick = onDecrement)
+            Text(formatAmount(value), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Ink)
+            StepperCircle(icon = GlucoIcons.Plus, onClick = onIncrement)
         }
-    )
+    }
+}
+
+@Composable
+private fun StepperCircle(icon: ImageVector, onClick: () -> Unit) {
+    Box(
+        Modifier.size(28.dp).clip(CircleShape).background(Color.White).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, contentDescription = null, tint = Ink, modifier = Modifier.size(12.dp))
+    }
 }
