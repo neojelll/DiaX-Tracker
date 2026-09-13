@@ -1,78 +1,69 @@
 package com.neojelll.diaxtracker.ui.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.neojelll.diaxtracker.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.navArgument
+import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.ui.components.InsulinBanner
+import com.neojelll.diaxtracker.ui.components.GlukoNavBar
+import com.neojelll.diaxtracker.ui.components.LucidePaths
+import com.neojelll.diaxtracker.ui.components.NavBarItem
+import com.neojelll.diaxtracker.ui.components.NotificationPanel
+import com.neojelll.diaxtracker.ui.components.Overlay
+import com.neojelll.diaxtracker.ui.components.OverlayController
+import com.neojelll.diaxtracker.ui.components.PhotoPreview
 import com.neojelll.diaxtracker.ui.screens.AddEntryScreen
-import com.neojelll.diaxtracker.ui.screens.EditEntryScreen
 import com.neojelll.diaxtracker.ui.screens.HistoryScreen
-import com.neojelll.diaxtracker.ui.screens.InsulinActiveBanner
 import com.neojelll.diaxtracker.ui.screens.MealPresetsScreen
+import com.neojelll.diaxtracker.ui.screens.PresetDetailSheet
+import com.neojelll.diaxtracker.ui.screens.PresetEditSheet
+import com.neojelll.diaxtracker.ui.screens.RecordEditSheet
 import com.neojelll.diaxtracker.ui.screens.SettingsScreen
-import com.neojelll.diaxtracker.ui.theme.AccentGreen
-import com.neojelll.diaxtracker.ui.theme.CardBackground
-import com.neojelll.diaxtracker.ui.theme.CardBorder
-import com.neojelll.diaxtracker.ui.theme.OnAccent
-import com.neojelll.diaxtracker.ui.theme.PageBackground
-import com.neojelll.diaxtracker.ui.theme.PageBackgroundMid
-import com.neojelll.diaxtracker.ui.theme.PageBackgroundTop
-import com.neojelll.diaxtracker.ui.theme.TextSecondary
+import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import com.neojelll.diaxtracker.ui.components.DateSheet
+import com.neojelll.diaxtracker.ui.components.TimeSheet
 
-sealed class Screen(val route: String, @StringRes val labelRes: Int, val icon: ImageVector) {
-    data object AddEntry : Screen("add_entry", R.string.nav_entry, Icons.Filled.Home)
-    data object MealPresets : Screen("meal_presets", R.string.nav_meal_presets, Icons.Filled.Restaurant)
-    data object History : Screen("history", R.string.nav_history, Icons.Filled.History)
-    data object Settings : Screen("settings", R.string.nav_settings, Icons.Filled.Settings)
-}
+private const val ROUTE_ADD_ENTRY = "add_entry"
+private const val ROUTE_MEAL_PRESETS = "meal_presets"
+private const val ROUTE_HISTORY = "history"
+private const val ROUTE_SETTINGS = "settings"
 
-private val bottomNavItems = listOf(Screen.AddEntry, Screen.MealPresets, Screen.History, Screen.Settings)
-
-private const val EDIT_ENTRY_ROUTE = "edit_entry/{entryId}"
-private fun editEntryRoute(entryId: Long) = "edit_entry/$entryId"
+private val navBarItems = listOf(
+    NavBarItem(ROUTE_ADD_ENTRY, R.string.nav_entry, LucidePaths.Home),
+    NavBarItem(ROUTE_MEAL_PRESETS, R.string.nav_meal_presets, LucidePaths.Dish),
+    NavBarItem(ROUTE_HISTORY, R.string.nav_history, LucidePaths.History),
+    NavBarItem(ROUTE_SETTINGS, R.string.nav_settings, LucidePaths.Settings)
+)
 
 @Composable
 fun NavGraph(navController: NavHostController) {
     val viewModel: DiaryViewModel = viewModel()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val activeInsulinEntries by viewModel.activeInsulinEntries.collectAsState()
+    val overlays = remember { OverlayController() }
+    var insulinExpanded by remember { mutableStateOf(true) }
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -82,122 +73,111 @@ fun NavGraph(navController: NavHostController) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .drawWithCache {
-                    val brush = Brush.radialGradient(
-                        colors = listOf(PageBackgroundTop, PageBackgroundMid, PageBackground),
-                        center = Offset(size.width / 2f, 0f),
-                        radius = size.width.coerceAtLeast(size.height) * 0.9f
-                    )
-                    onDrawBehind { drawRect(brush) }
-                }
-        )
-
+    Box(Modifier.fillMaxSize().background(GlukoColors.Screen)) {
         Scaffold(
             containerColor = Color.Transparent,
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            bottomBar = {
-                Column {
-                    if (activeInsulinEntries.isNotEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(PageBackground)
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            InsulinActiveBanner(entries = activeInsulinEntries)
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { padding ->
+            Column(Modifier.fillMaxSize().padding(padding)) {
+                InsulinBanner(
+                    entries = activeInsulinEntries,
+                    expanded = insulinExpanded,
+                    onToggle = { insulinExpanded = !insulinExpanded }
+                )
+
+                Box(Modifier.weight(1f)) {
+                    NavHost(navController = navController, startDestination = ROUTE_ADD_ENTRY) {
+                        composable(ROUTE_ADD_ENTRY) { AddEntryScreen(viewModel, overlays) }
+                        composable(ROUTE_MEAL_PRESETS) { MealPresetsScreen(viewModel, overlays) }
+                        composable(ROUTE_HISTORY) { HistoryScreen(viewModel, overlays) }
+                        composable(ROUTE_SETTINGS) { SettingsScreen(viewModel) }
+                    }
+                }
+
+                GlukoNavBar(
+                    items = navBarItems,
+                    currentRoute = currentRoute,
+                    onSelect = { item ->
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     }
-                    AppBottomBar(
-                        currentRoute = currentRoute,
-                        onSelect = { screen ->
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-            }
-        ) { padding ->
-            NavHost(
-                navController = navController,
-                startDestination = Screen.AddEntry.route,
-                modifier = Modifier.padding(padding)
-            ) {
-                composable(Screen.AddEntry.route) {
-                    AddEntryScreen(viewModel = viewModel)
-                }
-                composable(Screen.MealPresets.route) {
-                    MealPresetsScreen(viewModel = viewModel)
-                }
-                composable(Screen.History.route) {
-                    HistoryScreen(
-                        viewModel = viewModel,
-                        onEntryClick = { entryId -> navController.navigate(editEntryRoute(entryId)) }
-                    )
-                }
-                composable(Screen.Settings.route) {
-                    SettingsScreen(viewModel = viewModel)
-                }
-                composable(
-                    route = EDIT_ENTRY_ROUTE,
-                    arguments = listOf(navArgument("entryId") { type = NavType.LongType })
-                ) { backStackEntry ->
-                    val entryId = backStackEntry.arguments?.getLong("entryId") ?: return@composable
-                    EditEntryScreen(
-                        viewModel = viewModel,
-                        entryId = entryId,
-                        onDone = { navController.popBackStack() }
-                    )
-                }
+                )
             }
         }
+
+        OverlayHost(viewModel, overlays, navController)
     }
 }
 
 @Composable
-private fun AppBottomBar(
-    currentRoute: String?,
-    onSelect: (Screen) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(horizontal = 14.dp)
-            .padding(bottom = 12.dp)
-            .clip(RoundedCornerShape(30.dp))
-            .background(CardBackground)
-            .border(1.dp, CardBorder, RoundedCornerShape(30.dp))
-            .padding(9.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        bottomNavItems.forEach { screen ->
-            val selected = currentRoute == screen.route
-            val label = stringResource(screen.labelRes)
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .then(if (selected) Modifier.background(AccentGreen) else Modifier)
-                    .clickable { onSelect(screen) },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = screen.icon,
-                    contentDescription = label,
-                    tint = if (selected) OnAccent else TextSecondary,
-                    modifier = Modifier.size(20.dp)
+private fun OverlayHost(viewModel: DiaryViewModel, overlays: OverlayController, navController: NavHostController) {
+    val mealPresets by viewModel.mealPresets.collectAsState()
+
+    when (val overlay = overlays.current) {
+        Overlay.None -> Unit
+
+        is Overlay.DatePicker -> DateSheet(
+            initialDate = overlay.initial,
+            onDone = { picked -> overlay.onPick(picked); overlays.dismiss() },
+            onDismiss = overlays::dismiss
+        )
+
+        is Overlay.TimePicker -> TimeSheet(
+            initial = overlay.initial,
+            onDone = { picked -> overlay.onPick(picked); overlays.dismiss() },
+            onDismiss = overlays::dismiss
+        )
+
+        Overlay.Notifications -> NotificationPanel(onDismiss = overlays::dismiss)
+
+        is Overlay.Photo -> PhotoPreview(overlay.photoPath, overlay.caption, onDismiss = overlays::dismiss)
+
+        is Overlay.RecordEdit -> RecordEditSheet(
+            viewModel = viewModel,
+            entryId = overlay.entryId,
+            overlays = overlays,
+            onDismiss = overlays::dismiss
+        )
+
+        is Overlay.PresetDetail -> {
+            val preset = mealPresets.find { it.preset.id == overlay.presetId }
+            if (preset != null) {
+                PresetDetailSheet(
+                    preset = preset,
+                    onPick = {
+                        overlays.selectPresetForEntry(preset)
+                        overlays.dismiss()
+                        navController.navigate(ROUTE_ADD_ENTRY) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onEdit = { overlays.openPresetEdit(preset.preset.id) },
+                    onDelete = {
+                        viewModel.deleteMealPreset(preset.preset)
+                        overlays.dismiss()
+                    },
+                    onDismiss = overlays::dismiss
                 )
+            } else {
+                overlays.dismiss()
             }
+        }
+
+        is Overlay.PresetEdit -> {
+            val existing = overlay.presetId?.let { id -> mealPresets.find { it.preset.id == id } }
+            PresetEditSheet(
+                preset = existing,
+                onConfirm = { name, comment, products ->
+                    viewModel.saveMealPreset(id = existing?.preset?.id ?: 0, name = name, comment = comment, products = products)
+                    overlays.dismiss()
+                },
+                onDismiss = overlays::dismiss
+            )
         }
     }
 }

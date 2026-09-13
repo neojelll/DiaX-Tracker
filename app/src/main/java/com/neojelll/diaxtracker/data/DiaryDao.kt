@@ -25,6 +25,9 @@ abstract class DiaryDao {
     @Query("SELECT * FROM diary_entries ORDER BY createdAt DESC LIMIT 1")
     abstract suspend fun getMostRecentEntry(): DiaryEntry?
 
+    @Query("DELETE FROM diary_entries")
+    abstract suspend fun deleteAllEntries()
+
     @Insert
     abstract suspend fun insertEntryProducts(products: List<DiaryEntryProduct>)
 

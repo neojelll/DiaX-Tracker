@@ -47,11 +47,38 @@
     <string name="long_insulin_label">Длинный инсулин (ед.)</string>
     <string name="long_insulin_placeholder">Например: 10</string>
     <string name="comment_label">Комментарий</string>
-    <string name="comment_placeholder">Дополнительный комментарий...</string>
+    <string name="comment_placeholder">Самочувствие, активность…</string>
     <string name="add_photo">Добавить фото</string>
     <string name="add_photo_short">Фото</string>
     <string name="remove_photo">Удалить фото</string>
     <string name="entry_photo">Фото записи</string>
+
+    <string name="sugar_level_label">Уровень сахара в крови</string>
+    <string name="mmol_unit">ммоль/л</string>
+    <string name="units_short">ед</string>
+    <string name="food_placeholder_home">Что ты ел</string>
+    <string name="food_placeholder_edit">Выбрать приём пищи</string>
+    <string name="details_toggle_title">Добавить детали</string>
+    <string name="details_toggle_hint">комментарий, фото — необязательно</string>
+    <string name="photo_add_title">Фото блюда</string>
+    <string name="photo_add_hint">Снять или выбрать из галереи</string>
+    <string name="photo_attached">Фото добавлено</string>
+    <string name="food_manual_format">%1$s (вручную)</string>
+    <string name="food_picker_presets_kicker">Пресеты</string>
+    <string name="food_picker_manual_kicker">Кол-во ХЕ без пресета</string>
+    <string name="food_picker_apply">Ввести</string>
+    <string name="food_picker_create_preset">Создать пресет</string>
+    <string name="sheet_done">Готово</string>
+    <string name="sheet_time_title">Время</string>
+    <string name="sheet_hours_label">Часы</string>
+    <string name="sheet_minutes_label">Минуты</string>
+
+    <plurals name="presets_count">
+        <item quantity="one">%d пресет</item>
+        <item quantity="few">%d пресета</item>
+        <item quantity="many">%d пресетов</item>
+        <item quantity="other">%d пресетов</item>
+    </plurals>
 
     <string name="history_title">История записей</string>
     <string name="today_label">Сегодня</string>
@@ -70,8 +97,43 @@
     <string name="long_insulin_short_label">Длинный инсулин</string>
     <string name="dose_value_format">%1$s ед.</string>
 
+    <string name="history_filter_all">Все дни</string>
+    <string name="history_filter_today">Сегодня</string>
+    <string name="history_filter_week">Неделя</string>
+    <string name="history_filter_month">Месяц</string>
+    <string name="history_filter_range">Период…</string>
+    <string name="history_sort_desc">сначала новые</string>
+    <string name="history_sort_asc">сначала старые</string>
+    <string name="history_shown_format">показано: %1$d</string>
+    <string name="history_matches_format">совпадений: %1$d</string>
+    <string name="history_no_earlier">Раньше записей нет</string>
+    <string name="record_sugar_label">сахар</string>
+    <string name="record_insulin_label">инсулин, ед</string>
+    <string name="record_short_label">короткий</string>
+    <string name="record_long_label">длинный</string>
+    <string name="record_no_preset">Без пресета</string>
+    <string name="record_composition">состав</string>
+    <string name="record_no_photo">без фото</string>
+    <string name="record_measurement_tag">замер</string>
+    <string name="record_edit_title">Редактировать запись</string>
+    <string name="delete_entry_pill">Удалить запись</string>
+    <string name="range_picker_from_title">Дата начала</string>
+    <string name="range_picker_to_title">Дата окончания</string>
+
+    <plurals name="day_records_count">
+        <item quantity="one">%d зап.</item>
+        <item quantity="few">%d зап.</item>
+        <item quantity="many">%d зап.</item>
+        <item quantity="other">%d зап.</item>
+    </plurals>
+
     <string name="sensor_notification_channel">Датчик глюкозы</string>
     <string name="sensor_notification_text">Слушает данные с датчика</string>
+
+    <string name="insulin_banner_title">Инсулин ещё действует</string>
+    <string name="insulin_units_suffix">ед активны</string>
+    <string name="insulin_since_format">с записи %1$s</string>
+    <string name="insulin_left_format">осталось %1$s</string>
 
     <string name="language">Язык</string>
     <string name="language_russian">Русский</string>
@@ -93,18 +155,37 @@
     <string name="meal_preset_total_format">Итого: %1$s ХЕ</string>
     <string name="meal_breakdown_total_label">Итого</string>
     <string name="save">Сохранить</string>
+    <string name="action_edit">Редактировать</string>
+    <string name="action_photo">Фото</string>
 
     <string name="food_label">Еда</string>
     <string name="food_placeholder">Выберите приём пищи</string>
     <string name="enter_manually">Ввести вручную</string>
 
+    <string name="preset_detail_total_carbs">Всего углеводов</string>
+    <string name="preset_detail_composition">Состав</string>
+    <string name="preset_detail_pick">Выбрать для записи</string>
+    <string name="meal_preset_add_dashed">Добавить приём пищи</string>
+    <string name="meal_preset_comment_placeholder">Когда и где обычно ешь</string>
+
     <string name="settings_title">Настройки</string>
-    <string name="glucose_range_label">Диапазон сахара</string>
+    <string name="settings_subtitle">Бета-версия · данные только на устройстве</string>
+    <string name="glucose_range_label">Целевой диапазон сахара</string>
     <string name="glucose_range_value_format">%1$s–%2$s ммоль/л</string>
     <string name="glucose_range_title">Целевой диапазон сахара</string>
     <string name="glucose_range_low_label">Нижняя граница</string>
     <string name="glucose_range_high_label">Верхняя граница</string>
-    <string name="glucose_range_hint">В диапазоне — зелёный. Выше на 3–4 ммоль/л — жёлтый, дальше — оранжевый. Ниже 3.9 — всегда красный, ниже 3.0 — тёмно-красный.</string>
+    <string name="glucose_range_hint">Записи вне диапазона будут помечаться в истории.</string>
+    <string name="data_section_title">Данные</string>
+    <string name="backup_export_subtitle">Архив ZIP: записи и фото</string>
+    <string name="backup_import_subtitle">Из архива ZIP</string>
+    <string name="backup_toggle_title">Резервная копия</string>
+    <string name="backup_toggle_on">Каждый вечер, локально</string>
+    <string name="backup_toggle_off">Выключена</string>
+    <string name="delete_all_title">Удалить все записи</string>
+    <string name="delete_all_subtitle">Отменить будет нельзя</string>
+    <string name="delete_all_confirm_title">Удалить все записи?</string>
+    <string name="delete_all_confirm_text">Это действие необратимо и удалит все записи и связанные фото.</string>
 
     <string name="error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
 
@@ -120,4 +201,19 @@
 
     <string name="yesterday_summary_title">Вчера в это время</string>
     <string name="yesterday_summary_dismiss">Скрыть</string>
+
+    <string name="notif_panel_title">Уведомления</string>
+    <string name="notif_panel_footer">Это всё за неделю</string>
+    <string name="notif_category_report">Отчёт</string>
+    <string name="notif_category_pattern">Закономерность</string>
+    <string name="notif_category_reminder">Напоминание</string>
+    <string name="notif_time_today">сегодня</string>
+    <string name="notif_time_yesterday">вчера</string>
+    <string name="notif_time_two_days_ago">2 дня назад</string>
+    <string name="notif_text_report">Есть отчёт о том, что вы ели в это время на прошлой неделе.</string>
+    <string name="notif_text_pattern">После обедов с 5 ХЕ сахар держится выше обычного.</string>
+    <string name="notif_text_reminder">Вы не записали длинный инсулин за вечер вторника.</string>
+    <string name="notif_action_report">Подробный отчёт</string>
+    <string name="notif_action_pattern">Посмотреть разбор</string>
+    <string name="notif_action_reminder">Дополнить запись</string>
 </resources>
