@@ -144,20 +144,6 @@
     <string name="backup_import_invalid_file">File is corrupted or not a valid backup</string>
     <string name="backup_import_failed">Failed to restore data</string>
 
-    <string name="notifications_title">Notifications</string>
-    <string name="notif_1_kicker">Report</string>
-    <string name="notif_1_time">today</string>
-    <string name="notif_1_text">There\'s a report on what you ate at this time last week.</string>
-    <string name="notif_1_cta">Full report</string>
-    <string name="notif_2_kicker">Pattern</string>
-    <string name="notif_2_time">yesterday</string>
-    <string name="notif_2_text">After lunches with 5 BU, your sugar tends to stay higher than usual.</string>
-    <string name="notif_2_cta">See breakdown</string>
-    <string name="notif_3_kicker">Reminder</string>
-    <string name="notif_3_time">2 days ago</string>
-    <string name="notif_3_text">You didn\'t log long-acting insulin for Tuesday evening.</string>
-    <string name="notif_3_cta">Complete entry</string>
-    <string name="notif_footer">That\'s everything for the week</string>
 
     <string name="insulin_active_title">Insulin still active</string>
     <string name="insulin_units_active">units active</string>

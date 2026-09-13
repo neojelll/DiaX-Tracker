@@ -87,7 +87,6 @@ private sealed interface HistoryRow {
 fun HistoryScreen(
     viewModel: DiaryViewModel,
     onEditEntry: (Long) -> Unit,
-    onOpenNotifications: () -> Unit,
     onOpenPresetDetail: (Long) -> Unit,
     onOpenPhoto: (path: String, caption: String) -> Unit
 ) {
@@ -174,7 +173,7 @@ fun HistoryScreen(
                 Text(stringResource(R.string.history_title), style = ScreenTitle, color = Ink)
                 Text(historySummary(filteredEntries.size, filteredEntries), fontSize = 13.sp, color = TextLabel, modifier = Modifier.padding(top = 5.dp))
             }
-            NotificationBellButton(onClick = onOpenNotifications)
+            NotificationBellButton()
         }
 
         Row(

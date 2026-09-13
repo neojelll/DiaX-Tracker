@@ -81,7 +81,6 @@ import java.time.LocalDateTime
 @Composable
 fun HomeScreen(
     viewModel: DiaryViewModel,
-    onOpenNotifications: () -> Unit,
     onCreatePreset: () -> Unit,
     pendingFoodPick: PendingFoodPick? = null,
     onPendingFoodPickConsumed: () -> Unit = {}
@@ -132,7 +131,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 5.dp)
                 )
             }
-            NotificationBellButton(onClick = onOpenNotifications)
+            NotificationBellButton()
         }
 
         Box(Modifier.fillMaxWidth().card().padding(10.dp)) {

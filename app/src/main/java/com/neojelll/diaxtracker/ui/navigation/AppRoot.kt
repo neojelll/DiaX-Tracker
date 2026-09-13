@@ -33,7 +33,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.ui.components.AppBottomNavBar
 import com.neojelll.diaxtracker.ui.components.InsulinBadge
-import com.neojelll.diaxtracker.ui.components.NotificationPanel
 import com.neojelll.diaxtracker.ui.components.PhotoPreviewOverlay
 import com.neojelll.diaxtracker.ui.components.SheetBackdrop
 import com.neojelll.diaxtracker.ui.screens.EditEntrySheet
@@ -82,7 +81,6 @@ fun AppRoot() {
                 when (tab) {
                     AppTab.HOME -> HomeScreen(
                         viewModel = viewModel,
-                        onOpenNotifications = { overlay = AppOverlay.Notifications },
                         onCreatePreset = {
                             tab = AppTab.FOOD
                             overlay = AppOverlay.PresetEditor(null)
@@ -92,14 +90,12 @@ fun AppRoot() {
                     )
                     AppTab.FOOD -> FoodScreen(
                         viewModel = viewModel,
-                        onOpenNotifications = { overlay = AppOverlay.Notifications },
                         onOpenPresetDetail = ::openPresetDetail,
                         onCreatePreset = { overlay = AppOverlay.PresetEditor(null) }
                     )
                     AppTab.HISTORY -> HistoryScreen(
                         viewModel = viewModel,
                         onEditEntry = { id -> overlay = AppOverlay.EditEntry(id) },
-                        onOpenNotifications = { overlay = AppOverlay.Notifications },
                         onOpenPresetDetail = ::openPresetDetail,
                         onOpenPhoto = { path, caption -> overlay = AppOverlay.Photo(path, caption) }
                     )
@@ -143,7 +139,6 @@ fun AppRoot() {
                 PresetEditorSheet(viewModel = viewModel, presetId = current.presetId, onClose = { overlay = null })
             }
             is AppOverlay.Photo -> PhotoPreviewOverlay(photoPath = current.photoPath, caption = current.caption, onDismiss = { overlay = null })
-            AppOverlay.Notifications -> NotificationPanel(onClose = { overlay = null })
             null -> Unit
         }
     }

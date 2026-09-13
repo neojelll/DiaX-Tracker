@@ -152,20 +152,6 @@
     <string name="backup_import_invalid_file">Файл повреждён или не является бэкапом</string>
     <string name="backup_import_failed">Не удалось восстановить данные</string>
 
-    <string name="notifications_title">Уведомления</string>
-    <string name="notif_1_kicker">Отчёт</string>
-    <string name="notif_1_time">сегодня</string>
-    <string name="notif_1_text">Есть отчёт о том, что вы ели в это время на прошлой неделе.</string>
-    <string name="notif_1_cta">Подробный отчёт</string>
-    <string name="notif_2_kicker">Закономерность</string>
-    <string name="notif_2_time">вчера</string>
-    <string name="notif_2_text">После обедов с 5 ХЕ сахар держится выше обычного.</string>
-    <string name="notif_2_cta">Посмотреть разбор</string>
-    <string name="notif_3_kicker">Напоминание</string>
-    <string name="notif_3_time">2 дня назад</string>
-    <string name="notif_3_text">Вы не записали длинный инсулин за вечер вторника.</string>
-    <string name="notif_3_cta">Дополнить запись</string>
-    <string name="notif_footer">Это всё за неделю</string>
 
     <string name="insulin_active_title">Инсулин ещё действует</string>
     <string name="insulin_units_active">ед активны</string>

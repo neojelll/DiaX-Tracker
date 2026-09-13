@@ -49,7 +49,6 @@ import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 @Composable
 fun FoodScreen(
     viewModel: DiaryViewModel,
-    onOpenNotifications: () -> Unit,
     onOpenPresetDetail: (Long) -> Unit,
     onCreatePreset: () -> Unit
 ) {
@@ -70,7 +69,7 @@ fun FoodScreen(
                     modifier = Modifier.padding(top = 5.dp)
                 )
             }
-            NotificationBellButton(onClick = onOpenNotifications)
+            NotificationBellButton()
         }
 
         if (mealPresets.isEmpty()) {

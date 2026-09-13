@@ -9,5 +9,4 @@ sealed interface AppOverlay {
     data class PresetDetail(val presetId: Long) : AppOverlay
     data class PresetEditor(val presetId: Long?) : AppOverlay
     data class Photo(val photoPath: String, val caption: String) : AppOverlay
-    data object Notifications : AppOverlay
 }
