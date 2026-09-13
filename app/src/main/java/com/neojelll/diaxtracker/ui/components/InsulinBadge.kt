@@ -144,7 +144,7 @@ fun InsulinBadge(entry: DiaryEntry) {
                 tint = Color.White,
                 modifier = Modifier.size(12.dp)
             )
-            Row(Modifier.padding(start = 8.dp).weight(1f, fill = false)) {
+            Row(Modifier.padding(start = 8.dp).weight(1f, fill = false), verticalAlignment = Alignment.Bottom) {
                 Text("$unitsLabel ", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.White)
                 Text(stringResource(R.string.insulin_units_active), fontSize = 9.5.sp, color = OnDarkSecondary)
             }

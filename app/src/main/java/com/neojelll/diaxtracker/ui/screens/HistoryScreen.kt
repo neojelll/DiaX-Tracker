@@ -357,7 +357,7 @@ private fun CompactRecordRow(entry: DiaryEntry, glucoseRange: GlucoseRange, onCl
             Text(mealTagFor(entry), fontSize = 11.sp, color = TextTertiary, modifier = Modifier.padding(start = 8.dp))
         }
         entry.bloodSugar?.let {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.Bottom) {
                 Icon(GlucoIcons.Droplet, contentDescription = null, tint = TextLabel, modifier = Modifier.size(12.dp))
                 Text(
                     String.format(Locale.US, "%.1f", it),

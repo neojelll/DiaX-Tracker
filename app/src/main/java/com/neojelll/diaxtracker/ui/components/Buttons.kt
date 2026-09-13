@@ -42,7 +42,7 @@ fun PrimaryPillButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
-    val background = if (!enabled) Ink.copy(alpha = 0.4f) else if (pressed) InkActive else Ink
+    val background = if (pressed) InkActive else Ink
 
     Row(
         modifier
