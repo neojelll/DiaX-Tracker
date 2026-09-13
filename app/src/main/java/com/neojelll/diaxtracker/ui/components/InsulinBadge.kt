@@ -94,13 +94,13 @@ fun InsulinBadge(entry: DiaryEntry) {
                 IconCircle(GlucoIcons.ChevronUp)
             }
 
-            Row(Modifier.padding(top = 11.dp), verticalAlignment = Alignment.Bottom) {
-                Text(unitsLabel, fontSize = 24.sp, fontWeight = FontWeight.Medium, color = Color.White)
+            Row(Modifier.padding(top = 11.dp)) {
+                Text(unitsLabel, fontSize = 24.sp, fontWeight = FontWeight.Medium, color = Color.White, modifier = Modifier.alignByBaseline())
                 Text(
                     stringResource(R.string.insulin_units_active),
                     fontSize = 11.sp,
                     color = OnDarkSecondary,
-                    modifier = Modifier.padding(start = 5.dp)
+                    modifier = Modifier.padding(start = 5.dp).alignByBaseline()
                 )
             }
 
@@ -144,9 +144,9 @@ fun InsulinBadge(entry: DiaryEntry) {
                 tint = Color.White,
                 modifier = Modifier.size(12.dp)
             )
-            Row(Modifier.padding(start = 8.dp).weight(1f, fill = false), verticalAlignment = Alignment.Bottom) {
-                Text("$unitsLabel ", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.White)
-                Text(stringResource(R.string.insulin_units_active), fontSize = 9.5.sp, color = OnDarkSecondary)
+            Row(Modifier.padding(start = 8.dp).weight(1f, fill = false)) {
+                Text("$unitsLabel ", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.White, modifier = Modifier.alignByBaseline())
+                Text(stringResource(R.string.insulin_units_active), fontSize = 9.5.sp, color = OnDarkSecondary, modifier = Modifier.alignByBaseline())
             }
             Spacer(Modifier.weight(1f))
             Text(

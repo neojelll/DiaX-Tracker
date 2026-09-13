@@ -364,9 +364,14 @@ private fun CompactRecordRow(entry: DiaryEntry, glucoseRange: GlucoseRange, onCl
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     color = glucoseColor(it, glucoseRange.low, glucoseRange.high),
-                    modifier = Modifier.padding(start = 4.dp)
+                    modifier = Modifier.padding(start = 4.dp).alignByBaseline()
                 )
-                Text(stringResource(R.string.mmol_unit), fontSize = 10.sp, color = TextLabel, modifier = Modifier.padding(start = 4.dp))
+                Text(
+                    stringResource(R.string.mmol_unit),
+                    fontSize = 10.sp,
+                    color = TextLabel,
+                    modifier = Modifier.padding(start = 4.dp).alignByBaseline()
+                )
             }
         }
     }
@@ -400,14 +405,20 @@ private fun FullRecordCard(
         Row(Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 13.dp)) {
             Column(Modifier.weight(1f, fill = false)) {
                 Text(stringResource(R.string.sugar_stat_label), fontSize = 10.5.sp, color = TextLabel)
-                Row(Modifier.padding(top = 3.dp), verticalAlignment = Alignment.Bottom) {
+                Row(Modifier.padding(top = 3.dp)) {
                     Text(
                         entry.bloodSugar?.let { String.format(Locale.US, "%.1f", it) } ?: "—",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Medium,
-                        color = entry.bloodSugar?.let { glucoseColor(it, glucoseRange.low, glucoseRange.high) } ?: Ink
+                        color = entry.bloodSugar?.let { glucoseColor(it, glucoseRange.low, glucoseRange.high) } ?: Ink,
+                        modifier = Modifier.alignByBaseline()
                     )
-                    Text(stringResource(R.string.mmol_unit), fontSize = 9.5.sp, color = TextLabel, modifier = Modifier.padding(start = 3.dp))
+                    Text(
+                        stringResource(R.string.mmol_unit),
+                        fontSize = 9.5.sp,
+                        color = TextLabel,
+                        modifier = Modifier.padding(start = 3.dp).alignByBaseline()
+                    )
                 }
             }
             Row(
@@ -476,9 +487,9 @@ private fun FullRecordCard(
 
 @Composable
 private fun DoseValue(value: Float?, label: String) {
-    Row(verticalAlignment = Alignment.Bottom) {
-        Text(value?.let { formatAmount(it) } ?: "—", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Ink)
-        Text(label, fontSize = 9.5.sp, color = TextLabel, modifier = Modifier.padding(start = 5.dp))
+    Row {
+        Text(value?.let { formatAmount(it) } ?: "—", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Ink, modifier = Modifier.alignByBaseline())
+        Text(label, fontSize = 9.5.sp, color = TextLabel, modifier = Modifier.padding(start = 5.dp).alignByBaseline())
     }
 }
 
