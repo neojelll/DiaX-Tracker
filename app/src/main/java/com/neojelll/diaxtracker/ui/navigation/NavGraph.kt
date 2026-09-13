@@ -3,7 +3,9 @@ package com.neojelll.diaxtracker.ui.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -18,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -93,6 +96,10 @@ fun NavGraph(navController: NavHostController) {
                         composable(ROUTE_SETTINGS) { SettingsScreen(viewModel) }
                     }
                 }
+
+                // Fixed, non-scrollable gap so the navbar always floats on the plain screen
+                // background instead of touching the last scrolled card behind it.
+                Spacer(Modifier.height(18.dp))
 
                 GlukoNavBar(
                     items = navBarItems,

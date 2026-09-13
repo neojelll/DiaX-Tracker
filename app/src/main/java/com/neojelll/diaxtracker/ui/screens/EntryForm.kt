@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +35,7 @@ import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.PresetOption
 import com.neojelll.diaxtracker.ui.components.dashedBorder
+import com.neojelll.diaxtracker.ui.components.plainClickable
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.GlukoType
@@ -101,7 +101,7 @@ internal fun PhotoPickerRow(
         Modifier
             .fillMaxWidth()
             .dashedBorder()
-            .clickable { launchPicker() }
+            .plainClickable { launchPicker() }
             .padding(horizontal = 13.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -131,7 +131,7 @@ internal fun PhotoPickerRow(
         }
         if (photoPath != null) {
             Box(
-                Modifier.size(24.dp).clickable {
+                Modifier.size(24.dp).plainClickable {
                     PhotoStore.deletePhoto(photoPath)
                     onPhotoChanged(null)
                 },

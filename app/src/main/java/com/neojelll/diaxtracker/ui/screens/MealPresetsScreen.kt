@@ -59,6 +59,7 @@ import com.neojelll.diaxtracker.ui.components.SheetHeader
 import com.neojelll.diaxtracker.ui.components.XeBadge
 import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.numeric
+import com.neojelll.diaxtracker.ui.components.plainClickable
 import com.neojelll.diaxtracker.ui.theme.DangerRed
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
@@ -106,7 +107,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     Modifier
                         .fillMaxWidth()
                         .dashedBorder(radius = GlukoRadius.record)
-                        .clickable { overlays.openPresetEdit(null) }
+                        .plainClickable { overlays.openPresetEdit(null) }
                         .padding(15.dp),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
@@ -121,7 +122,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         Box(
             Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 20.dp, bottom = 118.dp)
+                .padding(end = 20.dp, bottom = 20.dp)
                 .size(56.dp)
                 .clip(RoundedCornerShape(GlukoRadius.pill))
                 .background(GlukoColors.Ink)
@@ -135,7 +136,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
 
 @Composable
 private fun PresetCard(preset: MealPresetWithProducts, onClick: () -> Unit) {
-    GlukoCard(padding = 14.dp, radius = GlukoRadius.record, modifier = Modifier.clickable(onClick = onClick)) {
+    GlukoCard(padding = 14.dp, radius = GlukoRadius.record, modifier = Modifier.plainClickable(onClick = onClick)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(preset.preset.name, style = GlukoType.Body.copy(fontSize = 14.sp), modifier = Modifier.weight(1f), maxLines = 1)
             Spacer(Modifier.width(8.dp))
@@ -279,7 +280,7 @@ fun PresetEditSheet(
 
             Row(
                 Modifier.fillMaxWidth()
-                    .clickable(enabled = products.size < MAX_PRESET_PRODUCTS) { products.add(ProductDraft(nextKey++, "", "")) }
+                    .plainClickable(enabled = products.size < MAX_PRESET_PRODUCTS) { products.add(ProductDraft(nextKey++, "", "")) }
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

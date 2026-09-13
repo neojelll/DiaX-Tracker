@@ -108,7 +108,7 @@ object GlukoSpacing {
     val cardPadding = 16.dp
     val cardGap = 10.dp
     val itemGap = 9.dp
-    val bottomInset = 130.dp
+    val bottomInset = 24.dp
 }
 
 /** Corner radii from the reference layout. */

@@ -202,6 +202,14 @@ fun GlukoField(
 /** Filters free text input down to digits, dot and comma (decimal separators). */
 fun numeric(input: String): String = input.filter { it.isDigit() || it == '.' || it == ',' }
 
+// Bare rows/cards with no clip+background of their own would show Android's default ripple
+// as an uncontained gray rectangle; this app's flat design has no press-state visuals at all.
+@Composable
+fun Modifier.plainClickable(enabled: Boolean = true, onClick: () -> Unit): Modifier {
+    val interaction = remember { MutableInteractionSource() }
+    return this.clickable(interactionSource = interaction, indication = null, enabled = enabled, onClick = onClick)
+}
+
 /** Dashed border used for "create" affordances and empty-photo placeholders. */
 fun Modifier.dashedBorder(
     color: Color = GlukoColors.BorderDashed,
@@ -269,19 +277,5 @@ fun XeBadge(text: String, background: Color = GlukoColors.Surface) {
             .padding(horizontal = 8.dp, vertical = 3.dp)
     ) {
         Text(text, style = GlukoType.CardLabel.copy(color = GlukoColors.Ink).tabular, maxLines = 1)
-    }
-}
-
-/** Small neutral out-of-range marker for history cards (never colored, per the design system). */
-@Composable
-fun OutOfRangeBadge(modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .size(15.dp)
-            .clip(RoundedCornerShape(GlukoRadius.pill))
-            .border(1.dp, GlukoColors.Ink, RoundedCornerShape(GlukoRadius.pill)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("!", style = GlukoType.CardLabel.copy(color = GlukoColors.Ink, fontSize = 9.sp))
     }
 }

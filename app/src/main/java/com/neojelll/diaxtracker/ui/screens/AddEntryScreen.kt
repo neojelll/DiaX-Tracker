@@ -49,6 +49,7 @@ import com.neojelll.diaxtracker.ui.components.PrimaryButton
 import com.neojelll.diaxtracker.ui.components.YesterdaySummaryCard
 import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.numeric
+import com.neojelll.diaxtracker.ui.components.plainClickable
 import com.neojelll.diaxtracker.ui.components.toPresetOption
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
@@ -209,7 +210,9 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
 
         GlukoCard {
             Row(
-                Modifier.fillMaxWidth().clickable { formState = formState.copy(detailsExpanded = !formState.detailsExpanded) },
+                Modifier
+                    .fillMaxWidth()
+                    .plainClickable { formState = formState.copy(detailsExpanded = !formState.detailsExpanded) },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(Modifier.weight(1f)) {

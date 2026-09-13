@@ -56,7 +56,6 @@ import com.neojelll.diaxtracker.ui.components.GlukoSheet
 import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
-import com.neojelll.diaxtracker.ui.components.OutOfRangeBadge
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
 import com.neojelll.diaxtracker.ui.components.SecondaryButton
@@ -64,13 +63,14 @@ import com.neojelll.diaxtracker.ui.components.SheetHeader
 import com.neojelll.diaxtracker.ui.components.XeBadge
 import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.numeric
+import com.neojelll.diaxtracker.ui.components.plainClickable
 import com.neojelll.diaxtracker.ui.components.shadowSoft
 import com.neojelll.diaxtracker.ui.components.toPresetOption
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.GlukoSpacing
 import com.neojelll.diaxtracker.ui.theme.GlukoType
-import com.neojelll.diaxtracker.ui.theme.isOutOfRange
+import com.neojelll.diaxtracker.ui.theme.glucoseColor
 import com.neojelll.diaxtracker.ui.theme.tabular
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.LocalDate
@@ -223,7 +223,7 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     stringResource(R.string.history_matches_format, filtered.size)
                 }
                 Text(countLabel, style = GlukoType.Hint, modifier = Modifier.weight(1f))
-                Row(Modifier.clickable { sortDescending = !sortDescending }, verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.plainClickable { sortDescending = !sortDescending }, verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         stringResource(if (sortDescending) R.string.history_sort_desc else R.string.history_sort_asc),
                         style = GlukoType.Hint.copy(color = GlukoColors.Ink)
@@ -259,15 +259,15 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 }
                 is HistoryRow.Entry -> {
                     val entry = row.entry
-                    val outOfRange = entry.bloodSugar?.let { isOutOfRange(it, glucoseRange.low, glucoseRange.high) } == true
+                    val sugarColor = entry.bloodSugar?.let { glucoseColor(it, glucoseRange.low, glucoseRange.high) } ?: GlukoColors.Ink
                     val statCount = listOfNotNull(entry.bloodSugar, entry.shortInsulinDose, entry.longInsulinDose).size
                     if (entry.mealLabel == null && statCount <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
-                        CompactRecordRow(entry, outOfRange) { overlays.openRecordEdit(entry.id) }
+                        CompactRecordRow(entry, sugarColor) { overlays.openRecordEdit(entry.id) }
                     } else {
                         val caption = photoCaption(entry.createdAt)
                         FullRecordCard(
                             entry = entry,
-                            outOfRange = outOfRange,
+                            sugarColor = sugarColor,
                             fetchProducts = viewModel::getEntryProducts,
                             onEdit = { overlays.openRecordEdit(entry.id) },
                             onOpenPhoto = { overlays.openPhoto(entry.photoPath, caption) }
@@ -325,7 +325,7 @@ private fun photoCaption(createdAt: LocalDateTime): String {
 }
 
 @Composable
-private fun CompactRecordRow(entry: DiaryEntry, outOfRange: Boolean, onClick: () -> Unit) {
+private fun CompactRecordRow(entry: DiaryEntry, sugarColor: Color, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -340,13 +340,10 @@ private fun CompactRecordRow(entry: DiaryEntry, outOfRange: Boolean, onClick: ()
         Spacer(Modifier.width(8.dp))
         Text(stringResource(R.string.record_measurement_tag), style = GlukoType.Hint)
         Spacer(Modifier.weight(1f))
-        if (outOfRange) {
-            OutOfRangeBadge(Modifier.padding(end = 6.dp))
-        }
         LucideIcon(LucidePaths.Droplet, 12.dp, GlukoColors.TextLabel, strokeWidth = 1.8f)
         Spacer(Modifier.width(4.dp))
         entry.bloodSugar?.let {
-            Text("%.1f".format(it), style = GlukoType.ValueSmall.tabular)
+            Text("%.1f".format(it), style = GlukoType.Value.copy(color = sugarColor).tabular)
             Spacer(Modifier.width(3.dp))
             Text(stringResource(R.string.mmol_unit), style = GlukoType.Unit)
         }
@@ -356,7 +353,7 @@ private fun CompactRecordRow(entry: DiaryEntry, outOfRange: Boolean, onClick: ()
 @Composable
 private fun FullRecordCard(
     entry: DiaryEntry,
-    outOfRange: Boolean,
+    sugarColor: Color,
     fetchProducts: suspend (Long) -> List<DiaryEntryProduct>,
     onEdit: () -> Unit,
     onOpenPhoto: () -> Unit
@@ -376,10 +373,6 @@ private fun FullRecordCard(
                 ) {
                     Text(entry.mealLabel ?: stringResource(R.string.record_no_preset), style = GlukoType.CardLabel.copy(fontSize = 11.sp), maxLines = 1)
                 }
-                if (outOfRange) {
-                    Spacer(Modifier.width(6.dp))
-                    OutOfRangeBadge()
-                }
                 Spacer(Modifier.weight(1f))
                 CircleButton(30.dp, GlukoColors.Tile, onEdit) {
                     LucideIcon(LucidePaths.Pencil, 14.dp, strokeWidth = 1.8f)
@@ -392,7 +385,7 @@ private fun FullRecordCard(
                     Text(stringResource(R.string.record_sugar_label), style = GlukoType.CardLabel)
                     Spacer(Modifier.height(3.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
-                        Text(entry.bloodSugar?.let { "%.1f".format(it) } ?: "—", style = GlukoType.Value.tabular)
+                        Text(entry.bloodSugar?.let { "%.1f".format(it) } ?: "—", style = GlukoType.ValueLarge.copy(color = sugarColor).tabular)
                         Spacer(Modifier.width(3.dp))
                         Text(stringResource(R.string.mmol_unit), style = GlukoType.Unit)
                     }
@@ -400,13 +393,21 @@ private fun FullRecordCard(
                 Spacer(Modifier.width(14.dp))
                 Box(Modifier.width(1.dp).heightIn(min = 40.dp).background(GlukoColors.Divider))
                 Spacer(Modifier.width(14.dp))
-                Column {
+                Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.record_insulin_label), style = GlukoType.CardLabel)
                     Spacer(Modifier.height(3.dp))
                     Row {
-                        InsulinValue(entry.shortInsulinDose, stringResource(R.string.record_short_label))
-                        Spacer(Modifier.width(14.dp))
-                        InsulinValue(entry.longInsulinDose, stringResource(R.string.record_long_label))
+                        InsulinValue(
+                            entry.shortInsulinDose,
+                            stringResource(R.string.record_short_label),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        InsulinValue(
+                            entry.longInsulinDose,
+                            stringResource(R.string.record_long_label),
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
@@ -489,11 +490,11 @@ private fun FullRecordCard(
 }
 
 @Composable
-private fun InsulinValue(dose: Float?, label: String) {
-    Row(verticalAlignment = Alignment.Bottom) {
-        Text(dose?.let { stringResource(R.string.dose_value_format, it.toString()) } ?: "—", style = GlukoType.Value.tabular)
+private fun InsulinValue(dose: Float?, label: String, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.Bottom) {
+        Text(dose?.let { formatAmount(it) } ?: "—", style = GlukoType.Value.tabular, maxLines = 1)
         Spacer(Modifier.width(5.dp))
-        Text(label, style = GlukoType.Unit)
+        Text(label, style = GlukoType.Unit, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

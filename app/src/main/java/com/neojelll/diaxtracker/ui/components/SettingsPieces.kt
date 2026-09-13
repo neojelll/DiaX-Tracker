@@ -63,7 +63,7 @@ fun GlukoSwitch(checked: Boolean, onToggle: () -> Unit) {
 @Composable
 fun DataRow(iconPath: String, title: String, subtitle: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 11.dp),
+        Modifier.fillMaxWidth().plainClickable(onClick = onClick).padding(vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         CircleButton(34.dp, GlukoColors.Tile) {

@@ -185,7 +185,7 @@ private fun CreatePresetCube(onClick: () -> Unit) {
             .width(104.dp)
             .heightIn(min = 120.dp)
             .dashedBorder(radius = GlukoRadius.panel)
-            .clickable(onClick = onClick)
+            .plainClickable(onClick = onClick)
             .padding(13.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
