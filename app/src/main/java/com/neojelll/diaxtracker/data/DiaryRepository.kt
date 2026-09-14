@@ -14,6 +14,7 @@ class DiaryRepository(
     suspend fun insert(entry: DiaryEntry): Long = dao.insert(entry)
     suspend fun update(entry: DiaryEntry) = dao.update(entry)
     suspend fun delete(entry: DiaryEntry) = dao.delete(entry)
+    suspend fun deleteAllEntries() = dao.deleteAllEntries()
 
     suspend fun insertWithProducts(entry: DiaryEntry, products: List<DiaryEntryProduct>): Long =
         dao.insertWithProducts(entry, products)

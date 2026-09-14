@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.BackupPreferencesStore
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
@@ -42,6 +43,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     )
     private val sensorReadingStore = SensorReadingStore(application)
     private val glucoseRangeStore = GlucoseRangeStore(application)
+    private val backupPreferencesStore = BackupPreferencesStore(application)
 
     val entries: StateFlow<List<DiaryEntry>> = repository.allEntries.stateIn(
         scope = viewModelScope,
@@ -60,6 +62,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _glucoseRange = MutableStateFlow(glucoseRangeStore.getRange())
     val glucoseRange: StateFlow<GlucoseRange> = _glucoseRange.asStateFlow()
+
+    private val _autoBackupEnabled = MutableStateFlow(backupPreferencesStore.isAutoBackupEnabled())
+    val autoBackupEnabled: StateFlow<Boolean> = _autoBackupEnabled.asStateFlow()
 
     private val _errorEvents = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     val errorEvents: SharedFlow<Int> = _errorEvents.asSharedFlow()
@@ -186,6 +191,22 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         val range = GlucoseRange(low, high)
         glucoseRangeStore.saveRange(range)
         _glucoseRange.value = range
+    }
+
+    fun setAutoBackupEnabled(enabled: Boolean) {
+        backupPreferencesStore.setAutoBackupEnabled(enabled)
+        _autoBackupEnabled.value = enabled
+    }
+
+    fun deleteAllEntries() {
+        launchSafely {
+            val snapshot = entries.value
+            snapshot.forEach { entry ->
+                PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
+                PhotoStore.deletePhoto(entry.photoPath)
+            }
+            repository.deleteAllEntries()
+        }
     }
 
     private companion object {

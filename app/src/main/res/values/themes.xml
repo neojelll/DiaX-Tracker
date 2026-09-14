@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.DiaXTracker" parent="android:Theme.Material.NoActionBar">
-        <item name="android:colorPrimary">@color/card_dark</item>
-        <item name="android:colorPrimaryDark">@color/page_black</item>
-        <item name="android:colorAccent">@color/accent_lime</item>
-        <item name="android:windowBackground">@color/page_black</item>
+    <style name="Theme.DiaXTracker" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">@color/ink</item>
+        <item name="android:colorPrimaryDark">@color/ink</item>
+        <item name="android:colorAccent">@color/ink</item>
+        <item name="android:windowBackground">@color/screen_background</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>
