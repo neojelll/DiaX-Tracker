@@ -1,15 +1,15 @@
 package com.neojelll.diaxtracker.ui.components
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import java.time.LocalDate
 import java.time.LocalTime
 
-/** Everything that can be shown on top of the four tabs. At most one is active at a time. */
+/** Everything that can be shown on top of the four tabs. */
 sealed interface Overlay {
-    data object None : Overlay
     data class DatePicker(val initial: LocalDate, val onPick: (LocalDate) -> Unit) : Overlay
     data class TimePicker(val initial: LocalTime, val onPick: (LocalTime) -> Unit) : Overlay
     data object Notifications : Overlay
@@ -19,17 +19,18 @@ sealed interface Overlay {
     data class Photo(val photoPath: String?, val caption: String) : Overlay
 }
 
-/** Owns the single active overlay and exposes intent-shaped open functions to screens. */
+// Stack, bottom to top. Date/time pickers push on top of whatever opened them (e.g. the
+// record-edit sheet), keeping it mounted with its draft state alive; everything else replaces
+// the whole stack since it's always a fresh standalone sheet.
 class OverlayController {
-    var current: Overlay by mutableStateOf(Overlay.None)
-        private set
+    private val backing = mutableStateListOf<Overlay>()
+    val stack: List<Overlay> get() = backing
 
-    // Cross-tab channel: Food's "Use for entry" sets this, Home consumes it into its own form state.
     var pendingPresetSelection: MealPresetWithProducts? by mutableStateOf(null)
         private set
 
     fun dismiss() {
-        current = Overlay.None
+        if (backing.isNotEmpty()) backing.removeAt(backing.lastIndex)
     }
 
     fun selectPresetForEntry(preset: MealPresetWithProducts) {
@@ -40,31 +41,40 @@ class OverlayController {
         pendingPresetSelection = null
     }
 
+    private fun replace(overlay: Overlay) {
+        backing.clear()
+        backing.add(overlay)
+    }
+
+    private fun push(overlay: Overlay) {
+        backing.add(overlay)
+    }
+
     fun openDatePicker(initial: LocalDate, onPick: (LocalDate) -> Unit) {
-        current = Overlay.DatePicker(initial, onPick)
+        push(Overlay.DatePicker(initial, onPick))
     }
 
     fun openTimePicker(initial: LocalTime, onPick: (LocalTime) -> Unit) {
-        current = Overlay.TimePicker(initial, onPick)
+        push(Overlay.TimePicker(initial, onPick))
     }
 
     fun openNotifications() {
-        current = Overlay.Notifications
+        replace(Overlay.Notifications)
     }
 
     fun openRecordEdit(entryId: Long) {
-        current = Overlay.RecordEdit(entryId)
+        replace(Overlay.RecordEdit(entryId))
     }
 
     fun openPresetDetail(presetId: Long) {
-        current = Overlay.PresetDetail(presetId)
+        replace(Overlay.PresetDetail(presetId))
     }
 
     fun openPresetEdit(presetId: Long?) {
-        current = Overlay.PresetEdit(presetId)
+        replace(Overlay.PresetEdit(presetId))
     }
 
     fun openPhoto(photoPath: String?, caption: String) {
-        current = Overlay.Photo(photoPath, caption)
+        replace(Overlay.Photo(photoPath, caption))
     }
 }

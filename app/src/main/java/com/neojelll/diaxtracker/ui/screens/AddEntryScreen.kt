@@ -115,6 +115,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
         Spacer(Modifier.height(14.dp))
 
+        YesterdaySummaryCard(entries = yesterdaySameTimeEntries)
+
         GlukoCard(padding = 10.dp) {
             Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
                 PickerButton(
@@ -137,9 +139,6 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
         Spacer(Modifier.height(GlukoSpacing.cardGap))
 
-        YesterdaySummaryCard(entries = yesterdaySameTimeEntries)
-        if (yesterdaySameTimeEntries.isNotEmpty()) Spacer(Modifier.height(GlukoSpacing.cardGap))
-
         if (!sensorAvailable) {
             SensorWarningBanner()
             Spacer(Modifier.height(GlukoSpacing.cardGap))
@@ -161,7 +160,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     textStyle = GlukoType.DisplaySugar.tabular,
                     keyboardType = KeyboardType.Decimal,
                     background = GlukoColors.Surface,
-                    padding = PaddingValues(0.dp)
+                    padding = PaddingValues(start = 2.dp)
                 )
                 Text(stringResource(R.string.mmol_unit), style = GlukoType.Label)
             }
@@ -337,7 +336,7 @@ private fun InsulinTile(modifier: Modifier, label: String, value: String, onChan
                 textStyle = GlukoType.ValueLarge.tabular,
                 keyboardType = KeyboardType.Decimal,
                 background = androidx.compose.ui.graphics.Color.Transparent,
-                padding = PaddingValues(0.dp)
+                padding = PaddingValues(start = 2.dp)
             )
             Text(stringResource(R.string.units_short), style = GlukoType.Hint.copy(color = GlukoColors.TextLabel))
         }

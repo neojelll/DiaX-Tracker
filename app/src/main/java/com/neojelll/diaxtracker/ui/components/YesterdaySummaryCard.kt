@@ -43,6 +43,7 @@ fun YesterdaySummaryCard(entries: List<DiaryEntry>) {
             entries.forEach { entry -> YesterdaySummaryRow(entry) }
         }
     }
+    Spacer(Modifier.height(GlukoSpacing.cardGap))
 }
 
 @Composable

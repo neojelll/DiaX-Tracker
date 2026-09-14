@@ -66,7 +66,7 @@ fun NavGraph(navController: NavHostController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val activeInsulinEntries by viewModel.activeInsulinEntries.collectAsState()
     val overlays = remember { OverlayController() }
-    var insulinExpanded by remember { mutableStateOf(true) }
+    var insulinExpanded by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -99,7 +99,7 @@ fun NavGraph(navController: NavHostController) {
 
                 // Fixed, non-scrollable gap so the navbar always floats on the plain screen
                 // background instead of touching the last scrolled card behind it.
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(10.dp))
 
                 GlukoNavBar(
                     items = navBarItems,
@@ -121,20 +121,32 @@ fun NavGraph(navController: NavHostController) {
 
 @Composable
 private fun OverlayHost(viewModel: DiaryViewModel, overlays: OverlayController, navController: NavHostController) {
+    // Render every layer in the stack (not just the top one) so a picker pushed on top of a
+    // sheet like RecordEdit leaves that sheet mounted underneath instead of tearing it down.
+    for (overlay in overlays.stack) {
+        OverlayLayer(overlay, viewModel, overlays, navController)
+    }
+}
+
+@Composable
+private fun OverlayLayer(
+    overlay: Overlay,
+    viewModel: DiaryViewModel,
+    overlays: OverlayController,
+    navController: NavHostController
+) {
     val mealPresets by viewModel.mealPresets.collectAsState()
 
-    when (val overlay = overlays.current) {
-        Overlay.None -> Unit
-
+    when (overlay) {
         is Overlay.DatePicker -> DateSheet(
             initialDate = overlay.initial,
-            onDone = { picked -> overlay.onPick(picked); overlays.dismiss() },
+            onDone = { picked -> overlays.dismiss(); overlay.onPick(picked) },
             onDismiss = overlays::dismiss
         )
 
         is Overlay.TimePicker -> TimeSheet(
             initial = overlay.initial,
-            onDone = { picked -> overlay.onPick(picked); overlays.dismiss() },
+            onDone = { picked -> overlays.dismiss(); overlay.onPick(picked) },
             onDismiss = overlays::dismiss
         )
 

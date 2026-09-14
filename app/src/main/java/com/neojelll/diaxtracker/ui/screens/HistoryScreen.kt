@@ -175,7 +175,7 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     modifier = Modifier.weight(1f),
                     textStyle = GlukoType.Body.copy(fontSize = 13.sp),
                     background = Color.Transparent,
-                    padding = PaddingValues(0.dp)
+                    padding = PaddingValues(start = 2.dp)
                 )
                 if (searchQuery.isNotEmpty()) {
                     CircleButton(22.dp, GlukoColors.Tile, { searchQuery = "" }) {
