@@ -33,10 +33,12 @@ class SensorForegroundService : Service() {
             // broadcast with malformed extras (wrong type -> ClassCastException). Never let
             // that crash the app.
             try {
-                val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, -1.0)
-                if (mgdl <= 0.0) return
-                val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
-                val bloodSugar = mgdlToMmol(mgdl)
+                val reading = when (intent.action) {
+                    ACTION_BG_ESTIMATE -> readXDripEstimate(intent)
+                    ACTION_GLUCODATA_MINUTE -> readGlucodataMinute(intent)
+                    else -> null
+                } ?: return
+                val (bloodSugar, timestamp) = reading
                 SensorReadingStore(applicationContext).save(bloodSugar, timestamp)
                 serviceScope.launch {
                     try {
@@ -56,6 +58,22 @@ class SensorForegroundService : Service() {
                 Log.e(TAG, "Ignoring malformed sensor broadcast", e)
             }
         }
+
+        // xDrip+ / AndroidAPS-style broadcast (also what Juggluco sends in "xDrip broadcast" mode).
+        private fun readXDripEstimate(intent: Intent): Pair<Float, Long>? {
+            val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, -1.0)
+            if (mgdl <= 0.0) return null
+            val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
+            return mgdlToMmol(mgdl) to timestamp
+        }
+
+        // Juggluco's own native broadcast (also sent by the JugglucoNG fork, same protocol).
+        private fun readGlucodataMinute(intent: Intent): Pair<Float, Long>? {
+            val mgdl = intent.getIntExtra(EXTRA_GLUCODATA_MGDL, -1)
+            if (mgdl <= 0) return null
+            val timestamp = intent.getLongExtra(EXTRA_GLUCODATA_TIME, System.currentTimeMillis())
+            return mgdlToMmol(mgdl.toDouble()) to timestamp
+        }
     }
 
     override fun onCreate() {
@@ -66,7 +84,10 @@ class SensorForegroundService : Service() {
         ContextCompat.registerReceiver(
             this,
             receiver,
-            IntentFilter(ACTION_BG_ESTIMATE),
+            IntentFilter().apply {
+                addAction(ACTION_BG_ESTIMATE)
+                addAction(ACTION_GLUCODATA_MINUTE)
+            },
             ContextCompat.RECEIVER_EXPORTED
         )
     }
@@ -106,6 +127,9 @@ class SensorForegroundService : Service() {
         const val ACTION_BG_ESTIMATE = "com.eveningoutpost.dexdrip.BgEstimate"
         private const val EXTRA_BG_ESTIMATE = "com.eveningoutpost.dexdrip.Extras.BgEstimate"
         private const val EXTRA_TIME = "com.eveningoutpost.dexdrip.Extras.Time"
+        const val ACTION_GLUCODATA_MINUTE = "glucodata.Minute"
+        private const val EXTRA_GLUCODATA_MGDL = "glucodata.Minute.mgdl"
+        private const val EXTRA_GLUCODATA_TIME = "glucodata.Minute.Time"
 
         fun start(context: Context) {
             ContextCompat.startForegroundService(
