@@ -96,24 +96,6 @@ fun FoodPicker(
 
         AnimatedVisibility(expanded, enter = fadeIn(), exit = fadeOut()) {
             Column(Modifier.padding(top = 11.dp)) {
-                Row(Modifier.fillMaxWidth()) {
-                    Kicker(stringResource(R.string.food_picker_presets_kicker), Modifier.weight(1f))
-                    Text(
-                        pluralStringResource(R.plurals.presets_count, presets.size, presets.size),
-                        style = GlukoType.Hint
-                    )
-                }
-                Spacer(Modifier.height(9.dp))
-
-                LazyRow(state = rememberLazyListState(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                    items(presets) { preset -> PresetCube(preset) { onPick(preset) } }
-                    item { CreatePresetCube(onCreatePreset) }
-                }
-
-                Spacer(Modifier.height(14.dp))
-                GlukoDivider()
-                Spacer(Modifier.height(12.dp))
-
                 Kicker(stringResource(R.string.food_picker_manual_kicker))
                 Spacer(Modifier.height(9.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -136,6 +118,24 @@ fun FoodPicker(
                     ) {
                         Text(stringResource(R.string.food_picker_apply), style = GlukoType.Body.copy(color = GlukoColors.Surface))
                     }
+                }
+
+                Spacer(Modifier.height(14.dp))
+                GlukoDivider()
+                Spacer(Modifier.height(12.dp))
+
+                Row(Modifier.fillMaxWidth()) {
+                    Kicker(stringResource(R.string.food_picker_presets_kicker), Modifier.weight(1f))
+                    Text(
+                        pluralStringResource(R.plurals.presets_count, presets.size, presets.size),
+                        style = GlukoType.Hint
+                    )
+                }
+                Spacer(Modifier.height(9.dp))
+
+                LazyRow(state = rememberLazyListState(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    items(presets) { preset -> PresetCube(preset) { onPick(preset) } }
+                    item { CreatePresetCube(onCreatePreset) }
                 }
             }
         }
