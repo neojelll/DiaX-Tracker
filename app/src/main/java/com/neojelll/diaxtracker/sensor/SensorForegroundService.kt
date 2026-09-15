@@ -13,19 +13,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.neojelll.diaxtracker.R
-import com.neojelll.diaxtracker.data.DiaryDatabase
-import com.neojelll.diaxtracker.data.SensorReadingLog
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
 
 class SensorForegroundService : Service() {
-
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -35,25 +24,10 @@ class SensorForegroundService : Service() {
             try {
                 val reading = when (intent.action) {
                     ACTION_BG_ESTIMATE -> readXDripEstimate(intent)
-                    ACTION_GLUCODATA_MINUTE -> readGlucodataMinute(intent)
                     else -> null
                 } ?: return
                 val (bloodSugar, timestamp) = reading
-                SensorReadingStore(applicationContext).save(bloodSugar, timestamp)
-                serviceScope.launch {
-                    try {
-                        DiaryDatabase.getDatabase(applicationContext).sensorReadingLogDao().insert(
-                            SensorReadingLog(
-                                timestamp = Instant.ofEpochMilli(timestamp)
-                                    .atZone(ZoneId.systemDefault())
-                                    .toLocalDateTime(),
-                                bloodSugar = bloodSugar
-                            )
-                        )
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to persist sensor reading", e)
-                    }
-                }
+                persistSensorReading(applicationContext, bloodSugar, timestamp)
             } catch (e: Exception) {
                 Log.e(TAG, "Ignoring malformed sensor broadcast", e)
             }
@@ -65,14 +39,6 @@ class SensorForegroundService : Service() {
             if (mgdl <= 0.0) return null
             val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
             return mgdlToMmol(mgdl) to timestamp
-        }
-
-        // Juggluco's own native broadcast (also sent by the JugglucoNG fork, same protocol).
-        private fun readGlucodataMinute(intent: Intent): Pair<Float, Long>? {
-            val mgdl = intent.getIntExtra(EXTRA_GLUCODATA_MGDL, -1)
-            if (mgdl <= 0) return null
-            val timestamp = intent.getLongExtra(EXTRA_GLUCODATA_TIME, System.currentTimeMillis())
-            return mgdlToMmol(mgdl.toDouble()) to timestamp
         }
     }
 
@@ -86,7 +52,6 @@ class SensorForegroundService : Service() {
             receiver,
             IntentFilter().apply {
                 addAction(ACTION_BG_ESTIMATE)
-                addAction(ACTION_GLUCODATA_MINUTE)
             },
             ContextCompat.RECEIVER_EXPORTED
         )
@@ -94,7 +59,6 @@ class SensorForegroundService : Service() {
 
     override fun onDestroy() {
         unregisterReceiver(receiver)
-        serviceScope.cancel()
         super.onDestroy()
     }
 
@@ -127,9 +91,6 @@ class SensorForegroundService : Service() {
         const val ACTION_BG_ESTIMATE = "com.eveningoutpost.dexdrip.BgEstimate"
         private const val EXTRA_BG_ESTIMATE = "com.eveningoutpost.dexdrip.Extras.BgEstimate"
         private const val EXTRA_TIME = "com.eveningoutpost.dexdrip.Extras.Time"
-        const val ACTION_GLUCODATA_MINUTE = "glucodata.Minute"
-        private const val EXTRA_GLUCODATA_MGDL = "glucodata.Minute.mgdl"
-        private const val EXTRA_GLUCODATA_TIME = "glucodata.Minute.Time"
 
         fun start(context: Context) {
             ContextCompat.startForegroundService(
