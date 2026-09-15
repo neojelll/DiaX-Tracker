@@ -13,19 +13,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.neojelll.diaxtracker.R
-import com.neojelll.diaxtracker.data.DiaryDatabase
-import com.neojelll.diaxtracker.data.SensorReadingLog
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
 
 class SensorForegroundService : Service() {
-
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -33,28 +22,23 @@ class SensorForegroundService : Service() {
             // broadcast with malformed extras (wrong type -> ClassCastException). Never let
             // that crash the app.
             try {
-                val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, -1.0)
-                if (mgdl <= 0.0) return
-                val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
-                val bloodSugar = mgdlToMmol(mgdl)
-                SensorReadingStore(applicationContext).save(bloodSugar, timestamp)
-                serviceScope.launch {
-                    try {
-                        DiaryDatabase.getDatabase(applicationContext).sensorReadingLogDao().insert(
-                            SensorReadingLog(
-                                timestamp = Instant.ofEpochMilli(timestamp)
-                                    .atZone(ZoneId.systemDefault())
-                                    .toLocalDateTime(),
-                                bloodSugar = bloodSugar
-                            )
-                        )
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to persist sensor reading", e)
-                    }
-                }
+                val reading = when (intent.action) {
+                    ACTION_BG_ESTIMATE -> readXDripEstimate(intent)
+                    else -> null
+                } ?: return
+                val (bloodSugar, timestamp) = reading
+                persistSensorReading(applicationContext, bloodSugar, timestamp)
             } catch (e: Exception) {
                 Log.e(TAG, "Ignoring malformed sensor broadcast", e)
             }
+        }
+
+        // xDrip+ / AndroidAPS-style broadcast (also what Juggluco sends in "xDrip broadcast" mode).
+        private fun readXDripEstimate(intent: Intent): Pair<Float, Long>? {
+            val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, -1.0)
+            if (mgdl <= 0.0) return null
+            val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
+            return mgdlToMmol(mgdl) to timestamp
         }
     }
 
@@ -66,14 +50,15 @@ class SensorForegroundService : Service() {
         ContextCompat.registerReceiver(
             this,
             receiver,
-            IntentFilter(ACTION_BG_ESTIMATE),
+            IntentFilter().apply {
+                addAction(ACTION_BG_ESTIMATE)
+            },
             ContextCompat.RECEIVER_EXPORTED
         )
     }
 
     override fun onDestroy() {
         unregisterReceiver(receiver)
-        serviceScope.cancel()
         super.onDestroy()
     }
 

@@ -27,6 +27,14 @@
             android:foregroundServiceType="dataSync"
             android:exported="false" />
 
+        <receiver
+            android:name=".sensor.GlucodataReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="glucodata.Minute" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"
