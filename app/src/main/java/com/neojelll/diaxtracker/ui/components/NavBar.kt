@@ -5,13 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +33,6 @@ fun GlukoNavBar(
     val shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp, bottomStart = 42.dp, bottomEnd = 42.dp)
     Row(
         modifier = modifier
-            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
             .fillMaxWidth()
             .shadow(8.dp, shape, ambientColor = Color(0x12000000), spotColor = Color(0x12000000))
             .clip(shape)
