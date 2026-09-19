@@ -46,7 +46,6 @@ import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
-import com.neojelll.diaxtracker.ui.components.YesterdaySummaryCard
 import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.numeric
 import com.neojelll.diaxtracker.ui.components.plainClickable
@@ -72,12 +71,6 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val todayCount = remember(entries) {
         val today = LocalDate.now()
         entries.count { it.createdAt.toLocalDate() == today }
-    }
-    val yesterdaySameTimeEntries = remember(entries) {
-        val now = LocalDateTime.now()
-        val from = now.minusHours(25)
-        val to = now.minusHours(23)
-        entries.filter { it.createdAt in from..to }.sortedBy { it.createdAt }
     }
     val greetingRes = remember {
         when (LocalTime.now().hour) {
@@ -114,8 +107,6 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             NotificationButton(onClick = overlays::openNotifications)
         }
         Spacer(Modifier.height(14.dp))
-
-        YesterdaySummaryCard(entries = yesterdaySameTimeEntries)
 
         GlukoCard(padding = 10.dp) {
             Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
