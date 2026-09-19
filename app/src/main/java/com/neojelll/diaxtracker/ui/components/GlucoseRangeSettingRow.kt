@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.GlucoseRangeStore
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.GlukoSpacing
@@ -32,10 +33,9 @@ import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.theme.tabular
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
-// Real validation bounds (also used for the visual scale below), matching the manual-entry
-// dialog these replace: a personal target can't cross the fixed clinical thresholds.
-private const val MIN_BOUND_MMOL = 3.9f
-private const val MAX_BOUND_MMOL = 20f
+// Bounds shared with GlucoseRangeStore (also used for the visual scale below).
+private const val MIN_BOUND_MMOL = GlucoseRangeStore.MIN_BOUND_MMOL
+private const val MAX_BOUND_MMOL = GlucoseRangeStore.MAX_BOUND_MMOL
 private const val STEP_MMOL = 0.1f
 private const val MIN_GAP_MMOL = 0.5f
 
