@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,12 +92,15 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
     }
 
+    val scrollState = rememberScrollState()
+    val scrollEnabled by remember { derivedStateOf { scrollState.maxValue > 0 } }
+
     Column(
         Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
             .padding(horizontal = GlukoSpacing.screenHorizontal)
-            .padding(top = 18.dp, bottom = GlukoSpacing.bottomInset)
+            .padding(top = 18.dp)
+            .verticalScroll(scrollState, enabled = scrollEnabled)
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
             Column(Modifier.weight(1f)) {
