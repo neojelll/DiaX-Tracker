@@ -98,9 +98,9 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     Column(
         Modifier
             .fillMaxWidth()
-            .verticalScroll(scrollState, enabled = scrollEnabled)
             .padding(horizontal = GlukoSpacing.screenHorizontal)
-            .padding(top = 18.dp, bottom = GlukoSpacing.bottomInset)
+            .padding(top = 18.dp)
+            .verticalScroll(scrollState, enabled = scrollEnabled)
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
             Column(Modifier.weight(1f)) {
