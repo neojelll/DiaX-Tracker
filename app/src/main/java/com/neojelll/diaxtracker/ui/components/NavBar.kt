@@ -38,13 +38,13 @@ fun GlukoNavBar(
     val shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp, bottomStart = 42.dp, bottomEnd = 42.dp)
     Row(
         modifier = modifier
+            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
             .fillMaxWidth()
             .shadow(8.dp, shape, ambientColor = Color(0x12000000), spotColor = Color(0x12000000))
             .clip(shape)
             .background(GlukoColors.Surface)
-            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
             .padding(horizontal = 10.dp)
-            .padding(top = 10.dp, bottom = 12.dp),
+            .padding(vertical = 11.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         items.forEach { item ->
@@ -67,7 +67,7 @@ private fun NavItem(modifier: Modifier, item: NavBarItem, selected: Boolean, onC
             .clip(RoundedCornerShape(18.dp))
             .background(if (selected) GlukoColors.Ink else Color.Transparent)
             .clickable(onClick = onClick)
-            .padding(top = 11.dp, bottom = 10.dp),
+            .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
