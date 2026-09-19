@@ -57,18 +57,28 @@ internal fun applyPresetPick(state: EntryFormState, preset: MealPresetWithProduc
         foodExpanded = false
     )
 
-/** Applies the manual bread-units entry; returns the state unchanged if the value doesn't parse. */
-internal fun applyManualXe(state: EntryFormState, manualFormat: String): EntryFormState {
-    val value = state.manualXe.replace(',', '.').toFloatOrNull() ?: return state
-    return state.copy(
+/**
+ * Live preview while typing manual bread units: updates the draft text and, once it parses,
+ * the committed food label too - the picker stays open so typing can continue.
+ */
+internal fun updateManualXe(state: EntryFormState, rawInput: String, manualFormat: String): EntryFormState {
+    val updated = state.copy(manualXe = rawInput)
+    val value = rawInput.replace(',', '.').toFloatOrNull() ?: return updated
+    return updated.copy(
         breadUnits = formatAmount(value),
         foodLabel = manualFormat.format(formatAmount(value)),
         mealLabel = null,
-        mealProducts = emptyList(),
-        foodExpanded = false,
-        manualXe = ""
+        mealProducts = emptyList()
     )
 }
+
+/** Closes the picker and clears the draft input once the keyboard's Done action commits a valid value. */
+internal fun finishManualXe(state: EntryFormState): EntryFormState =
+    if (state.manualXe.replace(',', '.').toFloatOrNull() != null) {
+        state.copy(foodExpanded = false, manualXe = "")
+    } else {
+        state
+    }
 
 /**
  * Photo affordance shared by the entry form and the record-edit sheet: dashed row with a camera
