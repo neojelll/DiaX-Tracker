@@ -95,6 +95,7 @@
     <string name="long_insulin_short_label">Длинный инсулин</string>
 
     <string name="history_filter_all">Все дни</string>
+    <string name="history_filter_yesterday">Вчера</string>
     <string name="history_filter_today">Сегодня</string>
     <string name="history_filter_week">Неделя</string>
     <string name="history_filter_month">Месяц</string>
