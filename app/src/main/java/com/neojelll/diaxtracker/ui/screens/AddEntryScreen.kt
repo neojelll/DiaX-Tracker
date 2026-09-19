@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
@@ -154,6 +155,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     modifier = Modifier.width(92.dp),
                     textStyle = GlukoType.DisplaySugar.tabular,
                     keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done,
                     background = GlukoColors.Surface,
                     padding = PaddingValues(start = 2.dp)
                 )
@@ -330,6 +332,7 @@ private fun InsulinTile(modifier: Modifier, label: String, value: String, onChan
                 modifier = Modifier.weight(1f),
                 textStyle = GlukoType.ValueLarge.tabular,
                 keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Done,
                 background = androidx.compose.ui.graphics.Color.Transparent,
                 padding = PaddingValues(start = 2.dp)
             )
