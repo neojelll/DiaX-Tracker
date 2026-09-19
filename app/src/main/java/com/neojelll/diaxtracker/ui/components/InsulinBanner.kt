@@ -44,9 +44,15 @@ import kotlin.math.exp
 
 private const val TICK_MILLIS = 30_000L
 
-// Time to peak activity for a rapid-acting analog (Humalog/NovoRapid), matching OpenAPS's own
-// "rapid-acting" default. Not exposed as a setting - only the overall duration is, per request.
-private const val PEAK_MINUTES = 75f
+// Peak-to-duration ratio, not an absolute peak time: AndroidAPS's own "rapid-acting" curve pairs
+// a 75min peak with a 300min (5h) duration and requires duration >= 5h specifically because that
+// pairing distorts (front-loads) once duration shrinks toward 2x the peak. Scaling peak with
+// whatever duration the person configures keeps the curve's shape (the `a` parameter below)
+// identical to that validated ratio at every duration, rather than assuming one specific
+// insulin's timing (Humalog/NovoRapid) regardless of what's actually configured - e.g. Apidra's
+// genuinely shorter ~4h action gets a proportionally shorter, still well-conditioned peak instead
+// of a mismatched fixed 75min forced onto a duration it wasn't calibrated for.
+private const val PEAK_RATIO = 75f / 300f
 
 private data class InsulinOnBoard(val units: Float, val minutesLeft: Long, val fromTime: LocalDateTime, val durationMinutes: Float) {
     val progress: Float get() = (minutesLeft / durationMinutes).coerceIn(0f, 1f)
@@ -76,7 +82,7 @@ private fun activeInsulin(entries: List<DiaryEntry>, now: LocalDateTime, duratio
         val dose = entry.shortInsulinDose ?: return@mapNotNull null
         val elapsed = Duration.between(entry.createdAt, now).toMinutes().toFloat()
         if (elapsed < 0f || elapsed >= durationMinutes) return@mapNotNull null
-        val onBoard = dose * insulinOnBoardFraction(elapsed, PEAK_MINUTES, durationMinutes)
+        val onBoard = dose * insulinOnBoardFraction(elapsed, durationMinutes * PEAK_RATIO, durationMinutes)
         Triple(entry.createdAt, onBoard, durationMinutes - elapsed)
     }
     if (active.isEmpty()) return null
