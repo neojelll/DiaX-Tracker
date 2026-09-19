@@ -40,26 +40,51 @@ import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.exp
 
-private const val INSULIN_WINDOW_HOURS = 4L
 private const val TICK_MILLIS = 30_000L
 
-private data class InsulinOnBoard(val units: Float, val minutesLeft: Long, val fromTime: LocalDateTime) {
-    val progress: Float get() = (minutesLeft / (INSULIN_WINDOW_HOURS * 60f)).coerceIn(0f, 1f)
+// Time to peak activity for a rapid-acting analog (Humalog/NovoRapid), matching OpenAPS's own
+// "rapid-acting" default. Not exposed as a setting - only the overall duration is, per request.
+private const val PEAK_MINUTES = 75f
+
+private data class InsulinOnBoard(val units: Float, val minutesLeft: Long, val fromTime: LocalDateTime, val durationMinutes: Float) {
+    val progress: Float get() = (minutesLeft / durationMinutes).coerceIn(0f, 1f)
 }
 
-private fun activeInsulin(entries: List<DiaryEntry>, now: LocalDateTime): InsulinOnBoard? {
+/**
+ * Fraction of a single dose still on board `elapsedMinutes` after it was taken, using the
+ * "scalable exponential" model (Maksimovic; used by Loop/AndroidAPS/OpenAPS) rather than a flat
+ * cutoff: activity peaks at [peakMinutes] and both activity and IOB reach exactly zero at
+ * [durationMinutes], giving a realistic decay curve instead of a cliff-edge.
+ */
+private fun insulinOnBoardFraction(elapsedMinutes: Float, peakMinutes: Float, durationMinutes: Float): Float {
+    if (elapsedMinutes <= 0f) return 1f
+    if (elapsedMinutes >= durationMinutes) return 0f
+    val tau = peakMinutes * (1 - peakMinutes / durationMinutes) / (1 - 2 * peakMinutes / durationMinutes)
+    val a = 2 * tau / durationMinutes
+    val s = 1 / (1 - a + (1 + a) * exp(-durationMinutes / tau))
+    val t = elapsedMinutes
+    return (1 - s * (1 - a) * ((t * t / (tau * durationMinutes * (1 - a)) - t / tau - 1) * exp(-t / tau) + 1))
+        .coerceIn(0f, 1f)
+}
+
+private fun activeInsulin(entries: List<DiaryEntry>, now: LocalDateTime, durationHours: Float): InsulinOnBoard? {
     if (entries.isEmpty()) return null
+    val durationMinutes = durationHours * 60f
     val active = entries.mapNotNull { entry ->
         val dose = entry.shortInsulinDose ?: return@mapNotNull null
-        val remaining = Duration.between(now, entry.createdAt.plusHours(INSULIN_WINDOW_HOURS))
-        if (remaining.isNegative) null else Triple(entry.createdAt, dose, remaining.toMinutes())
+        val elapsed = Duration.between(entry.createdAt, now).toMinutes().toFloat()
+        if (elapsed < 0f || elapsed >= durationMinutes) return@mapNotNull null
+        val onBoard = dose * insulinOnBoardFraction(elapsed, PEAK_MINUTES, durationMinutes)
+        Triple(entry.createdAt, onBoard, durationMinutes - elapsed)
     }
     if (active.isEmpty()) return null
     return InsulinOnBoard(
         units = active.sumOf { it.second.toDouble() }.toFloat(),
-        minutesLeft = active.maxOf { it.third },
-        fromTime = active.maxOf { it.first }
+        minutesLeft = active.maxOf { it.third }.toLong(),
+        fromTime = active.maxOf { it.first },
+        durationMinutes = durationMinutes
     )
 }
 
@@ -67,6 +92,7 @@ private fun activeInsulin(entries: List<DiaryEntry>, now: LocalDateTime): Insuli
 @Composable
 fun InsulinBanner(
     entries: List<DiaryEntry>,
+    durationHours: Float,
     expanded: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
@@ -78,7 +104,7 @@ fun InsulinBanner(
             delay(TICK_MILLIS)
         }
     }
-    val iob = activeInsulin(entries, now) ?: return
+    val iob = activeInsulin(entries, now, durationHours) ?: return
 
     Box(modifier.padding(horizontal = GlukoSpacing.screenHorizontal).padding(top = 8.dp)) {
         AnimatedVisibility(expanded, enter = fadeIn(), exit = fadeOut()) {

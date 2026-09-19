@@ -170,6 +170,10 @@
     <string name="glucose_range_low_label">Low bound</string>
     <string name="glucose_range_high_label">High bound</string>
     <string name="glucose_range_hint">Entries outside the range will be flagged in history.</string>
+    <string name="insulin_duration_label">Insulin action duration</string>
+    <string name="hours_unit">h</string>
+    <string name="insulin_duration_value_format">%1$.1f</string>
+    <string name="insulin_duration_hint">Affects the active-insulin estimate on the main screen.</string>
     <string name="data_section_title">Data</string>
     <string name="backup_export_subtitle">ZIP archive: entries and photos</string>
     <string name="backup_import_subtitle">From a ZIP archive</string>
