@@ -34,6 +34,7 @@ import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
 import com.neojelll.diaxtracker.ui.components.GlukoSwitch
 import com.neojelll.diaxtracker.ui.components.GlucoseRangeSection
+import com.neojelll.diaxtracker.ui.components.InsulinDurationSection
 import com.neojelll.diaxtracker.ui.components.LanguageSettingRow
 import com.neojelll.diaxtracker.ui.components.SecondaryButton
 import com.neojelll.diaxtracker.ui.theme.DangerRed
@@ -75,6 +76,11 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
 
             GlukoCard {
                 GlucoseRangeSection(viewModel)
+            }
+            Spacer(Modifier.height(GlukoSpacing.cardGap))
+
+            GlukoCard {
+                InsulinDurationSection(viewModel)
             }
             Spacer(Modifier.height(GlukoSpacing.cardGap))
 

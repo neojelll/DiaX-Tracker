@@ -12,6 +12,7 @@ import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.DiaryRepository
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.GlucoseRangeStore
+import com.neojelll.diaxtracker.data.InsulinSettingsStore
 import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.data.MealPresetProduct
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
@@ -43,6 +44,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     )
     private val sensorReadingStore = SensorReadingStore(application)
     private val glucoseRangeStore = GlucoseRangeStore(application)
+    private val insulinSettingsStore = InsulinSettingsStore(application)
     private val backupPreferencesStore = BackupPreferencesStore(application)
 
     val entries: StateFlow<List<DiaryEntry>> = repository.allEntries.stateIn(
@@ -62,6 +64,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _glucoseRange = MutableStateFlow(glucoseRangeStore.getRange())
     val glucoseRange: StateFlow<GlucoseRange> = _glucoseRange.asStateFlow()
+
+    private val _insulinDurationHours = MutableStateFlow(insulinSettingsStore.getDurationHours())
+    val insulinDurationHours: StateFlow<Float> = _insulinDurationHours.asStateFlow()
 
     private val _autoBackupEnabled = MutableStateFlow(backupPreferencesStore.isAutoBackupEnabled())
     val autoBackupEnabled: StateFlow<Boolean> = _autoBackupEnabled.asStateFlow()
@@ -89,10 +94,11 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    val activeInsulinEntries: StateFlow<List<DiaryEntry>> = combine(entries, insulinTicker) { list, _ ->
+    val activeInsulinEntries: StateFlow<List<DiaryEntry>> = combine(entries, insulinTicker, _insulinDurationHours) { list, _, durationHours ->
         val now = LocalDateTime.now()
+        val duration = Duration.ofMinutes((durationHours * 60).toLong())
         list
-            .filter { it.shortInsulinDose != null && Duration.between(it.createdAt, now) < Duration.ofHours(4) }
+            .filter { it.shortInsulinDose != null && Duration.between(it.createdAt, now) < duration }
             .sortedByDescending { it.createdAt }
     }.stateIn(
         scope = viewModelScope,
@@ -191,6 +197,11 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         val range = GlucoseRange(low, high)
         glucoseRangeStore.saveRange(range)
         _glucoseRange.value = range
+    }
+
+    fun setInsulinDurationHours(hours: Float) {
+        insulinSettingsStore.saveDurationHours(hours)
+        _insulinDurationHours.value = hours
     }
 
     fun setAutoBackupEnabled(enabled: Boolean) {

@@ -65,6 +65,7 @@ fun NavGraph(navController: NavHostController) {
     val viewModel: DiaryViewModel = viewModel()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val activeInsulinEntries by viewModel.activeInsulinEntries.collectAsState()
+    val insulinDurationHours by viewModel.insulinDurationHours.collectAsState()
     val overlays = remember { OverlayController() }
     var insulinExpanded by remember { mutableStateOf(false) }
 
@@ -84,6 +85,7 @@ fun NavGraph(navController: NavHostController) {
             Column(Modifier.fillMaxSize().padding(padding)) {
                 InsulinBanner(
                     entries = activeInsulinEntries,
+                    durationHours = insulinDurationHours,
                     expanded = insulinExpanded,
                     onToggle = { insulinExpanded = !insulinExpanded }
                 )
