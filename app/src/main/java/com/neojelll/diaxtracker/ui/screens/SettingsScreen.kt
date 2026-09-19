@@ -81,7 +81,7 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
             GlukoCard {
                 Text(stringResource(R.string.data_section_title), style = GlukoType.Label)
                 Spacer(Modifier.height(12.dp))
-                BackupExportRow(snackbarHostState)
+                BackupExportRow(viewModel, snackbarHostState)
                 GlukoDivider()
                 BackupImportRow(snackbarHostState)
                 GlukoDivider()

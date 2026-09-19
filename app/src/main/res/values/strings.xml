@@ -190,10 +190,25 @@
     <string name="backup_export_title">Экспортировать данные</string>
     <string name="backup_export_success">Бэкап сохранён</string>
     <string name="backup_export_failed">Не удалось сохранить бэкап</string>
+    <string name="backup_export_sheet_title">Экспорт записей</string>
+    <string name="backup_export_sheet_subtitle">Один архив ZIP на устройство</string>
+    <string name="backup_export_period_label">Период</string>
+    <string name="backup_export_contents_label">В архив войдёт</string>
+    <string name="backup_export_contents_records">Все записи</string>
+    <string name="backup_export_contents_photos">Фото блюд</string>
+    <string name="backup_export_contents_presets">Приёмы пищи</string>
+    <string name="backup_export_contents_count">%1$d шт.</string>
+    <string name="backup_export_confirm_action">Собрать архив ZIP</string>
+    <string name="export_period_week">Неделя</string>
+    <string name="export_period_month">Месяц</string>
+    <string name="export_period_all">Всё</string>
     <string name="backup_import_title">Импортировать данные</string>
-    <string name="backup_import_confirm_title">Восстановить из бэкапа?</string>
     <string name="backup_import_confirm_text">Это действие заменит ВСЕ текущие данные данными из выбранного файла. Отменить это будет нельзя.</string>
     <string name="backup_import_confirm_action">Восстановить</string>
+    <string name="backup_import_sheet_title">Импорт данных</string>
+    <string name="backup_import_sheet_subtitle">Восстановление из архива ZIP</string>
+    <string name="backup_import_pick_file">Выбрать архив ZIP</string>
+    <string name="backup_import_pick_hint">Внутри: база данных и папка с фото</string>
     <string name="backup_import_invalid_file">Файл повреждён или не является бэкапом</string>
     <string name="backup_import_failed">Не удалось восстановить данные</string>
 
