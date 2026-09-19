@@ -69,6 +69,8 @@ import com.neojelll.diaxtracker.ui.theme.tabular
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 
 private const val MAX_PRESET_PRODUCTS = 10
+private const val PRESET_CARD_PRODUCT_PREVIEW = 3
+private val PresetCardHeight = 150.dp
 
 @Composable
 fun MealPresetsScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
@@ -136,14 +138,24 @@ fun MealPresetsScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
 
 @Composable
 private fun PresetCard(preset: MealPresetWithProducts, onClick: () -> Unit) {
-    GlukoCard(padding = 14.dp, radius = GlukoRadius.record, modifier = Modifier.plainClickable(onClick = onClick)) {
+    val sortedProducts = remember(preset.products) { preset.products.sortedBy { it.sortOrder } }
+    val visibleProducts = sortedProducts.take(PRESET_CARD_PRODUCT_PREVIEW)
+    val hiddenCount = sortedProducts.size - visibleProducts.size
+
+    // Fixed height so every card in the grid lines up regardless of how many products or how
+    // long a comment the preset has - full composition is only ever shown in the detail sheet.
+    GlukoCard(
+        padding = 14.dp,
+        radius = GlukoRadius.record,
+        modifier = Modifier.height(PresetCardHeight).plainClickable(onClick = onClick)
+    ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(preset.preset.name, style = GlukoType.Body.copy(fontSize = 14.sp), modifier = Modifier.weight(1f), maxLines = 1)
             Spacer(Modifier.width(8.dp))
             XeBadge(stringResource(R.string.bread_units_value_format, formatAmount(preset.totalBreadUnits)), GlukoColors.Tile)
         }
         Spacer(Modifier.height(10.dp))
-        preset.products.sortedBy { it.sortOrder }.forEach { product ->
+        visibleProducts.forEach { product ->
             Row(Modifier.fillMaxWidth().padding(vertical = 2.5.dp)) {
                 Text(
                     product.name, style = GlukoType.Hint.copy(color = GlukoColors.TextLabel),
@@ -152,11 +164,12 @@ private fun PresetCard(preset: MealPresetWithProducts, onClick: () -> Unit) {
                 Text(stringResource(R.string.bread_units_value_format, formatAmount(product.breadUnits)), style = GlukoType.Hint.copy(color = GlukoColors.TextSecondary).tabular)
             }
         }
-        if (preset.preset.comment.isNotBlank()) {
-            Spacer(Modifier.height(10.dp))
-            GlukoDivider()
-            Spacer(Modifier.height(10.dp))
-            Text(preset.preset.comment, style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary), maxLines = 2)
+        if (hiddenCount > 0) {
+            Spacer(Modifier.height(2.5.dp))
+            Text(
+                stringResource(R.string.meal_preset_more_products, hiddenCount),
+                style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary)
+            )
         }
     }
 }
@@ -278,17 +291,27 @@ fun PresetEditSheet(
                 }
             }
 
+            val atProductLimit = products.size >= MAX_PRESET_PRODUCTS
             Row(
                 Modifier.fillMaxWidth()
-                    .plainClickable(enabled = products.size < MAX_PRESET_PRODUCTS) { products.add(ProductDraft(nextKey++, "", "")) }
+                    .plainClickable(enabled = !atProductLimit) { products.add(ProductDraft(nextKey++, "", "")) }
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CircleButton(26.dp, GlukoColors.Tile) {
-                    LucideIcon(LucidePaths.Plus, 13.dp, strokeWidth = 2.2f)
+                    LucideIcon(LucidePaths.Plus, 13.dp, if (atProductLimit) GlukoColors.Placeholder else GlukoColors.Ink, strokeWidth = 2.2f)
                 }
                 Spacer(Modifier.width(9.dp))
-                Text(stringResource(R.string.add_product), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary))
+                Text(
+                    stringResource(R.string.add_product),
+                    style = GlukoType.Body.copy(color = if (atProductLimit) GlukoColors.Placeholder else GlukoColors.TextSecondary)
+                )
+            }
+            if (atProductLimit) {
+                Text(
+                    stringResource(R.string.meal_preset_limit_hint, MAX_PRESET_PRODUCTS),
+                    style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary)
+                )
             }
 
             Spacer(Modifier.height(14.dp))

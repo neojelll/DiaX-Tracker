@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -142,11 +141,20 @@ fun FoodPicker(
     }
 }
 
+private const val PRESET_CUBE_PRODUCT_PREVIEW = 3
+private val PresetCubeHeight = 150.dp
+
+// Fixed height so every cube in the carousel lines up regardless of how many products or how
+// long a comment the preset has - matches the same cap on the presets grid (MealPresetsScreen).
 @Composable
 private fun PresetCube(preset: PresetOption, onClick: () -> Unit) {
+    val visibleItems = preset.items.take(PRESET_CUBE_PRODUCT_PREVIEW)
+    val hiddenCount = preset.items.size - visibleItems.size
+
     Column(
         Modifier
             .width(154.dp)
+            .height(PresetCubeHeight)
             .clip(RoundedCornerShape(GlukoRadius.panel))
             .background(GlukoColors.Screen)
             .border(1.dp, GlukoColors.PresetCubeBorder, RoundedCornerShape(GlukoRadius.panel))
@@ -159,7 +167,7 @@ private fun PresetCube(preset: PresetOption, onClick: () -> Unit) {
             XeBadge(preset.xeLabel)
         }
         Spacer(Modifier.height(10.dp))
-        preset.items.forEach { (name, xe) ->
+        visibleItems.forEach { (name, xe) ->
             Row(Modifier.fillMaxWidth().padding(vertical = 2.5.dp)) {
                 Text(
                     name,
@@ -171,9 +179,12 @@ private fun PresetCube(preset: PresetOption, onClick: () -> Unit) {
                 Text(xe, style = GlukoType.Hint.copy(color = GlukoColors.TextSecondary).tabular)
             }
         }
-        if (preset.comment.isNotBlank()) {
-            Spacer(Modifier.height(9.dp))
-            Text(preset.comment, style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary), maxLines = 2)
+        if (hiddenCount > 0) {
+            Spacer(Modifier.height(2.5.dp))
+            Text(
+                stringResource(R.string.meal_preset_more_products, hiddenCount),
+                style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary)
+            )
         }
     }
 }
@@ -183,7 +194,7 @@ private fun CreatePresetCube(onClick: () -> Unit) {
     Column(
         Modifier
             .width(104.dp)
-            .heightIn(min = 120.dp)
+            .height(PresetCubeHeight)
             .dashedBorder(radius = GlukoRadius.panel)
             .plainClickable(onClick = onClick)
             .padding(13.dp),
