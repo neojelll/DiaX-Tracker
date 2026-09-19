@@ -184,10 +184,25 @@
     <string name="backup_export_title">Export data</string>
     <string name="backup_export_success">Backup saved</string>
     <string name="backup_export_failed">Failed to save backup</string>
+    <string name="backup_export_sheet_title">Export entries</string>
+    <string name="backup_export_sheet_subtitle">One ZIP archive on your device</string>
+    <string name="backup_export_period_label">Period</string>
+    <string name="backup_export_contents_label">The archive will include</string>
+    <string name="backup_export_contents_records">All entries</string>
+    <string name="backup_export_contents_photos">Meal photos</string>
+    <string name="backup_export_contents_presets">Meal presets</string>
+    <string name="backup_export_contents_count">%1$d</string>
+    <string name="backup_export_confirm_action">Build ZIP archive</string>
+    <string name="export_period_week">Week</string>
+    <string name="export_period_month">Month</string>
+    <string name="export_period_all">All time</string>
     <string name="backup_import_title">Import data</string>
-    <string name="backup_import_confirm_title">Restore from backup?</string>
     <string name="backup_import_confirm_text">This will replace ALL current data with the data from the selected file. This cannot be undone.</string>
     <string name="backup_import_confirm_action">Restore</string>
+    <string name="backup_import_sheet_title">Import data</string>
+    <string name="backup_import_sheet_subtitle">Restore from a ZIP archive</string>
+    <string name="backup_import_pick_file">Choose a ZIP archive</string>
+    <string name="backup_import_pick_hint">Contains: the database and a photos folder</string>
     <string name="backup_import_invalid_file">File is corrupted or not a valid backup</string>
     <string name="backup_import_failed">Failed to restore data</string>
 
