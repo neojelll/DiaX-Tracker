@@ -87,6 +87,7 @@ private sealed interface HistoryRow {
 
 private sealed interface DateFilter {
     data object All : DateFilter
+    data object Yesterday : DateFilter
     data object Today : DateFilter
     data object Week : DateFilter
     data object Month : DateFilter
@@ -98,6 +99,7 @@ private fun DiaryEntry.matches(filter: DateFilter): Boolean {
     val today = LocalDate.now()
     return when (filter) {
         DateFilter.All -> true
+        DateFilter.Yesterday -> date == today.minusDays(1)
         DateFilter.Today -> date == today
         DateFilter.Week -> !date.isBefore(today.minusDays(6))
         DateFilter.Month -> !date.isBefore(today.minusDays(29))
@@ -190,6 +192,7 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         item {
             val filters = listOf(
                 DateFilter.All to stringResource(R.string.history_filter_all),
+                DateFilter.Yesterday to stringResource(R.string.history_filter_yesterday),
                 DateFilter.Today to stringResource(R.string.history_filter_today),
                 DateFilter.Week to stringResource(R.string.history_filter_week),
                 DateFilter.Month to stringResource(R.string.history_filter_month)
