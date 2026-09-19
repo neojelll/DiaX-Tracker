@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -605,7 +606,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             Spacer(Modifier.height(8.dp))
             GlukoField(
                 formState.bloodSugar, { formState = formState.copy(bloodSugar = numeric(it)) }, "0.0",
-                textStyle = GlukoType.Body.tabular, keyboardType = KeyboardType.Decimal
+                textStyle = GlukoType.Body.tabular, keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done
             )
 
             Spacer(Modifier.height(14.dp))
@@ -615,7 +616,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                     Spacer(Modifier.height(8.dp))
                     GlukoField(
                         formState.shortInsulinDose, { formState = formState.copy(shortInsulinDose = numeric(it)) }, "0",
-                        textStyle = GlukoType.Body.tabular, keyboardType = KeyboardType.Decimal
+                        textStyle = GlukoType.Body.tabular, keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done
                     )
                 }
                 Column(Modifier.weight(1f)) {
@@ -623,7 +624,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                     Spacer(Modifier.height(8.dp))
                     GlukoField(
                         formState.longInsulinDose, { formState = formState.copy(longInsulinDose = numeric(it)) }, "0",
-                        textStyle = GlukoType.Body.tabular, keyboardType = KeyboardType.Decimal
+                        textStyle = GlukoType.Body.tabular, keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done
                     )
                 }
             }

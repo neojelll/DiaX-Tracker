@@ -37,6 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -181,6 +183,9 @@ fun GlukoField(
     background: Color = GlukoColors.Tile,
     padding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 13.dp)
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -194,7 +199,11 @@ fun GlukoField(
         minLines = minLines,
         cursorBrush = SolidColor(GlukoColors.Ink),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
-        keyboardActions = KeyboardActions(onDone = { onDone?.invoke() }),
+        keyboardActions = KeyboardActions(onDone = {
+            keyboardController?.hide()
+            focusManager.clearFocus()
+            onDone?.invoke()
+        }),
         decorationBox = { inner ->
             if (value.isEmpty()) {
                 Text(placeholder, style = textStyle.copy(color = GlukoColors.Placeholder))
