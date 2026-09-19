@@ -64,7 +64,6 @@
     <string name="food_manual_format">%1$s (manual)</string>
     <string name="food_picker_presets_kicker">Presets</string>
     <string name="food_picker_manual_kicker">Bread units without a preset</string>
-    <string name="food_picker_apply">Apply</string>
     <string name="food_picker_create_preset">Create preset</string>
     <string name="sheet_done">Done</string>
     <string name="sheet_time_title">Time</string>

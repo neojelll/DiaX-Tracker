@@ -66,7 +66,6 @@
     <string name="food_manual_format">%1$s (вручную)</string>
     <string name="food_picker_presets_kicker">Пресеты</string>
     <string name="food_picker_manual_kicker">Кол-во ХЕ без пресета</string>
-    <string name="food_picker_apply">Ввести</string>
     <string name="food_picker_create_preset">Создать пресет</string>
     <string name="sheet_done">Готово</string>
     <string name="sheet_time_title">Время</string>

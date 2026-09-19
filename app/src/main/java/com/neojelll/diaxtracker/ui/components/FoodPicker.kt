@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,7 +68,7 @@ fun FoodPicker(
     onToggle: () -> Unit,
     onPick: (PresetOption) -> Unit,
     onManualXeChange: (String) -> Unit,
-    onManualXeApply: () -> Unit,
+    onManualXeDone: () -> Unit,
     onCreatePreset: () -> Unit
 ) {
     Column {
@@ -97,27 +97,16 @@ fun FoodPicker(
             Column(Modifier.padding(top = 11.dp)) {
                 Kicker(stringResource(R.string.food_picker_manual_kicker))
                 Spacer(Modifier.height(9.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    GlukoField(
-                        value = manualXe,
-                        onValueChange = { onManualXeChange(numeric(it)) },
-                        placeholder = "0",
-                        modifier = Modifier.weight(1f),
-                        textStyle = GlukoType.Body.tabular,
-                        keyboardType = KeyboardType.Decimal,
-                        padding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)
-                    )
-                    Box(
-                        Modifier
-                            .clip(RoundedCornerShape(GlukoRadius.field))
-                            .background(GlukoColors.Ink)
-                            .clickable(onClick = onManualXeApply)
-                            .padding(horizontal = 18.dp, vertical = 12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(stringResource(R.string.food_picker_apply), style = GlukoType.Body.copy(color = GlukoColors.Surface))
-                    }
-                }
+                GlukoField(
+                    value = manualXe,
+                    onValueChange = { onManualXeChange(numeric(it)) },
+                    placeholder = "0",
+                    textStyle = GlukoType.Body.tabular,
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done,
+                    onDone = onManualXeDone,
+                    padding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)
+                )
 
                 Spacer(Modifier.height(14.dp))
                 GlukoDivider()

@@ -195,8 +195,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     val preset = mealPresets.find { it.preset.id == option.id }
                     if (preset != null) formState = applyPresetPick(formState, preset, option)
                 },
-                onManualXeChange = { formState = formState.copy(manualXe = it) },
-                onManualXeApply = { formState = applyManualXe(formState, manualXeFormat) },
+                onManualXeChange = { formState = updateManualXe(formState, it, manualXeFormat) },
+                onManualXeDone = { formState = finishManualXe(formState) },
                 onCreatePreset = { overlays.openPresetEdit(null) }
             )
         }
