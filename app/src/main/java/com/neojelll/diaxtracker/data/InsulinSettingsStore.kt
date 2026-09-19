@@ -23,7 +23,13 @@ class InsulinSettingsStore(context: Context) {
         // Matches the flat 4h cutoff the active-insulin banner used before it modeled decay, so
         // nobody's readout changes shape until they actually touch this setting.
         const val DEFAULT_DURATION_HOURS = 4f
-        const val MIN_DURATION_HOURS = 3f
-        const val MAX_DURATION_HOURS = 8f
+
+        // Bracket the commonly recommended rapid-acting starting point (~4.5-5h per pump-vendor
+        // and diabetes-tech guidance) rather than the full clinical range: too-short DIA causes
+        // real insulin-stacking risk (the pump/app underestimates IOB and over-doses corrections),
+        // and durations near the low end of what the exponential IOB curve stays well-conditioned
+        // for (see InsulinBanner's PEAK_RATIO) get noticeably more aggressive the shorter they get.
+        const val MIN_DURATION_HOURS = 3.5f
+        const val MAX_DURATION_HOURS = 5.5f
     }
 }
