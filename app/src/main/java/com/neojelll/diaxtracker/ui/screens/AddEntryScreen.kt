@@ -227,7 +227,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 Column(Modifier.padding(top = 13.dp)) {
                     GlukoField(
                         value = formState.notes,
-                        onValueChange = { formState = formState.copy(notes = it) },
+                        onValueChange = { formState = formState.copy(notes = it.take(NOTES_MAX_LENGTH)) },
                         placeholder = stringResource(R.string.comment_placeholder),
                         singleLine = false,
                         minLines = 3

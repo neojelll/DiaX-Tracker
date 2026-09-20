@@ -3,6 +3,10 @@ package com.neojelll.diaxtracker.ui.screens
 import java.time.LocalDate
 import java.time.LocalTime
 
+// Guard against an accidental giant paste, not a real editorial limit - nothing else in the app
+// (storage, backup, display) actually requires one.
+internal const val NOTES_MAX_LENGTH = 2500
+
 internal data class MealProductEntry(val name: String, val breadUnits: String)
 
 internal data class EntryFormState(
