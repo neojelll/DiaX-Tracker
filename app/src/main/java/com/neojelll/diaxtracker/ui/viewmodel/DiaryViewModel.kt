@@ -59,8 +59,8 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         initialValue = emptyList()
     )
 
-    private val _sensorAvailable = MutableStateFlow(sensorReadingStore.getLatestReading() != null)
-    val sensorAvailable: StateFlow<Boolean> = _sensorAvailable.asStateFlow()
+    private val _sensorWarningVisible = MutableStateFlow(computeSensorWarningVisible())
+    val sensorWarningVisible: StateFlow<Boolean> = _sensorWarningVisible.asStateFlow()
 
     private val _glucoseRange = MutableStateFlow(glucoseRangeStore.getRange())
     val glucoseRange: StateFlow<GlucoseRange> = _glucoseRange.asStateFlow()
@@ -109,11 +109,18 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     init {
         viewModelScope.launch {
             while (true) {
-                _sensorAvailable.value = sensorReadingStore.getLatestReading() != null
+                _sensorWarningVisible.value = computeSensorWarningVisible()
                 delay(SENSOR_POLL_INTERVAL_MILLIS)
             }
         }
     }
+
+    // Only worth flagging for someone who's been getting readings recently - otherwise this is
+    // either a fresh install with no sensor at all, or a sensor pairing abandoned a while ago,
+    // and neither should nag the person about "stale" data that was never really flowing.
+    private fun computeSensorWarningVisible(): Boolean =
+        sensorReadingStore.getLatestReading() == null &&
+            sensorReadingStore.hasReadingWithin(SensorReadingStore.RECENT_ACTIVITY_WINDOW_MILLIS)
 
     fun addEntry(
         bloodSugar: Float?,
