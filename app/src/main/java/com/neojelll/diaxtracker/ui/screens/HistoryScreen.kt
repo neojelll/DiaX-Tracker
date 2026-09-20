@@ -493,7 +493,7 @@ private fun FullRecordCard(
                 Spacer(Modifier.height(13.dp))
                 GlukoDivider()
                 Spacer(Modifier.height(12.dp))
-                Text(entry.notes, style = GlukoType.Note)
+                Text(entry.notes, style = GlukoType.Note, maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -660,7 +660,10 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             Spacer(Modifier.height(16.dp))
             Kicker(stringResource(R.string.comment_label))
             Spacer(Modifier.height(8.dp))
-            GlukoField(formState.notes, { formState = formState.copy(notes = it) }, stringResource(R.string.comment_placeholder), singleLine = false, minLines = 2)
+            GlukoField(
+                formState.notes, { formState = formState.copy(notes = it.take(NOTES_MAX_LENGTH)) },
+                stringResource(R.string.comment_placeholder), singleLine = false, minLines = 2
+            )
 
             Spacer(Modifier.height(14.dp))
             PhotoPickerRow(formState.photoPath) { formState = formState.copy(photoPath = it) }
