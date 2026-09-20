@@ -4,10 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -90,6 +95,7 @@ fun NavGraph(navController: NavHostController) {
     Box(Modifier.fillMaxSize().background(GlukoColors.Screen)) {
         Scaffold(
             containerColor = Color.Transparent,
+            contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
             snackbarHost = { SnackbarHost(snackbarHostState) }
         ) { padding ->
             Column(Modifier.fillMaxSize().padding(padding)) {
@@ -109,9 +115,11 @@ fun NavGraph(navController: NavHostController) {
                     }
                 }
 
-                // Fixed, non-scrollable gap so the navbar always floats on the plain screen
-                // background instead of touching the last scrolled card behind it.
-                Spacer(Modifier.height(10.dp))
+                // Floor preserves the current gesture-nav look (real gesture inset is
+                // typically <= 10.dp); the live navigationBars inset dominates only on
+                // 3-button nav, pushing GlukoNavBar up flush above the system bar.
+                val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                Spacer(Modifier.height(maxOf(10.dp, navBarInset)))
 
                 GlukoNavBar(
                     items = navBarItems,
