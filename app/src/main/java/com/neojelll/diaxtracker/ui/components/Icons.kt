@@ -42,6 +42,8 @@ object LucidePaths {
     const val File = "M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8.5zM13.5 3.5v5h5"
     const val Sort = "M7 4.5v15M3.5 16l3.5 3.5L10.5 16M17 19.5v-15M13.5 8l3.5-3.5L20.5 8"
     const val AlertTriangle = "M12 9v4.5M12 17h.01M10.3 3.9 2 18a1.6 1.6 0 0 0 1.4 2.4h17.2A1.6 1.6 0 0 0 22 18L13.7 3.9a1.6 1.6 0 0 0-2.8 0z"
+    const val Report = "M7 3.5h7l4.5 4.5v12a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 7 3.5zM14 3.5v5h4.5M9 13h6M9 16.5h4"
+    const val Trend = "M3.5 17.5 9 11l3.5 3.5L20.5 6M15.5 6h5v5"
 }
 
 /** Draws a Lucide icon with the given stroke thickness, scaled to the target size. */
