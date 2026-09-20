@@ -66,7 +66,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     var formState by remember { mutableStateOf(EntryFormState()) }
-    val sensorAvailable by viewModel.sensorAvailable.collectAsState()
+    val sensorWarningVisible by viewModel.sensorWarningVisible.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
     val entries by viewModel.entries.collectAsState()
 
@@ -113,6 +113,11 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
         Spacer(Modifier.height(14.dp))
 
+        if (sensorWarningVisible) {
+            SensorWarningBanner()
+            Spacer(Modifier.height(GlukoSpacing.cardGap))
+        }
+
         GlukoCard(padding = 10.dp) {
             Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
                 PickerButton(
@@ -134,11 +139,6 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             }
         }
         Spacer(Modifier.height(GlukoSpacing.cardGap))
-
-        if (!sensorAvailable) {
-            SensorWarningBanner()
-            Spacer(Modifier.height(GlukoSpacing.cardGap))
-        }
 
         GlukoCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
