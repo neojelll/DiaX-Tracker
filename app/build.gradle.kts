@@ -22,8 +22,9 @@ android {
         applicationId = "com.neojelll.diaxtracker"
         minSdk = 26
         targetSdk = 35
+        // Play Store requires this to strictly increase - bump by hand alongside versionName.
         versionCode = 2
-        versionName = "0.2.0"
+        versionName = "0.2.0" // x-release-please-version
     }
 
     signingConfigs {

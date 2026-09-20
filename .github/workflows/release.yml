@@ -2,16 +2,33 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  build:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+
+  build-apk:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
 
       - uses: actions/setup-java@v4
         with:
@@ -22,9 +39,9 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk diax-tracker-${{ github.ref_name }}.apk
+        run: cp app/build/outputs/apk/release/app-release.apk diax-tracker-${{ needs.release-please.outputs.tag_name }}.apk
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: diax-tracker-${{ github.ref_name }}.apk
-          generate_release_notes: true
+          tag_name: ${{ needs.release-please.outputs.tag_name }}
+          files: diax-tracker-${{ needs.release-please.outputs.tag_name }}.apk
