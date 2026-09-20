@@ -493,7 +493,9 @@ private fun FullRecordCard(
                 Spacer(Modifier.height(13.dp))
                 GlukoDivider()
                 Spacer(Modifier.height(12.dp))
-                Text(entry.notes, style = GlukoType.Note)
+                Kicker(stringResource(R.string.comment_label))
+                Spacer(Modifier.height(4.dp))
+                Text(entry.notes, style = GlukoType.Note, maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
         }
     }
