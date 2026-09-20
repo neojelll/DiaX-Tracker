@@ -2,7 +2,7 @@
     <string name="app_name">DiaX-Tracker</string>
 
     <string name="nav_entry">Запись</string>
-    <string name="nav_meal_presets">Приёмы</string>
+    <string name="nav_meal_presets">Питание</string>
     <string name="nav_history">История</string>
     <string name="nav_settings">Настройки</string>
 
@@ -15,10 +15,10 @@
     <string name="save_entry_button">Сохранить запись</string>
 
     <plurals name="today_entries_count">
-        <item quantity="one">Сегодня у тебя %d запись</item>
-        <item quantity="few">Сегодня у тебя %d записи</item>
-        <item quantity="many">Сегодня у тебя %d записей</item>
-        <item quantity="other">Сегодня у тебя %d записей</item>
+        <item quantity="one">Сегодня %d запись</item>
+        <item quantity="few">Сегодня %d записи</item>
+        <item quantity="many">Сегодня %d записей</item>
+        <item quantity="other">Сегодня %d записей</item>
     </plurals>
 
     <string name="edit_entry_title">Редактирование</string>
@@ -56,7 +56,7 @@
     <string name="sugar_level_label">Уровень сахара в крови</string>
     <string name="mmol_unit">ммоль/л</string>
     <string name="units_short">ед</string>
-    <string name="food_placeholder_home">Что ты ел</string>
+    <string name="food_placeholder_home">Приём пищи</string>
     <string name="food_placeholder_edit">Выбрать приём пищи</string>
     <string name="details_toggle_title">Добавить детали</string>
     <string name="details_toggle_hint">комментарий, фото — необязательно</string>
@@ -166,7 +166,7 @@
     <string name="preset_detail_composition">Состав</string>
     <string name="preset_detail_pick">Выбрать для записи</string>
     <string name="meal_preset_add_dashed">Добавить приём пищи</string>
-    <string name="meal_preset_comment_placeholder">Когда и где обычно ешь</string>
+    <string name="meal_preset_comment_placeholder">Например: дома по утрам</string>
 
     <string name="settings_title">Настройки</string>
     <string name="settings_subtitle">Бета-версия · данные только на устройстве</string>
@@ -226,7 +226,7 @@
     <string name="notif_time_today">сегодня</string>
     <string name="notif_time_yesterday">вчера</string>
     <string name="notif_time_two_days_ago">2 дня назад</string>
-    <string name="notif_text_report">Есть отчёт о том, что вы ели в это время на прошлой неделе.</string>
+    <string name="notif_text_report">Есть отчёт о том, что Вы ели в это время на прошлой неделе.</string>
     <string name="notif_text_pattern">После обедов с 5 ХЕ сахар держится выше обычного.</string>
     <string name="notif_text_reminder">Вы не записали длинный инсулин за вечер вторника.</string>
     <string name="notif_action_report">Подробный отчёт</string>
