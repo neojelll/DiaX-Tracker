@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -354,6 +355,11 @@ private fun CompactRecordRow(entry: DiaryEntry, sugarColor: Color, onClick: () -
     }
 }
 
+// Strict, not a minimum - matching the fixed-size preset cards/cubes elsewhere (MealPresetsScreen,
+// FoodPicker) - so a portrait photo can't stretch this box (and the row) taller than the preset
+// tile next to it.
+private val RecordMediaHeight = 88.dp
+
 @Composable
 private fun FullRecordCard(
     entry: DiaryEntry,
@@ -424,7 +430,7 @@ private fun FullRecordCard(
                 Column(
                     Modifier
                         .weight(1f)
-                        .heightIn(min = 88.dp)
+                        .height(RecordMediaHeight)
                         .clip(RoundedCornerShape(GlukoRadius.tile))
                         .background(GlukoColors.Tile)
                         .clickable(onClick = onEdit)
@@ -454,7 +460,7 @@ private fun FullRecordCard(
                 if (entry.photoPath != null) {
                     Box(
                         Modifier
-                            .width(88.dp).heightIn(min = 88.dp)
+                            .width(88.dp).height(RecordMediaHeight)
                             .clip(RoundedCornerShape(GlukoRadius.tile))
                             .clickable(onClick = onOpenPhoto),
                         contentAlignment = Alignment.Center
@@ -463,7 +469,7 @@ private fun FullRecordCard(
                             model = java.io.File(entry.photoPath),
                             contentDescription = stringResource(R.string.entry_photo),
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxWidth().heightIn(min = 88.dp).clip(RoundedCornerShape(GlukoRadius.tile))
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(GlukoRadius.tile))
                         )
                         Box(
                             Modifier.align(Alignment.BottomEnd).padding(6.dp).width(20.dp).heightIn(min = 20.dp)
@@ -475,7 +481,7 @@ private fun FullRecordCard(
                     }
                 } else {
                     Box(
-                        Modifier.width(88.dp).heightIn(min = 88.dp).dashedBorder(),
+                        Modifier.width(88.dp).height(RecordMediaHeight).dashedBorder(),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(stringResource(R.string.record_no_photo), style = GlukoType.CardLabel.copy(color = GlukoColors.Placeholder), textAlign = TextAlign.Center)
