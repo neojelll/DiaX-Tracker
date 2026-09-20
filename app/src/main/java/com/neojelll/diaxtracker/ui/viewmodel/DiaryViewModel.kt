@@ -10,6 +10,7 @@ import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.DiaryRepository
+import com.neojelll.diaxtracker.data.DisclaimerStore
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.GlucoseRangeStore
 import com.neojelll.diaxtracker.data.InsulinSettingsStore
@@ -46,6 +47,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val glucoseRangeStore = GlucoseRangeStore(application)
     private val insulinSettingsStore = InsulinSettingsStore(application)
     private val backupPreferencesStore = BackupPreferencesStore(application)
+    private val disclaimerStore = DisclaimerStore(application)
 
     val entries: StateFlow<List<DiaryEntry>> = repository.allEntries.stateIn(
         scope = viewModelScope,
@@ -70,6 +72,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _autoBackupEnabled = MutableStateFlow(backupPreferencesStore.isAutoBackupEnabled())
     val autoBackupEnabled: StateFlow<Boolean> = _autoBackupEnabled.asStateFlow()
+
+    private val _disclaimerAccepted = MutableStateFlow(disclaimerStore.isAccepted())
+    val disclaimerAccepted: StateFlow<Boolean> = _disclaimerAccepted.asStateFlow()
 
     private val _errorEvents = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     val errorEvents: SharedFlow<Int> = _errorEvents.asSharedFlow()
@@ -214,6 +219,11 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun setAutoBackupEnabled(enabled: Boolean) {
         backupPreferencesStore.setAutoBackupEnabled(enabled)
         _autoBackupEnabled.value = enabled
+    }
+
+    fun acceptDisclaimer() {
+        disclaimerStore.setAccepted()
+        _disclaimerAccepted.value = true
     }
 
     fun deleteAllEntries() {
