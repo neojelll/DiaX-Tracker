@@ -32,7 +32,7 @@ import com.neojelll.diaxtracker.ui.components.InsulinBanner
 import com.neojelll.diaxtracker.ui.components.GlukoNavBar
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.NavBarItem
-import com.neojelll.diaxtracker.ui.components.NotificationPanel
+import com.neojelll.diaxtracker.ui.components.NotificationSheet
 import com.neojelll.diaxtracker.ui.components.Overlay
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.PhotoPreview
@@ -152,7 +152,7 @@ private fun OverlayLayer(
             onDismiss = overlays::dismiss
         )
 
-        Overlay.Notifications -> NotificationPanel(onDismiss = overlays::dismiss)
+        Overlay.Notifications -> NotificationSheet(onDismiss = overlays::dismiss)
 
         is Overlay.Photo -> PhotoPreview(overlay.photoPath, overlay.caption, onDismiss = overlays::dismiss)
 
