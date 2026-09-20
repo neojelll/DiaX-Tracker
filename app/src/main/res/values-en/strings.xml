@@ -226,4 +226,8 @@
     <string name="notif_action_report">Full report</string>
     <string name="notif_action_pattern">See breakdown</string>
     <string name="notif_action_reminder">Add entry</string>
+
+    <string name="disclaimer_title">Before you start</string>
+    <string name="disclaimer_body">DiaX-Tracker is a personal diary for your own diabetes records. It is not a medical device, does not provide medical recommendations, and does not calculate insulin doses. On-screen figures (including the active-insulin estimate) are informational only and do not replace consulting a doctor. You make all treatment decisions yourself and bear full responsibility for them.</string>
+    <string name="disclaimer_accept">I understand and accept</string>
 </resources>

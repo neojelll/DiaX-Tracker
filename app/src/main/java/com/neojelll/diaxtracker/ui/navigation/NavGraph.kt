@@ -29,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.ui.components.InsulinBanner
+import com.neojelll.diaxtracker.ui.components.DisclaimerOverlay
 import com.neojelll.diaxtracker.ui.components.GlukoNavBar
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.NavBarItem
@@ -63,6 +64,15 @@ private val navBarItems = listOf(
 @Composable
 fun NavGraph(navController: NavHostController) {
     val viewModel: DiaryViewModel = viewModel()
+    val disclaimerAccepted by viewModel.disclaimerAccepted.collectAsState()
+
+    if (!disclaimerAccepted) {
+        Box(Modifier.fillMaxSize().background(GlukoColors.Screen)) {
+            DisclaimerOverlay(onAccept = viewModel::acceptDisclaimer)
+        }
+        return
+    }
+
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val activeInsulinEntries by viewModel.activeInsulinEntries.collectAsState()
     val insulinDurationHours by viewModel.insulinDurationHours.collectAsState()

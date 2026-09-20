@@ -232,4 +232,8 @@
     <string name="notif_action_report">Подробный отчёт</string>
     <string name="notif_action_pattern">Посмотреть разбор</string>
     <string name="notif_action_reminder">Дополнить запись</string>
+
+    <string name="disclaimer_title">Прежде чем начать</string>
+    <string name="disclaimer_body">DiaX-Tracker — личный дневник для собственных записей о диабете. Приложение не является медицинским изделием, не даёт медицинских рекомендаций и не рассчитывает дозы инсулина. Показатели на экране (включая оценку активного инсулина) носят информационный характер и не заменяют консультацию врача. Все решения о лечении вы принимаете самостоятельно и несёте за них полную ответственность.</string>
+    <string name="disclaimer_accept">Понимаю и принимаю</string>
 </resources>
