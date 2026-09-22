@@ -4,10 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -90,9 +95,16 @@ fun NavGraph(navController: NavHostController) {
     Box(Modifier.fillMaxSize().background(GlukoColors.Screen)) {
         Scaffold(
             containerColor = Color.Transparent,
+            contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
             snackbarHost = { SnackbarHost(snackbarHostState) }
         ) { padding ->
-            Column(Modifier.fillMaxSize().padding(padding)) {
+            // Scaffold no longer consumes navigationBars itself (see contentWindowInsets
+            // above), so the live inset is applied here as bottom padding on the whole
+            // column instead - this is what actually keeps GlukoNavBar, the last child,
+            // clear of the system bar. The fixed 10.dp spacer below it is unrelated: it's
+            // just the visual gap between scrolled content and the navbar itself.
+            val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            Column(Modifier.fillMaxSize().padding(padding).padding(bottom = navBarInset)) {
                 InsulinBanner(
                     entries = activeInsulinEntries,
                     durationHours = insulinDurationHours,
@@ -109,8 +121,6 @@ fun NavGraph(navController: NavHostController) {
                     }
                 }
 
-                // Fixed, non-scrollable gap so the navbar always floats on the plain screen
-                // background instead of touching the last scrolled card behind it.
                 Spacer(Modifier.height(10.dp))
 
                 GlukoNavBar(
