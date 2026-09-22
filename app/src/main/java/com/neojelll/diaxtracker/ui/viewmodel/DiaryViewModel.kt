@@ -240,7 +240,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private companion object {
         const val TAG = "DiaryViewModel"
         const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
-        const val INSULIN_CHECK_INTERVAL_MILLIS = 30_000L
+        const val INSULIN_CHECK_INTERVAL_MILLIS = 60_000L
         const val SENSOR_FALLBACK_TOLERANCE_MINUTES = 10L
     }
 }
