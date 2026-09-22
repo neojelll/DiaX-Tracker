@@ -42,7 +42,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.exp
 
-private const val TICK_MILLIS = 30_000L
+private const val TICK_MILLIS = 60_000L
 
 // Peak-to-duration ratio, not an absolute peak time: AndroidAPS's own "rapid-acting" curve pairs
 // a 75min peak with a 300min (5h) duration and requires duration >= 5h specifically because that
