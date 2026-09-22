@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -68,6 +71,10 @@ fun GlukoSheet(
     content: @Composable ColumnScope.() -> Unit = {}
 ) {
     val noRipple = remember { MutableInteractionSource() }
+    // Floor preserves the current gesture-nav look (real gesture inset is typically
+    // <= 26.dp); the live navigationBars inset dominates only on 3-button nav, keeping
+    // sheet content clear of the system bar. Mirrors the GlukoNavBar fix in NavGraph.kt.
+    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     Box(Modifier.fillMaxSize()) {
         Box(
             Modifier
@@ -89,7 +96,7 @@ fun GlukoSheet(
                 )
                 .background(GlukoColors.Surface)
                 .clickable(interactionSource = noRipple, indication = null) {}
-                .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 26.dp)
+                .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = maxOf(26.dp, navBarInset))
         ) {
             Box(
                 Modifier
