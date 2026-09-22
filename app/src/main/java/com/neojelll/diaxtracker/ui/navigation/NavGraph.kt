@@ -98,7 +98,13 @@ fun NavGraph(navController: NavHostController) {
             contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
             snackbarHost = { SnackbarHost(snackbarHostState) }
         ) { padding ->
-            Column(Modifier.fillMaxSize().padding(padding)) {
+            // Scaffold no longer consumes navigationBars itself (see contentWindowInsets
+            // above), so the live inset is applied here as bottom padding on the whole
+            // column instead - this is what actually keeps GlukoNavBar, the last child,
+            // clear of the system bar. The fixed 10.dp spacer below it is unrelated: it's
+            // just the visual gap between scrolled content and the navbar itself.
+            val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            Column(Modifier.fillMaxSize().padding(padding).padding(bottom = navBarInset)) {
                 InsulinBanner(
                     entries = activeInsulinEntries,
                     durationHours = insulinDurationHours,
@@ -115,11 +121,7 @@ fun NavGraph(navController: NavHostController) {
                     }
                 }
 
-                // Floor preserves the current gesture-nav look (real gesture inset is
-                // typically <= 10.dp); the live navigationBars inset dominates only on
-                // 3-button nav, pushing GlukoNavBar up flush above the system bar.
-                val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                Spacer(Modifier.height(maxOf(10.dp, navBarInset)))
+                Spacer(Modifier.height(10.dp))
 
                 GlukoNavBar(
                     items = navBarItems,
