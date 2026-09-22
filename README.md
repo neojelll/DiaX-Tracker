@@ -1,6 +1,6 @@
 # DiaX-Tracker
 
-[![CI](https://img.shields.io/github/actions/workflow/status/neojelll/DiaX-Tracker/ci.yml?branch=main&style=flat-square)](https://github.com/neojelll/DiaX-Tracker/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/neojelll/DiaX-Tracker/ci.yml?branch=main&style=for-the-badge)](https://github.com/neojelll/DiaX-Tracker/actions/workflows/ci.yml)
 
 Личный дневник для людей с диабетом: сахар, инсулин, еда и заметки — в одном месте, без облака
 и без аккаунтов. Все данные хранятся только на устройстве.
