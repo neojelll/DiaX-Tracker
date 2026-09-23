@@ -74,6 +74,18 @@ class ActiveInsulinTest {
     }
 
     @Test
+    fun `filters correctly when valid and invalid entries are mixed in one list`() {
+        val sugarOnly = doseEntry(dose = null, minutesAgo = 5)
+        val stale = doseEntry(dose = 9f, minutesAgo = (DURATION_HOURS * 60).toLong() + 10)
+        val fromTheFuture = doseEntry(dose = 9f, minutesAgo = -5)
+        val valid = doseEntry(dose = 4f, minutesAgo = 0)
+
+        val result = activeInsulin(listOf(sugarOnly, stale, fromTheFuture, valid), NOW, DURATION_HOURS)
+
+        assertEquals(4f, result!!.units, 0.001f)
+    }
+
+    @Test
     fun `progress is coerced into 0 to 1 even if minutesLeft would fall outside it`() {
         val overLong = InsulinOnBoard(units = 1f, minutesLeft = 500L, fromTime = NOW, durationMinutes = 300f)
         val negative = InsulinOnBoard(units = 1f, minutesLeft = -10L, fromTime = NOW, durationMinutes = 300f)

@@ -55,4 +55,33 @@ class InsulinOnBoardFractionTest {
         val atHalfOfThreeAndAHalfHours = insulinOnBoardFraction(100f, 50f, 200f)
         assertEquals(atHalfOfFiveHours, atHalfOfThreeAndAHalfHours, 0.0001f)
     }
+
+    @Test
+    fun `matches a hand-derived reference value at the peak`() {
+        // Worked by hand from the formula itself (tau=112.5, a=0.75, S=~2.6911) at t=peak=75,
+        // duration=300 - not from an independent source, but a concrete pinned number that a
+        // structurally-valid-but-wrong formula (still monotonic, still bounded, still scalable)
+        // would not coincidentally reproduce. Catches a corrupted formula that the property
+        // tests above could miss.
+        assertEquals(0.6726f, insulinOnBoardFraction(75f, 75f, 300f), 0.001f)
+    }
+
+    @Test
+    fun `changing the peak while holding duration fixed actually changes the curve`() {
+        // Guards against peakMinutes silently being a dead parameter.
+        val earlierPeak = insulinOnBoardFraction(100f, 50f, 300f)
+        val laterPeak = insulinOnBoardFraction(100f, 100f, 300f)
+        assertTrue(earlierPeak != laterPeak)
+    }
+
+    @Test
+    fun `a peak at exactly half the duration is a known unsafe input`() {
+        // tau's denominator is (1 - 2*peakMinutes/durationMinutes), which is exactly zero here -
+        // division by zero. activeInsulin() never hits this (PEAK_RATIO is fixed at 0.25, i.e.
+        // peak is always a quarter of duration, never half), but insulinOnBoardFraction is a
+        // public function now - this test documents the one input shape any future caller must
+        // never pass, rather than leaving it as a silent landmine.
+        val fraction = insulinOnBoardFraction(150f, 150f, 300f)
+        assertTrue(fraction.isNaN() || fraction.isInfinite())
+    }
 }
