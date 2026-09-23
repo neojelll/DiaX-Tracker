@@ -9,6 +9,7 @@ class DiaryRepository(
     private val sensorReadingLogDao: SensorReadingLogDao
 ) {
     val allEntries: Flow<List<DiaryEntry>> = dao.getAllEntries()
+    val allEntryProducts: Flow<List<DiaryEntryProduct>> = dao.getAllEntryProducts()
     val allMealPresets: Flow<List<MealPresetWithProducts>> = mealPresetDao.getAllPresetsWithProducts()
 
     suspend fun insert(entry: DiaryEntry): Long = dao.insert(entry)

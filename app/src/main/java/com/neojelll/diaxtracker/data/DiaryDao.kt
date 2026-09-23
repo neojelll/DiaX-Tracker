@@ -37,6 +37,9 @@ abstract class DiaryDao {
     @Query("SELECT * FROM diary_entry_products WHERE diaryEntryId = :entryId ORDER BY sortOrder ASC")
     abstract suspend fun getEntryProducts(entryId: Long): List<DiaryEntryProduct>
 
+    @Query("SELECT * FROM diary_entry_products")
+    abstract fun getAllEntryProducts(): Flow<List<DiaryEntryProduct>>
+
     @Transaction
     open suspend fun insertWithProducts(entry: DiaryEntry, products: List<DiaryEntryProduct>): Long {
         val entryId = insert(entry)

@@ -55,6 +55,13 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         initialValue = emptyList()
     )
 
+    /** Every entry's product/ingredient rows, for History's search - see per-entry [getEntryProducts] for display. */
+    val entryProducts: StateFlow<List<DiaryEntryProduct>> = repository.allEntryProducts.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
+    )
+
     val mealPresets: StateFlow<List<MealPresetWithProducts>> = repository.allMealPresets.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),

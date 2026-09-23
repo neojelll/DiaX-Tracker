@@ -112,19 +112,25 @@ private fun DiaryEntry.matches(filter: DateFilter): Boolean {
 @Composable
 fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val entries by viewModel.entries.collectAsState()
+    val entryProducts by viewModel.entryProducts.collectAsState()
     val glucoseRange by viewModel.glucoseRange.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     var dateFilter by remember { mutableStateOf<DateFilter>(DateFilter.All) }
     var sortDescending by remember { mutableStateOf(true) }
 
-    val filtered = remember(entries, searchQuery, dateFilter, sortDescending) {
+    val productNamesByEntry = remember(entryProducts) {
+        entryProducts.groupBy(DiaryEntryProduct::diaryEntryId) { it.name }
+    }
+
+    val filtered = remember(entries, productNamesByEntry, searchQuery, dateFilter, sortDescending) {
         val byDateAndText = entries.filter { entry ->
             entry.matches(dateFilter) && (
                 searchQuery.isBlank() ||
                     entry.notes.contains(searchQuery, ignoreCase = true) ||
                     entry.mealLabel?.contains(searchQuery, ignoreCase = true) == true ||
-                    entry.bloodSugar?.toString()?.contains(searchQuery) == true
+                    entry.bloodSugar?.toString()?.contains(searchQuery) == true ||
+                    productNamesByEntry[entry.id]?.any { it.contains(searchQuery, ignoreCase = true) } == true
                 )
         }
         if (sortDescending) byDateAndText else byDateAndText.reversed()
