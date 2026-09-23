@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
@@ -111,19 +112,25 @@ private fun DiaryEntry.matches(filter: DateFilter): Boolean {
 @Composable
 fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val entries by viewModel.entries.collectAsState()
+    val entryProducts by viewModel.entryProducts.collectAsState()
     val glucoseRange by viewModel.glucoseRange.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     var dateFilter by remember { mutableStateOf<DateFilter>(DateFilter.All) }
     var sortDescending by remember { mutableStateOf(true) }
 
-    val filtered = remember(entries, searchQuery, dateFilter, sortDescending) {
+    val productNamesByEntry = remember(entryProducts) {
+        entryProducts.groupBy(DiaryEntryProduct::diaryEntryId) { it.name }
+    }
+
+    val filtered = remember(entries, productNamesByEntry, searchQuery, dateFilter, sortDescending) {
         val byDateAndText = entries.filter { entry ->
             entry.matches(dateFilter) && (
                 searchQuery.isBlank() ||
                     entry.notes.contains(searchQuery, ignoreCase = true) ||
                     entry.mealLabel?.contains(searchQuery, ignoreCase = true) == true ||
-                    entry.bloodSugar?.toString()?.contains(searchQuery) == true
+                    entry.bloodSugar?.toString()?.contains(searchQuery) == true ||
+                    productNamesByEntry[entry.id]?.any { it.contains(searchQuery, ignoreCase = true) } == true
                 )
         }
         if (sortDescending) byDateAndText else byDateAndText.reversed()
@@ -179,7 +186,8 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     modifier = Modifier.weight(1f),
                     textStyle = GlukoType.Body.copy(fontSize = 13.sp),
                     background = Color.Transparent,
-                    padding = PaddingValues(start = 2.dp)
+                    padding = PaddingValues(start = 4.dp),
+                    cursorBrush = SolidColor(GlukoColors.CursorSoft)
                 )
                 if (searchQuery.isNotEmpty()) {
                     CircleButton(22.dp, GlukoColors.Tile, { searchQuery = "" }) {

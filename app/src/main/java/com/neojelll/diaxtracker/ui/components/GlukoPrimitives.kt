@@ -33,8 +33,11 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalFocusManager
@@ -181,7 +184,13 @@ fun GlukoField(
     singleLine: Boolean = true,
     minLines: Int = 1,
     background: Color = GlukoColors.Tile,
-    padding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 13.dp)
+    padding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 13.dp),
+    // A rounded clip on a transparent background rounds nothing visible - it only risks
+    // cropping the cursor/glyphs near the corner for callers with tight padding. Default
+    // to no clip there instead of relying on every transparent-background call site to
+    // remember to opt out.
+    shape: Shape = if (background == Color.Transparent) RectangleShape else RoundedCornerShape(GlukoRadius.field),
+    cursorBrush: Brush = SolidColor(GlukoColors.Ink)
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -191,13 +200,13 @@ fun GlukoField(
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(GlukoRadius.field))
+            .clip(shape)
             .background(background)
             .padding(padding),
         textStyle = textStyle,
         singleLine = singleLine,
         minLines = minLines,
-        cursorBrush = SolidColor(GlukoColors.Ink),
+        cursorBrush = cursorBrush,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
         keyboardActions = KeyboardActions(onDone = {
             keyboardController?.hide()

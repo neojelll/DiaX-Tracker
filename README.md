@@ -1,50 +1,54 @@
 # DiaX-Tracker
 
-Личный дневник для людей с диабетом: сахар, инсулин, еда и заметки — в одном месте, без облака
-и без аккаунтов. Все данные хранятся только на устройстве.
+English | [Русский](README.ru.md)
 
-Сахар можно не вводить вручную — приложение принимает показания напрямую от **xDrip+** и
-**Juggluco** и подставляет их в запись автоматически. А на главном экране всегда видно, сколько
-инсулина ещё активно в организме — расчёт идёт по той же фармакокинетической модели, что
-используется в Loop/AndroidAPS/OpenAPS.
+[![CI](https://img.shields.io/github/actions/workflow/status/neojelll/DiaX-Tracker/ci.yml?branch=main&style=flat-square)](https://github.com/neojelll/DiaX-Tracker/actions/workflows/ci.yml)
 
-| Запись | Питание | История |
+A personal diary for people with diabetes: blood sugar, insulin, meals, and notes — all in
+one place, with no cloud and no accounts. All data stays on the device.
+
+Blood sugar doesn't have to be entered by hand — the app receives readings directly from
+**xDrip+** and **Juggluco** and fills them into the entry automatically. The home screen
+always shows how much insulin is still active in the body — calculated using the same
+pharmacokinetic model used by Loop/AndroidAPS/OpenAPS.
+
+| Entry | Meals | History |
 | --- | --- | --- |
-| ![Экран записи](docs/screenshots/entry.jpg) | ![Пресеты питания](docs/screenshots/meal-presets.jpg) | ![История записей](docs/screenshots/history.jpg) |
+| ![Entry screen](docs/screenshots/entry.jpg) | ![Meal presets](docs/screenshots/meal-presets.jpg) | ![Entry history](docs/screenshots/history.jpg) |
 
-## Возможности
+## Features
 
-- Автоматическая подстановка сахара из **xDrip+** и **Juggluco** — не нужно переписывать
-  показания датчика вручную
-- Активный инсулин на главном экране: расчёт по фармакокинетической модели (экспоненциальный
-  спад, как в Loop/AndroidAPS/OpenAPS), с настраиваемой длительностью действия
-- Быстрая запись: сахар, ХЕ, короткий/длинный инсулин, приём пищи, фото и комментарий
-- Пресеты питания с составом и автоматическим подсчётом ХЕ
-- История записей с поиском, фильтрами по датам и подсветкой значений вне целевого диапазона
-- Импорт/экспорт данных в ZIP-архив, автобэкап
-- Русский и английский интерфейс
+- Automatic blood sugar fill-in from **xDrip+** and **Juggluco** — no need to retype
+  sensor readings by hand
+- Active insulin on the home screen: calculated with a pharmacokinetic model (exponential
+  decay, as in Loop/AndroidAPS/OpenAPS), with configurable action duration
+- Quick entry: blood sugar, carb units, short/long insulin, meal, photo, and a comment
+- Meal presets with ingredients and automatic carb-unit calculation
+- Entry history with search, date filters, and highlighting for out-of-range values
+- Import/export data as a ZIP archive, auto-backup
+- Russian and English interface
 
-## Важно
+## Important
 
-DiaX-Tracker — личный дневник для собственных записей, а не медицинское изделие. Приложение
-не даёт рекомендаций по лечению и не рассчитывает дозы инсулина: все показатели на экране
-(включая оценку активного инсулина) носят исключительно информационный характер и не заменяют
-консультацию врача. Все решения о лечении пользователь принимает самостоятельно и несёт за них
-полную ответственность. Полный текст — в дисклеймере при первом запуске приложения.
+DiaX-Tracker is a personal diary for your own records, not a medical device. The app does
+not give treatment recommendations or calculate insulin doses: every figure on screen
+(including the active-insulin estimate) is purely informational and does not replace a
+doctor's advice. The user makes all treatment decisions independently and bears full
+responsibility for them. The full text is in the disclaimer shown on first launch.
 
-## Сборка и запуск
+## Build and run
 
-Требуется Android Studio (или Gradle + JDK 17) и подключённое устройство/эмулятор с Android 8.0
-(API 26) или новее.
+Requires Android Studio (or Gradle + JDK 17) and a connected device/emulator running
+Android 8.0 (API 26) or newer.
 
 ```bash
 ./gradlew installDebug
 ```
 
-## Стек
+## Stack
 
 Kotlin, Jetpack Compose, Material3, Room, WorkManager, Coil.
 
-## Лицензия
+## License
 
 [MIT](LICENSE)
