@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -157,7 +158,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Done,
                     background = GlukoColors.Surface,
-                    padding = PaddingValues(start = 2.dp)
+                    padding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                    cursorBrush = SolidColor(GlukoColors.CursorSoft)
                 )
                 Text(stringResource(R.string.mmol_unit), style = GlukoType.Label)
             }
@@ -334,7 +336,8 @@ private fun InsulinTile(modifier: Modifier, label: String, value: String, onChan
                 keyboardType = KeyboardType.Decimal,
                 imeAction = ImeAction.Done,
                 background = androidx.compose.ui.graphics.Color.Transparent,
-                padding = PaddingValues(start = 2.dp)
+                padding = PaddingValues(start = 4.dp),
+                cursorBrush = SolidColor(GlukoColors.CursorSoft)
             )
             Text(stringResource(R.string.units_short), style = GlukoType.Hint.copy(color = GlukoColors.TextLabel))
         }

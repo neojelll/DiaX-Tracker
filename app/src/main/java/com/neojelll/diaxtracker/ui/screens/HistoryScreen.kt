@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
@@ -179,7 +180,8 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     modifier = Modifier.weight(1f),
                     textStyle = GlukoType.Body.copy(fontSize = 13.sp),
                     background = Color.Transparent,
-                    padding = PaddingValues(start = 2.dp)
+                    padding = PaddingValues(start = 4.dp),
+                    cursorBrush = SolidColor(GlukoColors.CursorSoft)
                 )
                 if (searchQuery.isNotEmpty()) {
                     CircleButton(22.dp, GlukoColors.Tile, { searchQuery = "" }) {

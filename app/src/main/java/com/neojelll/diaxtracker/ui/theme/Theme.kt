@@ -25,6 +25,7 @@ object GlukoColors {
     val Ink = Color(0xFF0D0D0D)
     val InkHover = Color(0xFF333333)
     val InkSoft = Color(0xFF242424)
+    val CursorSoft = Ink.copy(alpha = 0.55f)
     val TextSecondary = Color(0xFF55534F)
     val TextLabel = Color(0xFF6E6B66)
     val TextTertiary = Color(0xFF7D7A74)
