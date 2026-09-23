@@ -92,7 +92,6 @@
 
     <string name="history_filter_all">All days</string>
     <string name="history_filter_yesterday">Yesterday</string>
-    <string name="history_filter_today">Today</string>
     <string name="history_filter_week">Week</string>
     <string name="history_filter_month">Month</string>
     <string name="history_filter_range">Range…</string>
