@@ -226,6 +226,7 @@
     <string name="backup_import_preview">В архиве записей: %1$d · %2$s – %3$s</string>
     <string name="backup_import_preview_empty">В архиве нет записей</string>
     <string name="backup_import_success">Добавлено записей: %1$d, дубликатов пропущено: %2$d</string>
+    <string name="backup_import_success_photos">Добавлено записей: %1$d, дубликатов пропущено: %2$d, фото восстановлено: %3$d</string>
 
     <string name="notif_panel_title">Уведомления</string>
     <string name="notif_panel_footer">Это всё за неделю</string>

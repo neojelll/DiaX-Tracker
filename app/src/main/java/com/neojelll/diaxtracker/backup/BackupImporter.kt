@@ -30,8 +30,14 @@ object BackupImporter {
         data object Failure : ImportResult
     }
 
-    /** What a merge did: entries added / skipped as duplicates, presets added, sensor readings added. */
-    data class Summary(val entriesAdded: Int, val duplicatesSkipped: Int, val presetsAdded: Int, val readingsAdded: Int)
+    /** What a merge did: entries added / skipped as duplicates, photos restored for existing entries, presets and readings added. */
+    data class Summary(
+        val entriesAdded: Int,
+        val duplicatesSkipped: Int,
+        val photosRestored: Int,
+        val presetsAdded: Int,
+        val readingsAdded: Int
+    )
 
     /** What an archive holds, for showing before the person confirms: entry count and the span they cover. */
     data class ArchiveInfo(val entries: Int, val first: LocalDateTime?, val last: LocalDateTime?)
@@ -41,49 +47,63 @@ object BackupImporter {
     private const val PHOTOS_DIR_NAME = "entry_photos"
     private const val WORK_DIR_NAME = "backup_import"
     private const val TEMP_DB_NAME = "backup_import_tmp"
+    private const val READINGS_PAGE_SIZE = 5000
     private val SQLITE_HEADER = "SQLite format 3\u0000".toByteArray(Charsets.US_ASCII)
 
     suspend fun import(context: Context, source: Uri): ImportResult = withContext(Dispatchers.IO) {
         val workDir = File(context.cacheDir, WORK_DIR_NAME).apply { deleteRecursively(); mkdirs() }
         context.deleteDatabase(TEMP_DB_NAME)
         val copiedPhotos = mutableListOf<File>()
+        var entriesCommitted = false
+        var backup: DiaryDatabase? = null
         try {
             val extractedDb = extract(context, source, workDir) ?: return@withContext ImportResult.InvalidFile
-            val backup = try {
+            val archive = try {
                 DiaryDatabase.newBuilder(context, TEMP_DB_NAME).createFromFile(extractedDb).build()
             } catch (e: Exception) {
                 Log.w(TAG, "Archive database can't be opened", e)
                 return@withContext ImportResult.InvalidFile
             }
+            backup = archive
 
             val backupEntries: List<DiaryEntry>
             val backupProducts: Map<Long, List<DiaryEntryProduct>>
             val backupPresets: List<MealPresetWithProducts>
             try {
-                backupEntries = backup.diaryDao().getAllEntries().first()
-                backupProducts = backup.diaryDao().getAllEntryProducts().first().groupBy { it.diaryEntryId }
-                backupPresets = backup.mealPresetDao().getAllPresetsWithProducts().first()
+                backupEntries = archive.diaryDao().getAllEntries().first()
+                backupProducts = archive.diaryDao().getAllEntryProducts().first().groupBy { it.diaryEntryId }
+                backupPresets = archive.mealPresetDao().getAllPresetsWithProducts().first()
             } catch (e: Exception) {
                 Log.w(TAG, "Archive database can't be read", e)
                 return@withContext ImportResult.InvalidFile
-            } finally {
-                backup.close()
             }
 
             val live = DiaryDatabase.getDatabase(context)
             val photosDir = File(context.filesDir, PHOTOS_DIR_NAME).apply { mkdirs() }
+            val archivePhotos = File(workDir, PHOTOS_DIR_NAME)
             var added = 0
             var skipped = 0
+            var photosRestored = 0
             var presetsAdded = 0
 
             live.withTransaction {
                 val diaryDao = live.diaryDao()
                 for (entry in backupEntries.sortedBy { it.createdAt }) {
-                    if (isDuplicateEntry(diaryDao.getEntriesAt(entry.createdAt), entry)) {
+                    val duplicate = findDuplicateEntry(diaryDao.getEntriesAt(entry.createdAt), entry)
+                    if (duplicate != null) {
                         skipped++
+                        // The record is already here but its photo is gone (deleted, or lost earlier):
+                        // the archive can give it back.
+                        if (duplicate.photoPath?.let { File(it).exists() } != true) {
+                            adoptPhoto(entry.photoPath, archivePhotos, photosDir)?.let { restored ->
+                                copiedPhotos += File(restored)
+                                diaryDao.update(duplicate.copy(photoPath = restored))
+                                photosRestored++
+                            }
+                        }
                         continue
                     }
-                    val photoPath = adoptPhoto(entry.photoPath, File(workDir, PHOTOS_DIR_NAME), photosDir)
+                    val photoPath = adoptPhoto(entry.photoPath, archivePhotos, photosDir)
                         ?.also { copiedPhotos += File(it) }
                     diaryDao.insertWithProducts(
                         entry.copy(id = 0, photoPath = photoPath),
@@ -102,15 +122,25 @@ object BackupImporter {
                     presetsAdded++
                 }
             }
+            entriesCommitted = true
 
-            val readingsAdded = mergeSensorReadings(live, context.getDatabasePath(TEMP_DB_NAME))
-            ImportResult.Success(Summary(added, skipped, presetsAdded, readingsAdded))
+            // Auxiliary data: the entries are already in, so a problem here must not turn the whole
+            // import into a reported failure (or undo anything that was committed).
+            val readingsAdded = try {
+                mergeSensorReadings(archive, live)
+            } catch (e: Exception) {
+                Log.e(TAG, "Merging the sensor reading log failed", e)
+                0
+            }
+            ImportResult.Success(Summary(added, skipped, photosRestored, presetsAdded, readingsAdded))
         } catch (e: Exception) {
             Log.e(TAG, "Backup import failed", e)
-            // Entries roll back with the transaction; the photo files copied for them would be orphans.
-            copiedPhotos.forEach { it.delete() }
+            // Only while the entries transaction hadn't committed: then it rolled back and the photo
+            // files copied for those entries are orphans. After a commit the entries own them.
+            if (!entriesCommitted) copiedPhotos.forEach { it.delete() }
             ImportResult.Failure
         } finally {
+            backup?.close()
             context.deleteDatabase(TEMP_DB_NAME)
             workDir.deleteRecursively()
         }
@@ -189,39 +219,36 @@ object BackupImporter {
     }
 
     /**
-     * Set-based on purpose: the reading log can hold hundreds of thousands of rows, so it is merged
-     * inside SQLite (attach, insert what's missing, detach) instead of through objects in memory.
+     * The reading log can hold hundreds of thousands of rows, so it is copied a page at a time (by id)
+     * and each page only looks up the live timestamps in its own narrow range.
      */
-    private fun mergeSensorReadings(live: DiaryDatabase, backupDb: File): Int {
-        val sqlite = live.openHelper.writableDatabase
-        sqlite.execSQL("ATTACH DATABASE ? AS backup", arrayOf<Any>(backupDb.path))
-        try {
-            var inserted = 0
-            sqlite.beginTransaction()
-            try {
-                sqlite.execSQL(
-                    "INSERT INTO sensor_readings_log (timestamp, bloodSugar) " +
-                        "SELECT b.timestamp, b.bloodSugar FROM backup.sensor_readings_log b " +
-                        "WHERE NOT EXISTS (SELECT 1 FROM main.sensor_readings_log m WHERE m.timestamp = b.timestamp)"
-                )
-                sqlite.query("SELECT changes()").use { if (it.moveToFirst()) inserted = it.getInt(0) }
-                sqlite.setTransactionSuccessful()
-            } finally {
-                sqlite.endTransaction()
+    private suspend fun mergeSensorReadings(backup: DiaryDatabase, live: DiaryDatabase): Int {
+        val backupLog = backup.sensorReadingLogDao()
+        val liveLog = live.sensorReadingLogDao()
+        var afterId = 0L
+        var inserted = 0
+        while (true) {
+            val page = backupLog.getPage(afterId, READINGS_PAGE_SIZE)
+            if (page.isEmpty()) break
+            afterId = page.last().id
+            val existing = liveLog.getReadingsBetween(page.minOf { it.timestamp }, page.maxOf { it.timestamp })
+                .mapTo(HashSet()) { it.timestamp }
+            val missing = page.distinctBy { it.timestamp }.filter { it.timestamp !in existing }.map { it.copy(id = 0) }
+            if (missing.isNotEmpty()) {
+                liveLog.insertAll(missing)
+                inserted += missing.size
             }
-            return inserted
-        } finally {
-            sqlite.execSQL("DETACH DATABASE backup")
         }
+        return inserted
     }
 }
 
 /**
- * The same record if it happened at the same moment with the same values. Different values at the
- * same moment are a genuine conflict and both are kept, so importing never loses data. The photo
- * path is ignored: it points into a different app data folder in the archive.
+ * The existing entry that is the same record as [candidate]: same moment, same values. Different
+ * values at the same moment are a genuine conflict and both are kept, so importing never loses
+ * data. The photo path is ignored: it points into a different app data folder in the archive.
  */
-internal fun isDuplicateEntry(existing: List<DiaryEntry>, candidate: DiaryEntry): Boolean {
+internal fun findDuplicateEntry(existing: List<DiaryEntry>, candidate: DiaryEntry): DiaryEntry? {
     val normalized = candidate.copy(id = 0, photoPath = null)
-    return existing.any { it.copy(id = 0, photoPath = null) == normalized }
+    return existing.firstOrNull { it.copy(id = 0, photoPath = null) == normalized }
 }

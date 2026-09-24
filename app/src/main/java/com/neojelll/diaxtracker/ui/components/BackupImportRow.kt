@@ -32,6 +32,7 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
     val invalidMessage = stringResource(R.string.backup_import_invalid_file)
     val failedMessage = stringResource(R.string.backup_import_failed)
     val successFormat = stringResource(R.string.backup_import_success)
+    val successWithPhotosFormat = stringResource(R.string.backup_import_success_photos)
 
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -70,8 +71,13 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
                     showSheet = false
                     scope.launch {
                         val message = when (val result = BackupImporter.import(context, uri)) {
-                            is BackupImporter.ImportResult.Success ->
-                                successFormat.format(result.summary.entriesAdded, result.summary.duplicatesSkipped)
+                            is BackupImporter.ImportResult.Success -> with(result.summary) {
+                                if (photosRestored > 0) {
+                                    successWithPhotosFormat.format(entriesAdded, duplicatesSkipped, photosRestored)
+                                } else {
+                                    successFormat.format(entriesAdded, duplicatesSkipped)
+                                }
+                            }
                             BackupImporter.ImportResult.InvalidFile -> invalidMessage
                             BackupImporter.ImportResult.Failure -> failedMessage
                         }

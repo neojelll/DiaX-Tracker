@@ -220,6 +220,7 @@
     <string name="backup_import_preview">Entries in the archive: %1$d · %2$s – %3$s</string>
     <string name="backup_import_preview_empty">The archive has no entries</string>
     <string name="backup_import_success">Entries added: %1$d, duplicates skipped: %2$d</string>
+    <string name="backup_import_success_photos">Entries added: %1$d, duplicates skipped: %2$d, photos restored: %3$d</string>
 
     <string name="notif_panel_title">Notifications</string>
     <string name="notif_panel_footer">That\'s all for the week</string>
