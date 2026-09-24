@@ -54,6 +54,8 @@ class PostMealCheckWorker(
 
     private companion object {
         val MIN_GAP_BETWEEN_AUTO_ENTRIES: Duration = Duration.ofMinutes(20)
-        val READING_TOLERANCE: Duration = Duration.ofMinutes(5)
+        // Same reach as the manual-entry sugar auto-fill: a reading up to 10 min off the target is
+        // still worth having (the entry is stamped at the exact target either way), a missing check isn't.
+        val READING_TOLERANCE: Duration = Duration.ofMinutes(10)
     }
 }
