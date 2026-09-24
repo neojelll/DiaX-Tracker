@@ -197,23 +197,12 @@ fun PresetDetailSheet(
         }
         Spacer(Modifier.height(16.dp))
 
-        GlukoTile(padding = PaddingValues(horizontal = 14.dp, vertical = 13.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.preset_detail_total_carbs), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary), modifier = Modifier.weight(1f))
-                Text(stringResource(R.string.bread_units_value_format, formatAmount(preset.totalBreadUnits)), style = GlukoType.Value.copy(fontSize = 19.sp).tabular)
-            }
-        }
+        TotalBreadUnitsTile(preset.totalBreadUnits)
         Spacer(Modifier.height(16.dp))
 
         Kicker(stringResource(R.string.preset_detail_composition))
         Spacer(Modifier.height(4.dp))
-        preset.products.sortedBy { it.sortOrder }.forEachIndexed { index, product ->
-            if (index > 0) GlukoDivider()
-            Row(Modifier.fillMaxWidth().padding(vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(product.name, style = GlukoType.Body, modifier = Modifier.weight(1f))
-                Text(stringResource(R.string.bread_units_value_format, formatAmount(product.breadUnits)), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary).tabular)
-            }
-        }
+        CompositionRows(preset.products.sortedBy { it.sortOrder }.map { it.name to it.breadUnits })
         Spacer(Modifier.height(16.dp))
 
         PrimaryButton(stringResource(R.string.preset_detail_pick), onClick = onPick)
@@ -221,6 +210,29 @@ fun PresetDetailSheet(
         Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
             SecondaryButton(stringResource(R.string.action_edit), Modifier.weight(1f), onClick = onEdit)
             SecondaryButton(stringResource(R.string.delete), Modifier.weight(1f), textColor = GlukoColors.TextLabel, onClick = onDelete)
+        }
+    }
+}
+
+/** "Total carbs / N ХЕ" tile shared by the preset detail sheet and the read-only record sheet. */
+@Composable
+internal fun TotalBreadUnitsTile(totalBreadUnits: Float) {
+    GlukoTile(padding = PaddingValues(horizontal = 14.dp, vertical = 13.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.preset_detail_total_carbs), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary), modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.bread_units_value_format, formatAmount(totalBreadUnits)), style = GlukoType.Value.copy(fontSize = 19.sp).tabular)
+        }
+    }
+}
+
+/** One row per product - name left, bread units right - with thin dividers between rows. */
+@Composable
+internal fun CompositionRows(products: List<Pair<String, Float>>) {
+    products.forEachIndexed { index, (name, breadUnits) ->
+        if (index > 0) GlukoDivider()
+        Row(Modifier.fillMaxWidth().padding(vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(name, style = GlukoType.Body, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.bread_units_value_format, formatAmount(breadUnits)), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary).tabular)
         }
     }
 }

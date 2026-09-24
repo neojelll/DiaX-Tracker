@@ -111,6 +111,8 @@
     <string name="record_long_label">long-acting</string>
     <string name="record_no_preset">No preset</string>
     <string name="record_composition">details</string>
+    <string name="record_composition_snapshot">Composition when recorded</string>
+    <string name="record_composition_empty">No composition saved</string>
     <string name="record_no_photo">no photo</string>
     <string name="record_measurement_tag">reading</string>
     <string name="record_edit_title">Edit entry</string>
