@@ -31,7 +31,6 @@ object LucidePaths {
     const val ChevronUp = "M6 14.5l6-6 6 6"
     const val ChevronLeft = "M14.5 5.5 8 12l6.5 6.5"
     const val ArrowRight = "M4.5 12h15M13 5.5l6.5 6.5-6.5 6.5"
-    const val Pencil = "M15.5 4.5 19.5 8.5M17.5 2.5a2 2 0 0 1 3 3L8 18l-4.5 1.5L5 15z"
     const val Expand = "M4 9V4h5M20 15v5h-5"
     const val History = "M3.5 12a8.5 8.5 0 1 0 2.6-6.1M3 4v4h4M12 8v4.2l3 1.8"
     const val Dish = "M4 11.5h16a8 8 0 0 1-16 0zM2.5 20.5h19M7.5 3.5c-1.6 1.3-1.6 2.7 0 4s1.6 2.7 0 4M12 3.5c-1.6 1.3-1.6 2.7 0 4s1.6 2.7 0 4M16.5 3.5c-1.6 1.3-1.6 2.7 0 4s1.6 2.7 0 4"
