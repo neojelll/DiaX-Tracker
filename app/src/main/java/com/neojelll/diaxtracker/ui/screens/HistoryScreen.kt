@@ -60,6 +60,7 @@ import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.OverlayController
+import com.neojelll.diaxtracker.ui.components.PhotoButton
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
 import com.neojelll.diaxtracker.ui.components.SecondaryButton
 import com.neojelll.diaxtracker.ui.components.SheetHeader
@@ -671,7 +672,12 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             )
 
             Spacer(Modifier.height(14.dp))
-            PhotoPickerRow(formState.photoPath) { formState = formState.copy(photoPath = it) }
+            val photoPicker = rememberPhotoPicker(
+                photoPath = formState.photoPath,
+                onPhotoChanged = { formState = formState.copy(photoPath = it) },
+                overlays = overlays
+            )
+            PhotoButton(hasPhoto = formState.photoPath != null, onOpenPicker = photoPicker.open)
 
             Spacer(Modifier.height(14.dp))
             SaveEntryButton(enabled = formState.isFillable, onSave = ::save)

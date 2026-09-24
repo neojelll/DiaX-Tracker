@@ -48,6 +48,7 @@ import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.OverlayController
+import com.neojelll.diaxtracker.ui.components.PhotoTile
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
 import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.numeric
@@ -235,9 +236,15 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                         minLines = 3
                     )
                     Spacer(Modifier.height(9.dp))
-                    PhotoPickerRow(
+                    val photoPicker = rememberPhotoPicker(
                         photoPath = formState.photoPath,
-                        onPhotoChanged = { formState = formState.copy(photoPath = it) }
+                        onPhotoChanged = { formState = formState.copy(photoPath = it) },
+                        overlays = overlays
+                    )
+                    PhotoTile(
+                        photoPath = formState.photoPath,
+                        onOpenPicker = photoPicker.open,
+                        onRemove = photoPicker.remove
                     )
                 }
             }
