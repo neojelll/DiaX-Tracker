@@ -41,6 +41,7 @@ import com.neojelll.diaxtracker.ui.components.NavBarItem
 import com.neojelll.diaxtracker.ui.components.NotificationSheet
 import com.neojelll.diaxtracker.ui.components.Overlay
 import com.neojelll.diaxtracker.ui.components.OverlayController
+import com.neojelll.diaxtracker.ui.components.PhotoActionMenu
 import com.neojelll.diaxtracker.ui.components.PhotoPreview
 import com.neojelll.diaxtracker.ui.screens.AddEntryScreen
 import com.neojelll.diaxtracker.ui.screens.HistoryScreen
@@ -173,6 +174,14 @@ private fun OverlayLayer(
         )
 
         Overlay.Notifications -> NotificationSheet(onDismiss = overlays::dismiss)
+
+        is Overlay.PhotoActions -> PhotoActionMenu(
+            hasPhoto = overlay.hasPhoto,
+            onCamera = overlay.onCamera,
+            onGallery = overlay.onGallery,
+            onRemove = overlay.onRemove,
+            onDismiss = overlays::dismiss
+        )
 
         is Overlay.Photo -> PhotoPreview(overlay.photoPath, overlay.caption, onDismiss = overlays::dismiss)
 

@@ -17,9 +17,15 @@ sealed interface Overlay {
     data class PresetDetail(val presetId: Long) : Overlay
     data class PresetEdit(val presetId: Long?) : Overlay
     data class Photo(val photoPath: String?, val caption: String) : Overlay
+    data class PhotoActions(
+        val hasPhoto: Boolean,
+        val onCamera: () -> Unit,
+        val onGallery: () -> Unit,
+        val onRemove: () -> Unit
+    ) : Overlay
 }
 
-// Stack, bottom to top. Date/time pickers push on top of whatever opened them (e.g. the
+// Stack, bottom to top. Date/time pickers and the photo action menu push on top of whatever opened them (e.g. the
 // record-edit sheet), keeping it mounted with its draft state alive; everything else replaces
 // the whole stack since it's always a fresh standalone sheet.
 class OverlayController {
@@ -56,6 +62,10 @@ class OverlayController {
 
     fun openTimePicker(initial: LocalTime, onPick: (LocalTime) -> Unit) {
         push(Overlay.TimePicker(initial, onPick))
+    }
+
+    fun openPhotoActions(hasPhoto: Boolean, onCamera: () -> Unit, onGallery: () -> Unit, onRemove: () -> Unit) {
+        push(Overlay.PhotoActions(hasPhoto, onCamera, onGallery, onRemove))
     }
 
     fun openNotifications() {
