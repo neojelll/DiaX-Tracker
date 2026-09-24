@@ -223,6 +223,8 @@
     <string name="backup_import_pick_hint">Внутри: база данных и папка с фото</string>
     <string name="backup_import_invalid_file">Файл повреждён или не является бэкапом</string>
     <string name="backup_import_failed">Не удалось импортировать данные</string>
+    <string name="backup_import_preview">В архиве записей: %1$d · %2$s – %3$s</string>
+    <string name="backup_import_preview_empty">В архиве нет записей</string>
     <string name="backup_import_success">Добавлено записей: %1$d, дубликатов пропущено: %2$d</string>
 
     <string name="notif_panel_title">Уведомления</string>

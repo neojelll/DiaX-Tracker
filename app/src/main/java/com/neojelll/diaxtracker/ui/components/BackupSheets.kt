@@ -26,10 +26,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 /** How far back an export reaches; same windows as the History date filters. */
-enum class ExportPeriod(val labelRes: Int) {
-    Week(R.string.export_period_week),
-    Month(R.string.export_period_month),
-    All(R.string.export_period_all)
+enum class ExportPeriod(val labelRes: Int, val fileTag: String) {
+    Week(R.string.export_period_week, "week"),
+    Month(R.string.export_period_month, "month"),
+    All(R.string.export_period_all, "all")
 }
 
 /** Start of the period counted from [today] (its first day at 00:00), or null for everything. */
@@ -98,6 +98,7 @@ private fun ArchiveRow(name: String, count: Int) {
 @Composable
 fun ImportSheet(
     pendingFileName: String?,
+    archiveSummary: String?,
     onPickFile: () -> Unit,
     onImport: () -> Unit,
     onDismiss: () -> Unit
@@ -121,6 +122,10 @@ fun ImportSheet(
                 LucideIcon(LucidePaths.File, 26.dp, GlukoColors.TextLabel, strokeWidth = 1.6f)
                 Spacer(Modifier.height(9.dp))
                 Text(pendingFileName ?: stringResource(R.string.backup_import_pick_file), style = GlukoType.Body)
+                if (archiveSummary != null) {
+                    Spacer(Modifier.height(5.dp))
+                    Text(archiveSummary, style = GlukoType.Hint.tabular, textAlign = TextAlign.Center)
+                }
                 if (pendingFileName == null) {
                     Spacer(Modifier.height(9.dp))
                     Text(

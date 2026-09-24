@@ -58,7 +58,7 @@ fun BackupExportRow(viewModel: DiaryViewModel, snackbarHostState: SnackbarHostSt
             onPeriod = { period = it },
             onExport = {
                 showSheet = false
-                exportLauncher.launch("diax-backup-${LocalDate.now()}.zip")
+                exportLauncher.launch("diax-backup-${period.fileTag}-${LocalDate.now()}.zip")
             },
             onDismiss = { showSheet = false }
         )

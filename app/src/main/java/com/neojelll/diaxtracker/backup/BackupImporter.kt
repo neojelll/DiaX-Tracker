@@ -1,6 +1,7 @@
 package com.neojelll.diaxtracker.backup
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.util.Log
 import androidx.room.withTransaction
@@ -9,6 +10,7 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import java.io.File
+import java.time.LocalDateTime
 import java.util.UUID
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +32,9 @@ object BackupImporter {
 
     /** What a merge did: entries added / skipped as duplicates, presets added, sensor readings added. */
     data class Summary(val entriesAdded: Int, val duplicatesSkipped: Int, val presetsAdded: Int, val readingsAdded: Int)
+
+    /** What an archive holds, for showing before the person confirms: entry count and the span they cover. */
+    data class ArchiveInfo(val entries: Int, val first: LocalDateTime?, val last: LocalDateTime?)
 
     private const val TAG = "BackupImporter"
     private const val DB_NAME = "diary_database"
@@ -111,6 +116,48 @@ object BackupImporter {
         }
     }
 
+    /** Reads just the database out of the archive and summarizes it; null if it isn't a readable backup. */
+    suspend fun inspect(context: Context, source: Uri): ArchiveInfo? = withContext(Dispatchers.IO) {
+        val workDir = File(context.cacheDir, "$WORK_DIR_NAME-preview").apply { deleteRecursively(); mkdirs() }
+        try {
+            val dbFile = File(workDir, DB_NAME)
+            val stream = context.contentResolver.openInputStream(source) ?: return@withContext null
+            stream.use { input ->
+                ZipInputStream(input).use { zip ->
+                    while (true) {
+                        val entry = zip.nextEntry ?: break
+                        if (entry.name == DB_NAME) {
+                            dbFile.outputStream().use { zip.copyTo(it) }
+                            break
+                        }
+                    }
+                }
+            }
+            if (!hasSqliteHeader(dbFile)) return@withContext null
+            SQLiteDatabase.openDatabase(dbFile.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+                db.rawQuery("SELECT COUNT(*), MIN(createdAt), MAX(createdAt) FROM diary_entries", null).use { cursor ->
+                    cursor.moveToFirst()
+                    ArchiveInfo(
+                        entries = cursor.getInt(0),
+                        first = cursor.getString(1)?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() },
+                        last = cursor.getString(2)?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() }
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Archive can't be inspected", e)
+            null
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    private fun hasSqliteHeader(file: File): Boolean {
+        if (!file.exists() || file.length() < SQLITE_HEADER.size) return false
+        val header = ByteArray(SQLITE_HEADER.size).also { buffer -> file.inputStream().use { it.read(buffer) } }
+        return header.contentEquals(SQLITE_HEADER)
+    }
+
     /** Unpacks the archive into [workDir]; returns the database file, or null if it isn't a backup. */
     private fun extract(context: Context, source: Uri, workDir: File): File? {
         val dbFile = File(workDir, DB_NAME)
@@ -129,9 +176,7 @@ object BackupImporter {
                 }
             }
         }
-        if (!dbFile.exists() || dbFile.length() < SQLITE_HEADER.size) return null
-        val header = ByteArray(SQLITE_HEADER.size).also { buffer -> dbFile.inputStream().use { it.read(buffer) } }
-        return dbFile.takeIf { header.contentEquals(SQLITE_HEADER) }
+        return dbFile.takeIf { hasSqliteHeader(it) }
     }
 
     /** Copies the backed-up photo under a fresh name (so it never shares a file with an existing entry). */

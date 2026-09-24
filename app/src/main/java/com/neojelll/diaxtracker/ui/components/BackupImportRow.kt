@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.backup.BackupImporter
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -25,6 +26,9 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
     var showSheet by remember { mutableStateOf(false) }
     var pendingUri by remember { mutableStateOf<Uri?>(null) }
     var pendingFileName by remember { mutableStateOf<String?>(null) }
+    var archiveSummary by remember { mutableStateOf<String?>(null) }
+    val previewFormat = stringResource(R.string.backup_import_preview)
+    val previewEmpty = stringResource(R.string.backup_import_preview_empty)
     val invalidMessage = stringResource(R.string.backup_import_invalid_file)
     val failedMessage = stringResource(R.string.backup_import_failed)
     val successFormat = stringResource(R.string.backup_import_success)
@@ -35,6 +39,17 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
         if (uri != null) {
             pendingUri = uri
             pendingFileName = queryDisplayName(context, uri)
+            archiveSummary = null
+            scope.launch {
+                val info = BackupImporter.inspect(context, uri)
+                if (info == null) {
+                    pendingUri = null
+                    pendingFileName = null
+                    snackbarHostState.showSnackbar(invalidMessage)
+                } else {
+                    archiveSummary = describeArchive(info, previewFormat, previewEmpty)
+                }
+            }
         }
     }
 
@@ -48,6 +63,7 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
     if (showSheet) {
         ImportSheet(
             pendingFileName = pendingFileName,
+            archiveSummary = archiveSummary,
             onPickFile = { importLauncher.launch(arrayOf("application/zip")) },
             onImport = {
                 pendingUri?.let { uri ->
@@ -61,6 +77,7 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
                         }
                         pendingUri = null
                         pendingFileName = null
+                        archiveSummary = null
                         snackbarHostState.showSnackbar(message)
                     }
                 }
@@ -69,9 +86,18 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
                 showSheet = false
                 pendingUri = null
                 pendingFileName = null
+                archiveSummary = null
             }
         )
     }
+}
+
+private fun describeArchive(info: BackupImporter.ArchiveInfo, format: String, empty: String): String {
+    val first = info.first
+    val last = info.last
+    if (info.entries == 0 || first == null || last == null) return empty
+    val day = DateTimeFormatter.ofPattern("d MMM yyyy")
+    return format.format(info.entries, first.format(day), last.format(day))
 }
 
 private fun queryDisplayName(context: Context, uri: Uri): String? = try {
