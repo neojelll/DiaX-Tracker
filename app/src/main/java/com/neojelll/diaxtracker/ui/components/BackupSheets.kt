@@ -18,20 +18,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.neojelll.diaxtracker.R
-import com.neojelll.diaxtracker.ui.theme.DangerRed
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.theme.tabular
+import java.time.LocalDate
+import java.time.LocalDateTime
 
-/**
- * Placeholder export period: selecting a value doesn't filter anything yet, the archive is
- * always the whole database (see BackupExporter). Real filtering is tracked in #47.
- */
+/** How far back an export reaches; same windows as the History date filters. */
 enum class ExportPeriod(val labelRes: Int) {
     Week(R.string.export_period_week),
     Month(R.string.export_period_month),
     All(R.string.export_period_all)
+}
+
+/** Start of the period counted from [today] (its first day at 00:00), or null for everything. */
+fun ExportPeriod.startsAt(today: LocalDate): LocalDateTime? = when (this) {
+    ExportPeriod.Week -> today.minusDays(6).atStartOfDay()
+    ExportPeriod.Month -> today.minusDays(29).atStartOfDay()
+    ExportPeriod.All -> null
 }
 
 /** Parameter sheet shown before handing off to the system "create document" picker. */
@@ -129,7 +134,7 @@ fun ImportSheet(
             if (pendingFileName != null) {
                 Spacer(Modifier.height(11.dp))
                 GlukoTile(padding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)) {
-                    Text(stringResource(R.string.backup_import_confirm_text), style = GlukoType.Note.copy(color = DangerRed))
+                    Text(stringResource(R.string.backup_import_confirm_text), style = GlukoType.Note.copy(color = GlukoColors.TextSecondary))
                 }
                 Spacer(Modifier.height(14.dp))
                 PrimaryButton(stringResource(R.string.backup_import_confirm_action), onClick = onImport)

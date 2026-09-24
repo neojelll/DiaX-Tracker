@@ -1,7 +1,6 @@
 package com.neojelll.diaxtracker.ui.components
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -28,6 +27,7 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
     var pendingFileName by remember { mutableStateOf<String?>(null) }
     val invalidMessage = stringResource(R.string.backup_import_invalid_file)
     val failedMessage = stringResource(R.string.backup_import_failed)
+    val successFormat = stringResource(R.string.backup_import_success)
 
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -53,13 +53,15 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
                 pendingUri?.let { uri ->
                     showSheet = false
                     scope.launch {
-                        when (BackupImporter.import(context, uri)) {
-                            BackupImporter.ImportResult.SUCCESS -> restartApp(context)
-                            BackupImporter.ImportResult.INVALID_FILE ->
-                                snackbarHostState.showSnackbar(invalidMessage)
-                            BackupImporter.ImportResult.FAILURE ->
-                                snackbarHostState.showSnackbar(failedMessage)
+                        val message = when (val result = BackupImporter.import(context, uri)) {
+                            is BackupImporter.ImportResult.Success ->
+                                successFormat.format(result.summary.entriesAdded, result.summary.duplicatesSkipped)
+                            BackupImporter.ImportResult.InvalidFile -> invalidMessage
+                            BackupImporter.ImportResult.Failure -> failedMessage
                         }
+                        pendingUri = null
+                        pendingFileName = null
+                        snackbarHostState.showSnackbar(message)
                     }
                 }
             },
@@ -78,11 +80,4 @@ private fun queryDisplayName(context: Context, uri: Uri): String? = try {
     }
 } catch (e: Exception) {
     null
-}
-
-private fun restartApp(context: Context) {
-    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        ?.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
-    context.startActivity(intent)
-    Runtime.getRuntime().exit(0)
 }

@@ -188,7 +188,7 @@
     <string name="insulin_duration_hint">Влияет на расчёт активного инсулина на главном экране.</string>
     <string name="data_section_title">Данные</string>
     <string name="backup_export_subtitle">Архив ZIP: записи и фото</string>
-    <string name="backup_import_subtitle">Из архива ZIP</string>
+    <string name="backup_import_subtitle">Добавит записи из архива ZIP</string>
     <string name="backup_toggle_title">Резервная копия</string>
     <string name="backup_toggle_on">Каждый вечер, локально</string>
     <string name="backup_toggle_off">Выключена</string>
@@ -215,14 +215,15 @@
     <string name="export_period_month">Месяц</string>
     <string name="export_period_all">Всё</string>
     <string name="backup_import_title">Импортировать данные</string>
-    <string name="backup_import_confirm_text">Это действие заменит ВСЕ текущие данные данными из выбранного файла. Отменить это будет нельзя.</string>
-    <string name="backup_import_confirm_action">Восстановить</string>
+    <string name="backup_import_confirm_text">Записи из архива будут добавлены к текущим, ничего не удаляется и не заменяется. Записи с тем же временем и теми же значениями пропускаются как дубликаты.</string>
+    <string name="backup_import_confirm_action">Добавить</string>
     <string name="backup_import_sheet_title">Импорт данных</string>
-    <string name="backup_import_sheet_subtitle">Восстановление из архива ZIP</string>
+    <string name="backup_import_sheet_subtitle">Добавление записей из архива ZIP</string>
     <string name="backup_import_pick_file">Выбрать архив ZIP</string>
     <string name="backup_import_pick_hint">Внутри: база данных и папка с фото</string>
     <string name="backup_import_invalid_file">Файл повреждён или не является бэкапом</string>
-    <string name="backup_import_failed">Не удалось восстановить данные</string>
+    <string name="backup_import_failed">Не удалось импортировать данные</string>
+    <string name="backup_import_success">Добавлено записей: %1$d, дубликатов пропущено: %2$d</string>
 
     <string name="notif_panel_title">Уведомления</string>
     <string name="notif_panel_footer">Это всё за неделю</string>

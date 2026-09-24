@@ -23,6 +23,9 @@ abstract class DiaryDao {
     @Query("SELECT * FROM diary_entries ORDER BY createdAt DESC")
     abstract fun getAllEntries(): Flow<List<DiaryEntry>>
 
+    @Query("SELECT * FROM diary_entries WHERE createdAt = :createdAt")
+    abstract suspend fun getEntriesAt(createdAt: LocalDateTime): List<DiaryEntry>
+
     @Query("SELECT COUNT(*) FROM diary_entries WHERE createdAt BETWEEN :from AND :to")
     abstract suspend fun countEntriesBetween(from: LocalDateTime, to: LocalDateTime): Int
 

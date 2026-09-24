@@ -127,13 +127,10 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
-        fun getDatabase(context: Context): DiaryDatabase {
-            return INSTANCE ?: synchronized(this) {
-                Room.databaseBuilder(
-                    context.applicationContext,
-                    DiaryDatabase::class.java,
-                    "diary_database"
-                ).addMigrations(
+        /** Builder with every migration attached - also used to bring an imported backup up to date. */
+        fun newBuilder(context: Context, name: String): RoomDatabase.Builder<DiaryDatabase> =
+            Room.databaseBuilder(context.applicationContext, DiaryDatabase::class.java, name)
+                .addMigrations(
                     MIGRATION_3_4,
                     MIGRATION_4_5,
                     MIGRATION_5_6,
@@ -141,16 +138,11 @@ abstract class DiaryDatabase : RoomDatabase() {
                     MIGRATION_7_8,
                     MIGRATION_8_9,
                     MIGRATION_9_10
-                ).build().also { INSTANCE = it }
-            }
-        }
+                )
 
-        // Used before swapping the underlying DB file (e.g. restoring a backup) so the next
-        // getDatabase() call opens a fresh connection instead of one pointing at stale state.
-        fun closeAndResetInstance() {
-            synchronized(this) {
-                INSTANCE?.close()
-                INSTANCE = null
+        fun getDatabase(context: Context): DiaryDatabase {
+            return INSTANCE ?: synchronized(this) {
+                newBuilder(context, "diary_database").build().also { INSTANCE = it }
             }
         }
     }
