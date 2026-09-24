@@ -281,6 +281,7 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                             sugarColor = sugarColor,
                             fetchProducts = viewModel::getEntryProducts,
                             onEdit = { overlays.openRecordEdit(entry.id) },
+                            onOpenComposition = { overlays.openRecordComposition(entry.id) },
                             onOpenPhoto = { overlays.openPhoto(entry.photoPath, caption) }
                         )
                     }
@@ -372,6 +373,7 @@ private fun FullRecordCard(
     sugarColor: Color,
     fetchProducts: suspend (Long) -> List<DiaryEntryProduct>,
     onEdit: () -> Unit,
+    onOpenComposition: () -> Unit,
     onOpenPhoto: () -> Unit
 ) {
     var products by remember(entry.id) { mutableStateOf<List<DiaryEntryProduct>>(emptyList()) }
@@ -435,7 +437,9 @@ private fun FullRecordCard(
                         .height(RecordMediaHeight)
                         .clip(RoundedCornerShape(GlukoRadius.tile))
                         .background(GlukoColors.Tile)
-                        .clickable(onClick = onEdit)
+                        // Only a real preset has a recorded composition to show; anything else falls
+                        // back to editing, like the rest of the card.
+                        .clickable(onClick = if (entry.mealLabel != null) onOpenComposition else onEdit)
                         .padding(horizontal = 13.dp, vertical = 11.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -452,10 +456,12 @@ private fun FullRecordCard(
                         style = GlukoType.CardLabel.copy(fontSize = 11.sp),
                         maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(R.string.record_composition), style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary))
-                        Spacer(Modifier.width(5.dp))
-                        LucideIcon(LucidePaths.ChevronRight, 11.dp, GlukoColors.TextTertiary, strokeWidth = 2.2f)
+                    if (entry.mealLabel != null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.record_composition), style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary))
+                            Spacer(Modifier.width(5.dp))
+                            LucideIcon(LucidePaths.ChevronRight, 11.dp, GlukoColors.TextTertiary, strokeWidth = 2.2f)
+                        }
                     }
                 }
 
