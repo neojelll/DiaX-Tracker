@@ -182,7 +182,7 @@
     <string name="insulin_duration_hint">Affects the active-insulin estimate on the main screen.</string>
     <string name="data_section_title">Data</string>
     <string name="backup_export_subtitle">ZIP archive: entries and photos</string>
-    <string name="backup_import_subtitle">From a ZIP archive</string>
+    <string name="backup_import_subtitle">Adds entries from a ZIP archive</string>
     <string name="backup_toggle_title">Backup</string>
     <string name="backup_toggle_on">Every evening, locally</string>
     <string name="backup_toggle_off">Off</string>
@@ -209,14 +209,18 @@
     <string name="export_period_month">Month</string>
     <string name="export_period_all">All time</string>
     <string name="backup_import_title">Import data</string>
-    <string name="backup_import_confirm_text">This will replace ALL current data with the data from the selected file. This cannot be undone.</string>
-    <string name="backup_import_confirm_action">Restore</string>
+    <string name="backup_import_confirm_text">Entries from the archive are added to your current ones - nothing is deleted or replaced. Entries with the same time and the same values are skipped as duplicates.</string>
+    <string name="backup_import_confirm_action">Add</string>
     <string name="backup_import_sheet_title">Import data</string>
-    <string name="backup_import_sheet_subtitle">Restore from a ZIP archive</string>
+    <string name="backup_import_sheet_subtitle">Add entries from a ZIP archive</string>
     <string name="backup_import_pick_file">Choose a ZIP archive</string>
     <string name="backup_import_pick_hint">Contains: the database and a photos folder</string>
     <string name="backup_import_invalid_file">File is corrupted or not a valid backup</string>
-    <string name="backup_import_failed">Failed to restore data</string>
+    <string name="backup_import_failed">Failed to import data</string>
+    <string name="backup_import_preview">Entries in the archive: %1$d · %2$s – %3$s</string>
+    <string name="backup_import_preview_empty">The archive has no entries</string>
+    <string name="backup_import_success">Entries added: %1$d, duplicates skipped: %2$d</string>
+    <string name="backup_import_success_photos">Entries added: %1$d, duplicates skipped: %2$d, photos restored: %3$d</string>
 
     <string name="notif_panel_title">Notifications</string>
     <string name="notif_panel_footer">That\'s all for the week</string>

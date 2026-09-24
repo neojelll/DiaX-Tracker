@@ -35,7 +35,7 @@ fun BackupExportRow(viewModel: DiaryViewModel, snackbarHostState: SnackbarHostSt
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val success = BackupExporter.export(context, uri)
+            val success = BackupExporter.export(context, uri, period.startsAt(LocalDate.now()))
             snackbarHostState.showSnackbar(if (success) successMessage else failureMessage)
         }
     }
@@ -48,15 +48,17 @@ fun BackupExportRow(viewModel: DiaryViewModel, snackbarHostState: SnackbarHostSt
     )
 
     if (showSheet) {
+        val from = period.startsAt(LocalDate.now())
+        val inPeriod = entries.filter { from == null || it.createdAt >= from }
         ExportSheet(
             period = period,
-            recordsCount = entries.size,
-            photosCount = entries.count { it.photoPath != null },
+            recordsCount = inPeriod.size,
+            photosCount = inPeriod.count { it.photoPath != null },
             presetsCount = mealPresets.size,
             onPeriod = { period = it },
             onExport = {
                 showSheet = false
-                exportLauncher.launch("diax-backup-${LocalDate.now()}.zip")
+                exportLauncher.launch("diax-backup-${period.fileTag}-${LocalDate.now()}.zip")
             },
             onDismiss = { showSheet = false }
         )
