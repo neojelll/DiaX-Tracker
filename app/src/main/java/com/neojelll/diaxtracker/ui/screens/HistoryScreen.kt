@@ -379,7 +379,7 @@ private fun FullRecordCard(
         products = if (entry.mealLabel != null) fetchProducts(entry.id) else emptyList()
     }
 
-    GlukoCard(radius = GlukoRadius.record, padding = 0.dp) {
+    GlukoCard(radius = GlukoRadius.record, padding = 0.dp, modifier = Modifier.plainClickable(onClick = onEdit)) {
         Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 15.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(entry.createdAt.format(DateTimeFormatter.ofPattern("HH:mm")), style = GlukoType.RecordTime.tabular)
@@ -388,10 +388,6 @@ private fun FullRecordCard(
                     Modifier.clip(RoundedCornerShape(GlukoRadius.pill)).background(GlukoColors.Tile).padding(horizontal = 9.dp, vertical = 3.dp)
                 ) {
                     Text(entry.mealLabel ?: stringResource(R.string.record_no_preset), style = GlukoType.CardLabel.copy(fontSize = 11.sp), maxLines = 1)
-                }
-                Spacer(Modifier.weight(1f))
-                CircleButton(30.dp, GlukoColors.Tile, onEdit) {
-                    LucideIcon(LucidePaths.Pencil, 14.dp, strokeWidth = 1.8f)
                 }
             }
 
