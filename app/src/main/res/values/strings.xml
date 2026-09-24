@@ -63,6 +63,9 @@
     <string name="photo_add_title">Фото блюда</string>
     <string name="photo_add_hint">Снять или выбрать из галереи</string>
     <string name="photo_attached">Фото добавлено</string>
+    <string name="photo_take">Снять фото</string>
+    <string name="photo_choose">Выбрать из галереи</string>
+    <string name="photo_camera_unavailable">Камера недоступна</string>
     <string name="food_manual_format">%1$s (вручную)</string>
     <string name="food_picker_presets_kicker">Пресеты</string>
     <string name="food_picker_manual_kicker">Кол-во ХЕ без пресета</string>

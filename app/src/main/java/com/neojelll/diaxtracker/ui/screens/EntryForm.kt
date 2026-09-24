@@ -1,6 +1,8 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import android.content.ActivityNotFoundException
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,9 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -91,64 +100,110 @@ internal fun PhotoPickerRow(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val launcher = rememberLauncherForActivityResult(
+    var menuOpen by remember { mutableStateOf(false) }
+    // The camera writes into a temp file that outlives this composition if the process is
+    // killed while the camera app is in front, so remember its path across recreation.
+    var pendingCapture by rememberSaveable { mutableStateOf<String?>(null) }
+
+    fun replacePhoto(save: () -> String?) {
+        val oldPath = photoPath
+        scope.launch(Dispatchers.IO) {
+            val newPath = save()
+            if (newPath != null) {
+                withContext(Dispatchers.Main) { onPhotoChanged(newPath) }
+                oldPath?.let { PhotoStore.deletePhoto(it) }
+            }
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
-        if (uri != null) {
-            val oldPath = photoPath
-            scope.launch(Dispatchers.IO) {
-                val newPath = PhotoStore.savePhoto(context, uri)
-                if (newPath != null) {
-                    withContext(Dispatchers.Main) { onPhotoChanged(newPath) }
-                    oldPath?.let { PhotoStore.deletePhoto(it) }
+        if (uri != null) replacePhoto { PhotoStore.savePhoto(context, uri) }
+    }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { captured: Boolean ->
+        val capture = pendingCapture?.let(::File)
+        pendingCapture = null
+        if (capture != null) {
+            replacePhoto {
+                try {
+                    if (captured) PhotoStore.saveCapture(context, capture) else null
+                } finally {
+                    capture.delete()
                 }
             }
         }
     }
-    fun launchPicker() = launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
 
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .dashedBorder()
-            .plainClickable { launchPicker() }
-            .padding(horizontal = 13.dp, vertical = 11.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            Modifier.size(42.dp).clip(RoundedCornerShape(GlukoRadius.strip)).background(GlukoColors.Tile),
-            contentAlignment = Alignment.Center
+    fun launchGallery() = galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    fun launchCamera() {
+        val (file, uri) = PhotoStore.newCaptureTarget(context)
+        pendingCapture = file.absolutePath
+        try {
+            cameraLauncher.launch(uri)
+        } catch (e: ActivityNotFoundException) {
+            pendingCapture = null
+            file.delete()
+            Toast.makeText(context, R.string.photo_camera_unavailable, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    Box {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .dashedBorder()
+                .plainClickable { menuOpen = true }
+                .padding(horizontal = 13.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (photoPath != null) {
-                AsyncImage(
-                    model = File(photoPath),
-                    contentDescription = stringResource(R.string.entry_photo),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(42.dp).clip(RoundedCornerShape(GlukoRadius.strip))
-                )
-            } else {
-                LucideIcon(LucidePaths.Camera, 18.dp, strokeWidth = 1.7f)
-            }
-        }
-        Spacer(Modifier.width(11.dp))
-        Column(Modifier.weight(1f)) {
-            Text(
-                stringResource(if (photoPath != null) R.string.photo_attached else R.string.photo_add_title),
-                style = GlukoType.Body.copy(fontSize = 13.sp)
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(stringResource(R.string.photo_add_hint), style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary))
-        }
-        if (photoPath != null) {
             Box(
-                Modifier.size(24.dp).plainClickable {
-                    PhotoStore.deletePhoto(photoPath)
-                    onPhotoChanged(null)
-                },
+                Modifier.size(42.dp).clip(RoundedCornerShape(GlukoRadius.strip)).background(GlukoColors.Tile),
                 contentAlignment = Alignment.Center
             ) {
-                LucideIcon(LucidePaths.Close, 13.dp, GlukoColors.TextSecondary, strokeWidth = 2.2f)
+                if (photoPath != null) {
+                    AsyncImage(
+                        model = File(photoPath),
+                        contentDescription = stringResource(R.string.entry_photo),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(42.dp).clip(RoundedCornerShape(GlukoRadius.strip))
+                    )
+                } else {
+                    LucideIcon(LucidePaths.Camera, 18.dp, strokeWidth = 1.7f)
+                }
             }
+            Spacer(Modifier.width(11.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    stringResource(if (photoPath != null) R.string.photo_attached else R.string.photo_add_title),
+                    style = GlukoType.Body.copy(fontSize = 13.sp)
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(stringResource(R.string.photo_add_hint), style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary))
+            }
+            if (photoPath != null) {
+                Box(
+                    Modifier.size(24.dp).plainClickable {
+                        PhotoStore.deletePhoto(photoPath)
+                        onPhotoChanged(null)
+                    },
+                    contentAlignment = Alignment.Center
+                ) {
+                    LucideIcon(LucidePaths.Close, 13.dp, GlukoColors.TextSecondary, strokeWidth = 2.2f)
+                }
+            }
+        }
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.photo_take), style = GlukoType.Body) },
+                onClick = { menuOpen = false; launchCamera() }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.photo_choose), style = GlukoType.Body) },
+                onClick = { menuOpen = false; launchGallery() }
+            )
         }
     }
 }

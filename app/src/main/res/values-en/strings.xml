@@ -61,6 +61,9 @@
     <string name="photo_add_title">Meal photo</string>
     <string name="photo_add_hint">Take a photo or pick from gallery</string>
     <string name="photo_attached">Photo attached</string>
+    <string name="photo_take">Take a photo</string>
+    <string name="photo_choose">Choose from gallery</string>
+    <string name="photo_camera_unavailable">Camera unavailable</string>
     <string name="food_manual_format">%1$s (manual)</string>
     <string name="food_picker_presets_kicker">Presets</string>
     <string name="food_picker_manual_kicker">Bread units without a preset</string>
