@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 @Dao
 abstract class DiaryDao {
@@ -22,8 +23,8 @@ abstract class DiaryDao {
     @Query("SELECT * FROM diary_entries ORDER BY createdAt DESC")
     abstract fun getAllEntries(): Flow<List<DiaryEntry>>
 
-    @Query("SELECT * FROM diary_entries ORDER BY createdAt DESC LIMIT 1")
-    abstract suspend fun getMostRecentEntry(): DiaryEntry?
+    @Query("SELECT COUNT(*) FROM diary_entries WHERE createdAt BETWEEN :from AND :to")
+    abstract suspend fun countEntriesBetween(from: LocalDateTime, to: LocalDateTime): Int
 
     @Query("DELETE FROM diary_entries")
     abstract suspend fun deleteAllEntries()

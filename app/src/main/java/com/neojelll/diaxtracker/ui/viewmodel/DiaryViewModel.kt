@@ -21,6 +21,7 @@ import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.sensor.PostMealScheduler
 import com.neojelll.diaxtracker.sensor.SensorReadingStore
+import com.neojelll.diaxtracker.sensor.nearestSensorReading
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -166,7 +167,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                 mealProducts
             )
             if (shortInsulinDose != null || longInsulinDose != null) {
-                PostMealScheduler.scheduleFollowUps(getApplication(), entryId)
+                PostMealScheduler.scheduleFollowUps(getApplication(), entryId, createdAt)
             }
         }
     }
@@ -174,8 +175,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun sensorReadingNear(referenceTime: LocalDateTime): Float? {
         val windowStart = referenceTime.minusMinutes(SENSOR_FALLBACK_TOLERANCE_MINUTES)
         val windowEnd = referenceTime.plusMinutes(SENSOR_FALLBACK_TOLERANCE_MINUTES)
-        return repository.getSensorReadingsBetween(windowStart, windowEnd)
-            .minByOrNull { kotlin.math.abs(Duration.between(referenceTime, it.timestamp).toMinutes()) }
+        return nearestSensorReading(repository.getSensorReadingsBetween(windowStart, windowEnd), referenceTime)
             ?.bloodSugar
     }
 
@@ -183,7 +183,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         launchSafely {
             repository.updateWithProducts(entry, mealProducts)
             if (entry.shortInsulinDose != null || entry.longInsulinDose != null) {
-                PostMealScheduler.scheduleFollowUps(getApplication(), entry.id)
+                PostMealScheduler.scheduleFollowUps(getApplication(), entry.id, entry.createdAt)
             } else {
                 PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
             }
