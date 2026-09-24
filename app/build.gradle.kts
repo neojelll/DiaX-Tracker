@@ -23,7 +23,7 @@ android {
         minSdk = 26
         targetSdk = 35
         // Play Store requires this to strictly increase - bump by hand alongside versionName.
-        versionCode = 2
+        versionCode = 3
         versionName = "0.1.0-beta.1" // x-release-please-version
     }
 
