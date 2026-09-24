@@ -184,7 +184,10 @@
     <string name="backup_export_subtitle">ZIP archive: entries and photos</string>
     <string name="backup_import_subtitle">Adds entries from a ZIP archive</string>
     <string name="backup_toggle_title">Backup</string>
-    <string name="backup_toggle_on">Every evening, locally</string>
+    <string name="backup_toggle_on">Every evening · %1$s</string>
+    <string name="backup_toggle_last">Last backup: %1$s</string>
+    <string name="backup_toggle_never">No backup yet</string>
+    <string name="backup_toggle_failed">Couldn\'t save a backup - check the folder</string>
     <string name="backup_toggle_off">Off</string>
     <string name="delete_all_title">Delete all entries</string>
     <string name="delete_all_subtitle">This cannot be undone</string>

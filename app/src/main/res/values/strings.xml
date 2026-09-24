@@ -190,7 +190,10 @@
     <string name="backup_export_subtitle">Архив ZIP: записи и фото</string>
     <string name="backup_import_subtitle">Добавит записи из архива ZIP</string>
     <string name="backup_toggle_title">Резервная копия</string>
-    <string name="backup_toggle_on">Каждый вечер, локально</string>
+    <string name="backup_toggle_on">Каждый вечер · %1$s</string>
+    <string name="backup_toggle_last">Последняя копия: %1$s</string>
+    <string name="backup_toggle_never">Копия ещё не создавалась</string>
+    <string name="backup_toggle_failed">Не удалось сохранить копию — проверьте папку</string>
     <string name="backup_toggle_off">Выключена</string>
     <string name="delete_all_title">Удалить все записи</string>
     <string name="delete_all_subtitle">Отменить будет нельзя</string>

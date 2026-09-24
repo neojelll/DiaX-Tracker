@@ -1,5 +1,8 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.backup.BackupFolder
+import com.neojelll.diaxtracker.data.AutoBackupState
 import com.neojelll.diaxtracker.ui.components.BackupExportRow
 import com.neojelll.diaxtracker.ui.components.BackupImportRow
 import com.neojelll.diaxtracker.ui.components.GlukoCard
@@ -42,11 +47,28 @@ import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoSpacing
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+@Composable
+private fun autoBackupStatus(state: AutoBackupState): String = when {
+    state.lastAttemptFailed -> stringResource(R.string.backup_toggle_failed)
+    state.lastSuccessMillis == 0L -> stringResource(R.string.backup_toggle_never)
+    else -> stringResource(
+        R.string.backup_toggle_last,
+        Instant.ofEpochMilli(state.lastSuccessMillis).atZone(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern("d MMM, HH:mm"))
+    )
+}
 
 @Composable
 fun SettingsScreen(viewModel: DiaryViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val autoBackupEnabled by viewModel.autoBackupEnabled.collectAsState()
+    val autoBackup by viewModel.autoBackup.collectAsState()
+    val folderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) viewModel.enableAutoBackup(uri)
+    }
     var showDeleteAllConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -99,11 +121,22 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
                         Text(stringResource(R.string.backup_toggle_title), style = GlukoType.Body)
                         Spacer(Modifier.height(2.dp))
                         Text(
-                            stringResource(if (autoBackupEnabled) R.string.backup_toggle_on else R.string.backup_toggle_off),
+                            if (autoBackup.enabled) {
+                                stringResource(R.string.backup_toggle_on, autoBackup.folderUri?.let { BackupFolder.label(Uri.parse(it)) }.orEmpty())
+                            } else {
+                                stringResource(R.string.backup_toggle_off)
+                            },
                             style = GlukoType.Hint
                         )
+                        if (autoBackup.enabled) {
+                            Text(autoBackupStatus(autoBackup), style = GlukoType.Hint)
+                        }
                     }
-                    GlukoSwitch(autoBackupEnabled) { viewModel.setAutoBackupEnabled(!autoBackupEnabled) }
+                    GlukoSwitch(autoBackup.enabled) {
+                        // Enabling always goes through the folder picker (it opens on the folder chosen
+                        // before, so keeping it is one tap); disabling just stops the schedule.
+                        if (autoBackup.enabled) viewModel.disableAutoBackup() else folderLauncher.launch(null)
+                    }
                 }
             }
             Spacer(Modifier.height(GlukoSpacing.cardGap))
