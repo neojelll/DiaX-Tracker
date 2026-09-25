@@ -287,7 +287,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteAllEntries(onDeleted: (undo: () -> Unit) -> Unit = {}) {
         launchSafely {
             val snapshot = repository.allEntries.first()
-            val products = repository.allEntryProducts.first()
+            // Only rows that belong to a snapshotted entry: a stray product with no parent would fail the restore.
+            val ids = snapshot.mapTo(HashSet()) { it.id }
+            val products = repository.allEntryProducts.first().filter { it.diaryEntryId in ids }
             snapshot.forEach { PostMealScheduler.cancelFollowUps(getApplication(), it.id) }
             repository.deleteAllEntries()
             val cleanup = deletePhotosAfterUndoWindow(snapshot)
