@@ -53,6 +53,16 @@ abstract class DiaryDao {
         return entryId
     }
 
+    @Insert
+    abstract suspend fun insertEntries(entries: List<DiaryEntry>)
+
+    /** Puts deleted entries back under their original ids, along with their products. */
+    @Transaction
+    open suspend fun restore(entries: List<DiaryEntry>, products: List<DiaryEntryProduct>) {
+        insertEntries(entries)
+        if (products.isNotEmpty()) insertEntryProducts(products)
+    }
+
     @Transaction
     open suspend fun updateWithProducts(entry: DiaryEntry, products: List<DiaryEntryProduct>) {
         update(entry)

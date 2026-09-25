@@ -11,7 +11,6 @@
     <string name="greeting_afternoon">Добрый день!</string>
     <string name="greeting_evening">Добрый вечер!</string>
     <string name="greeting_night">Доброй ночи!</string>
-    <string name="entry_saved_snackbar">Запись сохранена!</string>
     <string name="save_entry_button">Сохранить запись</string>
 
     <plurals name="today_entries_count">
@@ -203,7 +202,6 @@
     <string name="error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
 
     <string name="backup_export_title">Экспортировать данные</string>
-    <string name="backup_export_success">Бэкап сохранён</string>
     <string name="backup_export_failed">Не удалось сохранить бэкап</string>
     <string name="backup_export_sheet_title">Экспорт записей</string>
     <string name="backup_export_sheet_subtitle">Один архив ZIP на устройство</string>
@@ -249,4 +247,19 @@
     <string name="disclaimer_title">Прежде чем начать</string>
     <string name="disclaimer_body">DiaX-Tracker — личный дневник для собственных записей о диабете. Приложение не является медицинским изделием, не даёт медицинских рекомендаций и не рассчитывает дозы инсулина. Показатели на экране (включая оценку активного инсулина) носят информационный характер и не заменяют консультацию врача. Все решения о лечении вы принимаете самостоятельно и несёте за них полную ответственность.</string>
     <string name="disclaimer_accept">Понимаю и принимаю</string>
+    <string name="toast_undo">Вернуть</string>
+    <string name="toast_restored">Восстановлено</string>
+    <string name="toast_record_saved">Запись сохранена</string>
+    <string name="toast_record_edited">Изменения сохранены</string>
+    <string name="toast_record_deleted">Запись удалена</string>
+    <string name="toast_preset_created">Приём пищи создан</string>
+    <string name="toast_preset_updated">Приём пищи обновлён</string>
+    <string name="toast_preset_deleted">Приём пищи удалён</string>
+    <string name="toast_all_deleted">Все записи удалены</string>
+    <string name="toast_export_done">Архив сохранён</string>
+    <string name="toast_import_done">Импорт завершён</string>
+    <string name="toast_backup_on">Резервная копия включена</string>
+    <string name="toast_backup_off">Резервная копия выключена</string>
+    <string name="toast_backup_every_evening">Каждый вечер · %1$s</string>
+    <string name="toast_when_today">Сегодня, %1$s</string>
 </resources>
