@@ -40,6 +40,7 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FoodPicker
+import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
 import com.neojelll.diaxtracker.ui.components.GlukoField
@@ -68,6 +69,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     var formState by remember { mutableStateOf(EntryFormState()) }
+    val toasts = rememberAppToasts()
     val sensorWarningVisible by viewModel.sensorWarningVisible.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
     val entries by viewModel.entries.collectAsState()
@@ -254,6 +256,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         SaveEntryButton(
             enabled = formState.isFillable,
             onSave = {
+                val createdAt = LocalDateTime.of(formState.date, formState.time)
                 viewModel.addEntry(
                     bloodSugar = formState.bloodSugar.toFloatOrNull(),
                     breadUnits = formState.breadUnits.toFloatOrNull(),
@@ -270,8 +273,9 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
                     notes = formState.notes.trim(),
                     photoPath = formState.photoPath,
-                    createdAt = LocalDateTime.of(formState.date, formState.time)
+                    createdAt = createdAt
                 )
+                toasts.recordSaved(createdAt)
                 formState = EntryFormState()
             }
         )

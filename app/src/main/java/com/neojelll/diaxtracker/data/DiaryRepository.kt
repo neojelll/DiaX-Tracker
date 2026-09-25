@@ -26,6 +26,10 @@ class DiaryRepository(
     suspend fun saveMealPreset(preset: MealPreset, products: List<MealPresetProduct>): Long =
         mealPresetDao.upsertPresetWithProducts(preset, products)
     suspend fun deleteMealPreset(preset: MealPreset) = mealPresetDao.delete(preset)
+    suspend fun restoreMealPreset(preset: MealPreset, products: List<MealPresetProduct>) =
+        mealPresetDao.restore(preset, products)
+    suspend fun restoreEntries(entries: List<DiaryEntry>, products: List<DiaryEntryProduct>) =
+        dao.restore(entries, products)
 
     suspend fun logSensorReading(reading: SensorReadingLog) = sensorReadingLogDao.insert(reading)
     suspend fun getSensorReadingsBetween(from: LocalDateTime, to: LocalDateTime): List<SensorReadingLog> =

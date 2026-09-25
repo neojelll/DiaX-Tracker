@@ -2,7 +2,6 @@ package com.neojelll.diaxtracker.ui.screens
 
 import android.content.ActivityNotFoundException
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +16,7 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.ui.components.OverlayController
+import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.PresetOption
 import java.io.File
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +73,7 @@ internal fun rememberPhotoPicker(
     overlays: OverlayController
 ): PhotoPicker {
     val context = LocalContext.current
+    val toasts = rememberAppToasts()
     val scope = rememberCoroutineScope()
     // The camera writes into a temp file that outlives this composition if the process is
     // killed while the camera app is in front, so remember its path across recreation.
@@ -119,7 +120,7 @@ internal fun rememberPhotoPicker(
         } catch (e: ActivityNotFoundException) {
             pendingCapture = null
             file.delete()
-            Toast.makeText(context, R.string.photo_camera_unavailable, Toast.LENGTH_SHORT).show()
+            toasts.error(context.getString(R.string.photo_camera_unavailable))
         }
     }
 

@@ -13,9 +13,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,7 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -43,6 +44,10 @@ import com.neojelll.diaxtracker.ui.components.Overlay
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.PhotoActionMenu
 import com.neojelll.diaxtracker.ui.components.PhotoPreview
+import com.neojelll.diaxtracker.ui.components.LocalToast
+import com.neojelll.diaxtracker.ui.components.ToastHost
+import com.neojelll.diaxtracker.ui.components.rememberAppToasts
+import com.neojelll.diaxtracker.ui.components.rememberToastState
 import com.neojelll.diaxtracker.ui.screens.AddEntryScreen
 import com.neojelll.diaxtracker.ui.screens.HistoryScreen
 import com.neojelll.diaxtracker.ui.screens.MealPresetsScreen
@@ -87,18 +92,20 @@ fun NavGraph(navController: NavHostController) {
     var insulinExpanded by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
+    val toastState = rememberToastState()
+    var navBarHeightPx by remember { mutableStateOf(0) }
+    val density = LocalDensity.current
+
+    CompositionLocalProvider(LocalToast provides toastState) {
+    val toasts = rememberAppToasts()
     LaunchedEffect(viewModel) {
-        viewModel.errorEvents.collect { messageRes ->
-            snackbarHostState.showSnackbar(context.getString(messageRes))
-        }
+        viewModel.errorEvents.collect { messageRes -> toasts.error(context.getString(messageRes)) }
     }
 
     Box(Modifier.fillMaxSize().background(GlukoColors.Screen)) {
         Scaffold(
             containerColor = Color.Transparent,
-            contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
-            snackbarHost = { SnackbarHost(snackbarHostState) }
+            contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars)
         ) { padding ->
             // Scaffold no longer consumes navigationBars itself (see contentWindowInsets
             // above), so the live inset is applied here as bottom padding on the whole
@@ -126,6 +133,7 @@ fun NavGraph(navController: NavHostController) {
                 Spacer(Modifier.height(10.dp))
 
                 GlukoNavBar(
+                    modifier = Modifier.onSizeChanged { navBarHeightPx = it.height },
                     items = navBarItems,
                     currentRoute = currentRoute,
                     onSelect = { item ->
@@ -139,15 +147,27 @@ fun NavGraph(navController: NavHostController) {
             }
         }
 
-        OverlayHost(viewModel, overlays, navController)
+        // Toasts float above the screen and its sheets, but under the photo action menu.
+        OverlayHost(viewModel, overlays, navController) { it !is Overlay.PhotoActions }
+        // Above the nav bar (and the spacer over it) with a small gap; a sheet covers the bar, so drop to the bottom.
+        val aboveNavBar = with(density) { navBarHeightPx.toDp() } + 10.dp + 12.dp
+        ToastHost(toastState, bottomOffset = if (overlays.stack.isEmpty()) aboveNavBar else 24.dp)
+        OverlayHost(viewModel, overlays, navController) { it is Overlay.PhotoActions }
+    }
     }
 }
 
 @Composable
-private fun OverlayHost(viewModel: DiaryViewModel, overlays: OverlayController, navController: NavHostController) {
+private fun OverlayHost(
+    viewModel: DiaryViewModel,
+    overlays: OverlayController,
+    navController: NavHostController,
+    include: (Overlay) -> Boolean
+) {
     // Render every layer in the stack (not just the top one) so a picker pushed on top of a
     // sheet like RecordEdit leaves that sheet mounted underneath instead of tearing it down.
     for (overlay in overlays.stack) {
+        if (!include(overlay)) continue
         OverlayLayer(overlay, viewModel, overlays, navController)
     }
 }
@@ -160,6 +180,7 @@ private fun OverlayLayer(
     navController: NavHostController
 ) {
     val mealPresets by viewModel.mealPresets.collectAsState()
+    val toasts = rememberAppToasts()
 
     when (overlay) {
         is Overlay.DatePicker -> DateSheet(
@@ -215,7 +236,7 @@ private fun OverlayLayer(
                     },
                     onEdit = { overlays.openPresetEdit(preset.preset.id) },
                     onDelete = {
-                        viewModel.deleteMealPreset(preset.preset)
+                        viewModel.deleteMealPreset(preset) { undo -> toasts.presetDeleted(preset.preset.name, undo) }
                         overlays.dismiss()
                     },
                     onDismiss = overlays::dismiss
@@ -231,6 +252,7 @@ private fun OverlayLayer(
                 preset = existing,
                 onConfirm = { name, comment, products ->
                     viewModel.saveMealPreset(id = existing?.preset?.id ?: 0, name = name, comment = comment, products = products)
+                    toasts.presetSaved(name, isNew = existing == null)
                     overlays.dismiss()
                 },
                 onDismiss = overlays::dismiss

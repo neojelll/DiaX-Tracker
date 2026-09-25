@@ -3,6 +3,7 @@ package com.neojelll.diaxtracker.data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
@@ -51,6 +52,22 @@ abstract class DiaryDao {
             insertEntryProducts(products.map { it.copy(diaryEntryId = entryId) })
         }
         return entryId
+    }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun replaceEntries(entries: List<DiaryEntry>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun replaceEntryProducts(products: List<DiaryEntryProduct>)
+
+    /**
+     * Puts deleted entries back under their original ids, along with their products. Replaces on
+     * conflict so a product row that survived the delete doesn't fail the whole restore.
+     */
+    @Transaction
+    open suspend fun restore(entries: List<DiaryEntry>, products: List<DiaryEntryProduct>) {
+        replaceEntries(entries)
+        if (products.isNotEmpty()) replaceEntryProducts(products)
     }
 
     @Transaction
