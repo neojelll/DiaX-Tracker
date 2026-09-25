@@ -195,7 +195,7 @@ private fun OverlayLayer(
             onDismiss = overlays::dismiss
         )
 
-        Overlay.Notifications -> NotificationSheet(onDismiss = overlays::dismiss)
+        Overlay.Notifications -> NotificationSheet(viewModel, onDismiss = overlays::dismiss)
 
         is Overlay.PhotoActions -> PhotoActionMenu(
             hasPhoto = overlay.hasPhoto,
