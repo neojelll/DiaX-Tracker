@@ -43,6 +43,8 @@ object LucidePaths {
     const val AlertTriangle = "M12 9v4.5M12 17h.01M10.3 3.9 2 18a1.6 1.6 0 0 0 1.4 2.4h17.2A1.6 1.6 0 0 0 22 18L13.7 3.9a1.6 1.6 0 0 0-2.8 0z"
     const val Report = "M7 3.5h7l4.5 4.5v12a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 7 3.5zM14 3.5v5h4.5M9 13h6M9 16.5h4"
     const val Image = "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 7a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"
+    const val Check = "M5 12.5l4.5 4.5L19 7.5"
+    const val Alert = "M12 7v6M12 17h.01"
     const val Trash = "M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"
     const val Trend = "M3.5 17.5 9 11l3.5 3.5L20.5 6M15.5 6h5v5"
 }

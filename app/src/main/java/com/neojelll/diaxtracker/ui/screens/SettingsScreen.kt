@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.backup.BackupFolder
+import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.data.AutoBackupState
 import com.neojelll.diaxtracker.ui.components.BackupExportRow
 import com.neojelll.diaxtracker.ui.components.BackupImportRow
@@ -64,15 +63,14 @@ private fun autoBackupStatus(state: AutoBackupState): String = when {
 
 @Composable
 fun SettingsScreen(viewModel: DiaryViewModel) {
-    val snackbarHostState = remember { SnackbarHostState() }
+    val toasts = rememberAppToasts()
     val autoBackup by viewModel.autoBackup.collectAsState()
     val folderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        if (uri != null) viewModel.enableAutoBackup(uri)
+        if (uri != null && viewModel.enableAutoBackup(uri)) toasts.backup(true, BackupFolder.label(uri))
     }
     var showDeleteAllConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Column(
@@ -109,9 +107,9 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
             GlukoCard {
                 Text(stringResource(R.string.data_section_title), style = GlukoType.Label)
                 Spacer(Modifier.height(12.dp))
-                BackupExportRow(viewModel, snackbarHostState)
+                BackupExportRow(viewModel)
                 GlukoDivider()
-                BackupImportRow(snackbarHostState)
+                BackupImportRow()
                 GlukoDivider()
                 Row(
                     Modifier.fillMaxWidth().padding(vertical = 11.dp),
@@ -135,7 +133,12 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
                     GlukoSwitch(autoBackup.enabled) {
                         // Enabling always goes through the folder picker (it opens on the folder chosen
                         // before, so keeping it is one tap); disabling just stops the schedule.
-                        if (autoBackup.enabled) viewModel.disableAutoBackup() else folderLauncher.launch(null)
+                        if (autoBackup.enabled) {
+                            viewModel.disableAutoBackup()
+                            toasts.backup(false)
+                        } else {
+                            folderLauncher.launch(null)
+                        }
                     }
                 }
             }
@@ -164,7 +167,7 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
             text = { Text(stringResource(R.string.delete_all_confirm_text)) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteAllEntries()
+                    viewModel.deleteAllEntries { undo -> toasts.allDeleted(undo) }
                     showDeleteAllConfirm = false
                 }) {
                     Text(stringResource(R.string.delete), color = DangerRed)

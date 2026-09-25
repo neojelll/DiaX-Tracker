@@ -27,7 +27,9 @@ import com.neojelll.diaxtracker.sensor.PostMealScheduler
 import com.neojelll.diaxtracker.sensor.SensorReadingStore
 import com.neojelll.diaxtracker.sensor.nearestSensorReading
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -199,11 +201,33 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun getEntryProducts(entryId: Long): List<DiaryEntryProduct> = repository.getEntryProducts(entryId)
 
-    fun deleteEntry(entry: DiaryEntry) {
+    /**
+     * Deletes the entry but keeps its photo file for [UNDO_WINDOW_MILLIS] so [onDeleted] can offer to
+     * bring it back; the callback gets the function that does so. If the app dies inside the window
+     * the photo file stays behind as an orphan.
+     */
+    fun deleteEntry(entry: DiaryEntry, onDeleted: (undo: () -> Unit) -> Unit = {}) {
         launchSafely {
+            val products = repository.getEntryProducts(entry.id)
             PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
             repository.delete(entry)
-            PhotoStore.deletePhoto(entry.photoPath)
+            val cleanup = deletePhotosAfterUndoWindow(listOf(entry))
+            onDeleted { undoDelete(listOf(entry), products, cleanup) }
+        }
+    }
+
+    private fun deletePhotosAfterUndoWindow(entries: List<DiaryEntry>): Job = viewModelScope.launch {
+        delay(UNDO_WINDOW_MILLIS)
+        entries.forEach { PhotoStore.deletePhoto(it.photoPath) }
+    }
+
+    private fun undoDelete(entries: List<DiaryEntry>, products: List<DiaryEntryProduct>, cleanup: Job) {
+        cleanup.cancel()
+        launchSafely {
+            repository.restoreEntries(entries, products)
+            entries
+                .filter { it.shortInsulinDose != null || it.longInsulinDose != null }
+                .forEach { PostMealScheduler.scheduleFollowUps(getApplication(), it.id, it.createdAt) }
         }
     }
 
@@ -213,9 +237,10 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deleteMealPreset(preset: MealPreset) {
+    fun deleteMealPreset(preset: MealPresetWithProducts, onDeleted: (undo: () -> Unit) -> Unit = {}) {
         launchSafely {
-            repository.deleteMealPreset(preset)
+            repository.deleteMealPreset(preset.preset)
+            onDeleted { launchSafely { repository.restoreMealPreset(preset.preset, preset.products) } }
         }
     }
 
@@ -230,17 +255,19 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         _insulinDurationHours.value = hours
     }
 
-    fun enableAutoBackup(folder: Uri) {
+    /** Returns whether the backup was turned on; on failure an error is already reported. */
+    fun enableAutoBackup(folder: Uri): Boolean {
         val app = getApplication<Application>()
         try {
             app.contentResolver.takePersistableUriPermission(folder, FOLDER_ACCESS_FLAGS)
         } catch (e: SecurityException) {
             Log.e(TAG, "Couldn't keep access to the backup folder", e)
             _errorEvents.tryEmit(R.string.error_generic)
-            return
+            return false
         }
         backupPreferencesStore.enableAutoBackup(folder.toString())
         AutoBackupScheduler.enable(app)
+        return true
     }
 
     fun disableAutoBackup() {
@@ -257,20 +284,24 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         _disclaimerAccepted.value = true
     }
 
-    fun deleteAllEntries() {
+    fun deleteAllEntries(onDeleted: (undo: () -> Unit) -> Unit = {}) {
         launchSafely {
-            val snapshot = entries.value
-            snapshot.forEach { entry ->
-                PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
-                PhotoStore.deletePhoto(entry.photoPath)
-            }
+            val snapshot = repository.allEntries.first()
+            // Only rows that belong to a snapshotted entry: a stray product with no parent would fail the restore.
+            val ids = snapshot.mapTo(HashSet()) { it.id }
+            val products = repository.allEntryProducts.first().filter { it.diaryEntryId in ids }
+            snapshot.forEach { PostMealScheduler.cancelFollowUps(getApplication(), it.id) }
             repository.deleteAllEntries()
+            val cleanup = deletePhotosAfterUndoWindow(snapshot)
+            onDeleted { undoDelete(snapshot, products, cleanup) }
         }
     }
 
     private companion object {
         const val TAG = "DiaryViewModel"
         const val FOLDER_ACCESS_FLAGS = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        // Toast with undo lives 5 s; the margin covers animation and a late tap.
+        const val UNDO_WINDOW_MILLIS = 7_000L
         const val SENSOR_POLL_INTERVAL_MILLIS = 30_000L
         const val INSULIN_CHECK_INTERVAL_MILLIS = 60_000L
         const val SENSOR_FALLBACK_TOLERANCE_MINUTES = 10L

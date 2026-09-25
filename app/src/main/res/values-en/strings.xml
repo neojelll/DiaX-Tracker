@@ -11,7 +11,6 @@
     <string name="greeting_afternoon">Good afternoon!</string>
     <string name="greeting_evening">Good evening!</string>
     <string name="greeting_night">Good night!</string>
-    <string name="entry_saved_snackbar">Entry saved!</string>
     <string name="save_entry_button">Save Entry</string>
 
     <plurals name="today_entries_count">
@@ -197,7 +196,6 @@
     <string name="error_generic">Something went wrong. Please try again.</string>
 
     <string name="backup_export_title">Export data</string>
-    <string name="backup_export_success">Backup saved</string>
     <string name="backup_export_failed">Failed to save backup</string>
     <string name="backup_export_sheet_title">Export entries</string>
     <string name="backup_export_sheet_subtitle">One ZIP archive on your device</string>
@@ -243,4 +241,19 @@
     <string name="disclaimer_title">Before you start</string>
     <string name="disclaimer_body">DiaX-Tracker is a personal diary for your own diabetes records. It is not a medical device, does not provide medical recommendations, and does not calculate insulin doses. On-screen figures (including the active-insulin estimate) are informational only and do not replace consulting a doctor. You make all treatment decisions yourself and bear full responsibility for them.</string>
     <string name="disclaimer_accept">I understand and accept</string>
+    <string name="toast_undo">Undo</string>
+    <string name="toast_restored">Restored</string>
+    <string name="toast_record_saved">Entry saved</string>
+    <string name="toast_record_edited">Changes saved</string>
+    <string name="toast_record_deleted">Entry deleted</string>
+    <string name="toast_preset_created">Meal preset created</string>
+    <string name="toast_preset_updated">Meal preset updated</string>
+    <string name="toast_preset_deleted">Meal preset deleted</string>
+    <string name="toast_all_deleted">All entries deleted</string>
+    <string name="toast_export_done">Archive saved</string>
+    <string name="toast_import_done">Import complete</string>
+    <string name="toast_backup_on">Backup turned on</string>
+    <string name="toast_backup_off">Backup turned off</string>
+    <string name="toast_backup_every_evening">Every evening · %1$s</string>
+    <string name="toast_when_today">Today, %1$s</string>
 </resources>

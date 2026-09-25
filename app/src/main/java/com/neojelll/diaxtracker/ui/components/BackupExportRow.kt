@@ -2,7 +2,6 @@ package com.neojelll.diaxtracker.ui.components
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,10 +18,10 @@ import java.time.LocalDate
 import kotlinx.coroutines.launch
 
 @Composable
-fun BackupExportRow(viewModel: DiaryViewModel, snackbarHostState: SnackbarHostState) {
+fun BackupExportRow(viewModel: DiaryViewModel) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val successMessage = stringResource(R.string.backup_export_success)
+    val toasts = rememberAppToasts()
     val failureMessage = stringResource(R.string.backup_export_failed)
     val entries by viewModel.entries.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
@@ -36,7 +35,7 @@ fun BackupExportRow(viewModel: DiaryViewModel, snackbarHostState: SnackbarHostSt
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
             val success = BackupExporter.export(context, uri, period.startsAt(LocalDate.now()))
-            snackbarHostState.showSnackbar(if (success) successMessage else failureMessage)
+            if (success) toasts.exported(queryDisplayName(context, uri)) else toasts.error(failureMessage)
         }
     }
 

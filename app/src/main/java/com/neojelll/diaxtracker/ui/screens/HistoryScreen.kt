@@ -60,6 +60,7 @@ import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.OverlayController
+import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.PhotoButton
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
 import com.neojelll.diaxtracker.ui.components.SecondaryButton
@@ -524,6 +525,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
     val breadUnitsFormat = stringResource(R.string.bread_units_value_format)
     val manualXeFormat = stringResource(R.string.food_manual_format)
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    val toasts = rememberAppToasts()
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     val initialBloodSugarText = remember(entryId) {
@@ -595,6 +597,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                     )
                 }
             )
+            toasts.recordEdited()
         }
         onDismiss()
     }
@@ -698,7 +701,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             text = { Text(stringResource(R.string.delete_entry_confirm_text)) },
             confirmButton = {
                 androidx.compose.material3.TextButton(onClick = {
-                    viewModel.deleteEntry(entry)
+                    viewModel.deleteEntry(entry) { undo -> toasts.recordDeleted(entry.createdAt, undo) }
                     showDeleteConfirm = false
                     onDismiss()
                 }) {

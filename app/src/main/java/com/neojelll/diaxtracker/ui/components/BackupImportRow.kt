@@ -5,7 +5,6 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +19,8 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 
 @Composable
-fun BackupImportRow(snackbarHostState: SnackbarHostState) {
+fun BackupImportRow() {
+    val toasts = rememberAppToasts()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showSheet by remember { mutableStateOf(false) }
@@ -46,7 +46,7 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
                 if (info == null) {
                     pendingUri = null
                     pendingFileName = null
-                    snackbarHostState.showSnackbar(invalidMessage)
+                    toasts.error(invalidMessage)
                 } else {
                     archiveSummary = describeArchive(info, previewFormat, previewEmpty)
                 }
@@ -70,21 +70,23 @@ fun BackupImportRow(snackbarHostState: SnackbarHostState) {
                 pendingUri?.let { uri ->
                     showSheet = false
                     scope.launch {
-                        val message = when (val result = BackupImporter.import(context, uri)) {
-                            is BackupImporter.ImportResult.Success -> with(result.summary) {
-                                if (photosRestored > 0) {
-                                    successWithPhotosFormat.format(entriesAdded, duplicatesSkipped, photosRestored)
-                                } else {
-                                    successFormat.format(entriesAdded, duplicatesSkipped)
-                                }
-                            }
-                            BackupImporter.ImportResult.InvalidFile -> invalidMessage
-                            BackupImporter.ImportResult.Failure -> failedMessage
-                        }
+                        val result = BackupImporter.import(context, uri)
                         pendingUri = null
                         pendingFileName = null
                         archiveSummary = null
-                        snackbarHostState.showSnackbar(message)
+                        when (result) {
+                            is BackupImporter.ImportResult.Success -> with(result.summary) {
+                                toasts.imported(
+                                    if (photosRestored > 0) {
+                                        successWithPhotosFormat.format(entriesAdded, duplicatesSkipped, photosRestored)
+                                    } else {
+                                        successFormat.format(entriesAdded, duplicatesSkipped)
+                                    }
+                                )
+                            }
+                            BackupImporter.ImportResult.InvalidFile -> toasts.error(invalidMessage)
+                            BackupImporter.ImportResult.Failure -> toasts.error(failedMessage)
+                        }
                     }
                 }
             },
@@ -106,7 +108,7 @@ private fun describeArchive(info: BackupImporter.ArchiveInfo, format: String, em
     return format.format(info.entries, first.format(day), last.format(day))
 }
 
-private fun queryDisplayName(context: Context, uri: Uri): String? = try {
+internal fun queryDisplayName(context: Context, uri: Uri): String? = try {
     context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
         if (cursor.moveToFirst()) cursor.getString(0) else null
     }

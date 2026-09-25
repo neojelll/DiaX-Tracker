@@ -25,6 +25,13 @@ abstract class MealPresetDao {
     @Query("DELETE FROM meal_preset_products WHERE mealPresetId = :presetId")
     abstract suspend fun deleteProductsForPreset(presetId: Long)
 
+    /** Puts a deleted preset back under its original id, along with its products. */
+    @Transaction
+    open suspend fun restore(preset: MealPreset, products: List<MealPresetProduct>) {
+        insert(preset)
+        if (products.isNotEmpty()) insertProducts(products)
+    }
+
     @Transaction
     @Query("SELECT * FROM meal_presets ORDER BY name ASC")
     abstract fun getAllPresetsWithProducts(): Flow<List<MealPresetWithProducts>>
