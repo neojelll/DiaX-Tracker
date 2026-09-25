@@ -445,6 +445,8 @@ private fun FullRecordCard(
             }
 
             if (afterMeal != null) {
+                Spacer(Modifier.height(13.dp))
+                GlukoDivider()
                 AfterMealPill(afterMeal)
                 Spacer(Modifier.height(13.dp))
             } else {
