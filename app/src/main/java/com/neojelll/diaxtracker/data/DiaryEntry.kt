@@ -20,3 +20,6 @@ data class DiaryEntry(
     val photoPath: String? = null,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
+
+/** Food was logged: a preset or a manual amount. Sugar checks and insulin-only entries aren't meals. */
+fun DiaryEntry.isMeal(): Boolean = mealLabel != null || breadUnits != null

@@ -59,6 +59,9 @@ import com.neojelll.diaxtracker.ui.components.GlukoSheet
 import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
+import com.neojelll.diaxtracker.ui.aftermeal.AfterMeal
+import com.neojelll.diaxtracker.ui.aftermeal.buildAfterMeal
+import com.neojelll.diaxtracker.ui.components.AfterMealPill
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.PhotoButton
@@ -82,6 +85,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private sealed interface HistoryRow {
@@ -123,9 +127,19 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         entryProducts.groupBy(DiaryEntryProduct::diaryEntryId) { it.name }
     }
 
-    val filtered = remember(entries, productNamesByEntry, searchQuery, dateFilter, sortDescending) {
+    // A pill appears an hour after a meal, so re-evaluate as time passes, not only when entries change.
+    var now by remember { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000)
+            now = LocalDateTime.now()
+        }
+    }
+    val afterMeal = remember(entries, now) { buildAfterMeal(entries, now) }
+
+    val filtered = remember(entries, afterMeal, productNamesByEntry, searchQuery, dateFilter, sortDescending) {
         val byDateAndText = entries.filter { entry ->
-            entry.matches(dateFilter) && (
+            entry.id !in afterMeal.hidden && entry.matches(dateFilter) && (
                 searchQuery.isBlank() ||
                     entry.notes.contains(searchQuery, ignoreCase = true) ||
                     entry.mealLabel?.contains(searchQuery, ignoreCase = true) == true ||
@@ -266,20 +280,22 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }) { row ->
             when (row) {
                 is HistoryRow.DayHeader -> {
-                    DayHeaderRow(row.date, entries.count { it.createdAt.toLocalDate() == row.date && it.matches(dateFilter) })
+                    DayHeaderRow(row.date, entries.count { it.id !in afterMeal.hidden && it.createdAt.toLocalDate() == row.date && it.matches(dateFilter) })
                     Spacer(Modifier.height(10.dp))
                 }
                 is HistoryRow.Entry -> {
                     val entry = row.entry
                     val sugarColor = entry.bloodSugar?.let { glucoseColor(it, glucoseRange.low, glucoseRange.high) } ?: GlukoColors.Ink
                     val statCount = listOfNotNull(entry.bloodSugar, entry.shortInsulinDose, entry.longInsulinDose).size
-                    if (entry.mealLabel == null && statCount <= 1 && entry.notes.isBlank() && entry.photoPath == null) {
+                    val pill = afterMeal.byMeal[entry.id]
+                    if (entry.mealLabel == null && statCount <= 1 && entry.notes.isBlank() && entry.photoPath == null && pill == null) {
                         CompactRecordRow(entry, sugarColor) { overlays.openRecordEdit(entry.id) }
                     } else {
                         val caption = photoCaption(entry.createdAt)
                         FullRecordCard(
                             entry = entry,
                             sugarColor = sugarColor,
+                            afterMeal = pill,
                             fetchProducts = viewModel::getEntryProducts,
                             onEdit = { overlays.openRecordEdit(entry.id) },
                             onOpenComposition = { overlays.openRecordComposition(entry.id) },
@@ -372,6 +388,7 @@ private val RecordMediaHeight = 88.dp
 private fun FullRecordCard(
     entry: DiaryEntry,
     sugarColor: Color,
+    afterMeal: AfterMeal?,
     fetchProducts: suspend (Long) -> List<DiaryEntryProduct>,
     onEdit: () -> Unit,
     onOpenComposition: () -> Unit,
@@ -427,9 +444,14 @@ private fun FullRecordCard(
                 }
             }
 
-            Spacer(Modifier.height(13.dp))
-            GlukoDivider()
-            Spacer(Modifier.height(13.dp))
+            if (afterMeal != null) {
+                AfterMealPill(afterMeal)
+                Spacer(Modifier.height(13.dp))
+            } else {
+                Spacer(Modifier.height(13.dp))
+                GlukoDivider()
+                Spacer(Modifier.height(13.dp))
+            }
 
             Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
                 Column(
