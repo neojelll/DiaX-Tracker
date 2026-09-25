@@ -15,6 +15,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,45 +29,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.DiaryEntry
+import com.neojelll.diaxtracker.data.DiaryEntryProduct
+import com.neojelll.diaxtracker.ui.notifications.yesterdayMeals
+import com.neojelll.diaxtracker.ui.screens.formatAmount
+import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.theme.tabular
 
-private data class NotificationItem(val categoryRes: Int, val timeRes: Int, val textRes: Int, val actionRes: Int, val iconPath: String)
-
-private val sampleNotifications = listOf(
-    NotificationItem(
-        R.string.notif_category_report, R.string.notif_time_today,
-        R.string.notif_text_report, R.string.notif_action_report, LucidePaths.Report
-    ),
-    NotificationItem(
-        R.string.notif_category_pattern, R.string.notif_time_yesterday,
-        R.string.notif_text_pattern, R.string.notif_action_pattern, LucidePaths.Trend
-    ),
-    NotificationItem(
-        R.string.notif_category_reminder, R.string.notif_time_two_days_ago,
-        R.string.notif_text_reminder, R.string.notif_action_reminder, LucidePaths.Clock
-    )
-)
-
 /**
  * Notifications as a bottom sheet, matching the design's other sheets (date, time, presets,
  * export) instead of a full-height side panel whose close button sat out of thumb's reach.
- * The three sample rows and their action links are decorative (no report screens exist),
- * matching the design handoff intentionally.
+ * For now there is one kind: a reminder of what was eaten at this time yesterday, shown only
+ * within an hour of yesterday's meal.
  */
 @Composable
-fun NotificationSheet(onDismiss: () -> Unit) {
+fun NotificationSheet(viewModel: DiaryViewModel, onDismiss: () -> Unit) {
+    val entries by viewModel.entries.collectAsState()
+    val meals = remember(entries) { yesterdayMeals(entries, LocalDateTime.now()) }
+    val xeFormat = stringResource(R.string.bread_units_value_format)
+
     GlukoSheet(onDismiss, maxHeightFraction = 0.76f) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Row(Modifier.weight(1f), verticalAlignment = Alignment.Bottom) {
                 Text(stringResource(R.string.notif_panel_title), style = GlukoType.SheetTitle)
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    sampleNotifications.size.toString(),
-                    style = GlukoType.CardLabel.copy(fontSize = 11.sp).tabular
-                )
+                if (meals.isNotEmpty()) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(meals.size.toString(), style = GlukoType.CardLabel.copy(fontSize = 11.sp).tabular)
+                }
             }
             CircleButton(32.dp, GlukoColors.Tile, onDismiss) {
                 LucideIcon(LucidePaths.Close, 14.dp, strokeWidth = 2.2f)
@@ -69,24 +68,45 @@ fun NotificationSheet(onDismiss: () -> Unit) {
         }
         Spacer(Modifier.height(14.dp))
 
-        Column(
-            Modifier.verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(7.dp)
-        ) {
-            sampleNotifications.forEach { item -> NotificationRow(item) }
-            Spacer(Modifier.height(6.dp))
+        if (meals.isEmpty()) {
             Text(
-                stringResource(R.string.notif_panel_footer),
-                style = GlukoType.CardLabel.copy(fontSize = 11.sp),
-                modifier = Modifier.fillMaxWidth(),
+                stringResource(R.string.notif_empty),
+                style = GlukoType.CardLabel.copy(fontSize = 12.sp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 28.dp),
                 textAlign = TextAlign.Center
             )
+        } else {
+            Column(
+                Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(7.dp)
+            ) {
+                meals.forEach { meal -> YesterdayMealRow(viewModel, meal, xeFormat) }
+                Spacer(Modifier.height(6.dp))
+            }
         }
     }
 }
 
 @Composable
-private fun NotificationRow(item: NotificationItem) {
+private fun YesterdayMealRow(viewModel: DiaryViewModel, meal: DiaryEntry, xeFormat: String) {
+    var products by remember(meal.id) { mutableStateOf<List<DiaryEntryProduct>>(emptyList()) }
+    LaunchedEffect(meal.id) { products = viewModel.getEntryProducts(meal.id) }
+
+    val what = products.takeIf { it.isNotEmpty() }?.joinToString { it.name } ?: meal.mealLabel.orEmpty()
+    val amount = meal.breadUnits?.let { xeFormat.format(formatAmount(it)) }
+    val food = listOf(what, amount.orEmpty()).filter { it.isNotEmpty() }.joinToString(" · ")
+    val time = meal.createdAt.format(DateTimeFormatter.ofPattern("HH:mm"))
+
+    NotificationRow(
+        category = stringResource(R.string.notif_category_report),
+        time = time,
+        text = stringResource(R.string.notif_yesterday_meal, time, food),
+        iconPath = LucidePaths.Report
+    )
+}
+
+@Composable
+private fun NotificationRow(category: String, time: String, text: String, iconPath: String) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -97,23 +117,17 @@ private fun NotificationRow(item: NotificationItem) {
     ) {
         Box(Modifier.padding(top = 1.dp)) {
             CircleButton(28.dp, GlukoColors.Surface) {
-                LucideIcon(item.iconPath, 14.dp, strokeWidth = 1.8f)
+                LucideIcon(iconPath, 14.dp, strokeWidth = 1.8f)
             }
         }
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                Kicker(stringResource(item.categoryRes), Modifier.weight(1f))
-                Text(stringResource(item.timeRes), style = GlukoType.CardLabel.tabular)
+                Kicker(category, Modifier.weight(1f))
+                Text(time, style = GlukoType.CardLabel.tabular)
             }
             Spacer(Modifier.height(4.dp))
-            Text(stringResource(item.textRes), style = GlukoType.Note.copy(color = GlukoColors.Ink))
-            Spacer(Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(item.actionRes), style = GlukoType.CardLabel.copy(fontSize = 11.sp))
-                Spacer(Modifier.width(4.dp))
-                LucideIcon(LucidePaths.ChevronRight, 11.dp, GlukoColors.TextLabel, strokeWidth = 2.2f)
-            }
+            Text(text, style = GlukoType.Note.copy(color = GlukoColors.Ink))
         }
     }
 }
