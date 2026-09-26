@@ -249,7 +249,5 @@
     <string name="after_meal_label">after meal</string>
     <string name="after_meal_peak">peak %1$s</string>
     <string name="after_meal_none">no readings yet</string>
-    <string name="after_meal_next">then %1$s</string>
-    <string name="after_meal_next_fallback">meal</string>
     <string name="after_meal_hour">%1$dh</string>
 </resources>

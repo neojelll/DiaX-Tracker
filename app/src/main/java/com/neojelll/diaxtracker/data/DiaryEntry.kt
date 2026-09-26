@@ -18,7 +18,11 @@ data class DiaryEntry(
     val longInsulinDose: Float?,
     val notes: String,
     val photoPath: String? = null,
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+    /** For an automatic sugar check: the meal entry that scheduled it. Not a foreign key - see [isMeal]. */
+    val sourceEntryId: Long? = null,
+    /** For an automatic sugar check: which hour after the meal it is for, 1..4. */
+    val sourceHour: Int? = null
 )
 
 /** Food was logged: a preset or a manual amount. Sugar checks and insulin-only entries aren't meals. */

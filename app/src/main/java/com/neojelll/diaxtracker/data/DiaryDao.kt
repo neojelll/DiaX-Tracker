@@ -27,6 +27,12 @@ abstract class DiaryDao {
     @Query("SELECT * FROM diary_entries WHERE createdAt = :createdAt")
     abstract suspend fun getEntriesAt(createdAt: LocalDateTime): List<DiaryEntry>
 
+    @Query("SELECT * FROM diary_entries WHERE id = :id")
+    abstract suspend fun getEntryById(id: Long): DiaryEntry?
+
+    @Query("SELECT COUNT(*) FROM diary_entries WHERE sourceEntryId = :sourceEntryId AND sourceHour = :hour")
+    abstract suspend fun countAutoChecks(sourceEntryId: Long, hour: Int): Int
+
     @Query("SELECT COUNT(*) FROM diary_entries WHERE createdAt BETWEEN :from AND :to")
     abstract suspend fun countEntriesBetween(from: LocalDateTime, to: LocalDateTime): Int
 

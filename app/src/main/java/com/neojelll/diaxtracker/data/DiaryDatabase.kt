@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         DiaryEntryProduct::class,
         SensorReadingLog::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -127,6 +127,13 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE diary_entries ADD COLUMN sourceEntryId INTEGER")
+                db.execSQL("ALTER TABLE diary_entries ADD COLUMN sourceHour INTEGER")
+            }
+        }
+
         /** Builder with every migration attached - also used to bring an imported backup up to date. */
         fun newBuilder(context: Context, name: String): RoomDatabase.Builder<DiaryDatabase> =
             Room.databaseBuilder(context.applicationContext, DiaryDatabase::class.java, name)
@@ -137,7 +144,8 @@ abstract class DiaryDatabase : RoomDatabase() {
                     MIGRATION_6_7,
                     MIGRATION_7_8,
                     MIGRATION_8_9,
-                    MIGRATION_9_10
+                    MIGRATION_9_10,
+                    MIGRATION_10_11
                 )
 
         fun getDatabase(context: Context): DiaryDatabase {

@@ -30,51 +30,25 @@ import java.util.Locale
 
 private val SegmentShadow = Color(0x14000000)
 
-private enum class SegmentState { Value, Missing, Cut }
-
-private class Segment(val hour: Int, val state: SegmentState, val value: Double?, val isPeak: Boolean)
+private class Segment(val hour: Int, val value: Double?, val isPeak: Boolean)
 
 private fun AfterMeal.segments(): List<Segment> {
-    val own = ownHours.coerceIn(0, 4)
-    var peakIndex = -1
-    var peak = Double.NEGATIVE_INFINITY
-    for (i in 0 until own) {
-        val v = values.getOrNull(i) ?: continue
-        if (v > peak) { peak = v; peakIndex = i }
-    }
-    return (0 until 4).map { i ->
-        val v = if (i < own) values.getOrNull(i) else null
-        Segment(
-            hour = i + 1,
-            state = when {
-                i >= own -> SegmentState.Cut
-                v == null -> SegmentState.Missing
-                else -> SegmentState.Value
-            },
-            value = v,
-            isPeak = i == peakIndex
-        )
-    }
+    val peak = values.filterNotNull().maxOrNull()
+    val peakIndex = if (peak == null) -1 else values.indexOfFirst { it == peak }
+    return values.mapIndexed { i, v -> Segment(hour = i + 1, value = v, isPeak = i == peakIndex) }
 }
 
 private fun format(value: Double) = String.format(Locale.US, "%.1f", value)
 
 /**
  * "Sugar after a meal": four segments, +1h..+4h after the meal, on the meal's history card.
- * The highest reading is the peak (white segment); a reading not taken yet is "—", and hours
- * after the next meal began are "·" (they belong to that meal).
+ * The highest reading is the peak (white segment); a check not taken yet is "—".
  */
 @Composable
 fun AfterMealPill(data: AfterMeal, modifier: Modifier = Modifier) {
     val segments = data.segments()
     val peak = segments.firstOrNull { it.isPeak }?.value
-    val caption = buildString {
-        append(if (peak == null) stringResource(R.string.after_meal_none) else stringResource(R.string.after_meal_peak, format(peak)))
-        if (data.ownHours < 4 && data.cutByMeal != null) {
-            val name = data.cutByMeal.mealLabel?.lowercase() ?: stringResource(R.string.after_meal_next_fallback)
-            append(" · ").append(stringResource(R.string.after_meal_next, name))
-        }
-    }
+    val caption = if (peak == null) stringResource(R.string.after_meal_none) else stringResource(R.string.after_meal_peak, format(peak))
 
     Column(modifier.fillMaxWidth()) {
         Spacer(Modifier.height(12.dp))
@@ -112,15 +86,11 @@ private fun SegmentCell(segment: Segment, modifier: Modifier) {
     ) {
         Text(stringResource(R.string.after_meal_hour, segment.hour), style = GlukoType.Unit.tabular)
         Text(
-            when (segment.state) {
-                SegmentState.Value -> format(segment.value!!)
-                SegmentState.Missing -> "—"
-                SegmentState.Cut -> "·"
-            },
+            segment.value?.let(::format) ?: "—",
             style = GlukoType.Body.copy(
                 fontSize = 13.sp,
                 fontWeight = if (segment.isPeak) FontWeight.Medium else FontWeight.Normal,
-                color = if (segment.state == SegmentState.Value) GlukoColors.Ink else GlukoColors.Placeholder
+                color = if (segment.value != null) GlukoColors.Ink else GlukoColors.Placeholder
             ).tabular
         )
     }

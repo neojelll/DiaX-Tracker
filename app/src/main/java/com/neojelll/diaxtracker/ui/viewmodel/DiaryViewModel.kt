@@ -22,6 +22,7 @@ import com.neojelll.diaxtracker.data.MealPreset
 import com.neojelll.diaxtracker.data.MealPresetProduct
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import com.neojelll.diaxtracker.data.SugarSource
+import com.neojelll.diaxtracker.data.isMeal
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.sensor.PostMealScheduler
 import com.neojelll.diaxtracker.sensor.SensorReadingStore
@@ -175,7 +176,8 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                 ),
                 mealProducts
             )
-            if (shortInsulinDose != null || longInsulinDose != null) {
+            // Sugar checks after a meal are for meals; an insulin-only entry has nothing to follow.
+            if (mealLabel != null || breadUnits != null) {
                 PostMealScheduler.scheduleFollowUps(getApplication(), entryId, createdAt)
             }
         }
@@ -191,7 +193,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun updateEntry(entry: DiaryEntry, mealProducts: List<DiaryEntryProduct>) {
         launchSafely {
             repository.updateWithProducts(entry, mealProducts)
-            if (entry.shortInsulinDose != null || entry.longInsulinDose != null) {
+            if (entry.isMeal()) {
                 PostMealScheduler.scheduleFollowUps(getApplication(), entry.id, entry.createdAt)
             } else {
                 PostMealScheduler.cancelFollowUps(getApplication(), entry.id)
@@ -226,7 +228,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         launchSafely {
             repository.restoreEntries(entries, products)
             entries
-                .filter { it.shortInsulinDose != null || it.longInsulinDose != null }
+                .filter { it.isMeal() }
                 .forEach { PostMealScheduler.scheduleFollowUps(getApplication(), it.id, it.createdAt) }
         }
     }

@@ -255,7 +255,5 @@
     <string name="after_meal_label">после еды</string>
     <string name="after_meal_peak">пик %1$s</string>
     <string name="after_meal_none">замеров пока нет</string>
-    <string name="after_meal_next">дальше %1$s</string>
-    <string name="after_meal_next_fallback">еда</string>
     <string name="after_meal_hour">%1$dч</string>
 </resources>
