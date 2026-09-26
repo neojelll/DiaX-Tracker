@@ -98,4 +98,46 @@ class AfterMealTest {
         val notMeal = meal(day).copy(mealLabel = null, breadUnits = null)
         assertNull(buildAfterMeal(listOf(notMeal), minutes(300)).byMeal[notMeal.id])
     }
+
+    private fun oldCheck(at: LocalDateTime, sugar: Float) = DiaryEntry(
+        id = nextId++, bloodSugar = sugar, sugarSource = SugarSource.SENSOR, shortInsulinDose = null, longInsulinDose = null,
+        notes = "", createdAt = at
+    )
+
+    @Test
+    fun `old checks without a link are placed by time and leave the feed`() {
+        val lunch = meal(day)
+        val olds = listOf(60L to 8.4f, 121L to 7.9f, 180L to 7.1f, 240L to 6.6f).map { oldCheck(minutes(it.first), it.second) }
+        val index = buildAfterMeal(listOf(lunch) + olds, now = minutes(300))
+        assertEquals(listOf(8.4, 7.9, 7.1, 6.6), index.byMeal.getValue(lunch.id).values)
+        assertEquals(olds.map { it.id }.toSet(), index.hidden)
+    }
+
+    @Test
+    fun `an old check goes to the last meal before it`() {
+        val lunch = meal(day, "Обед")
+        val dinner = meal(minutes(150), "Ужин")
+        val old = oldCheck(minutes(210), 8.0f)
+        val index = buildAfterMeal(listOf(lunch, dinner, old), now = minutes(600))
+        assertEquals(8.0, index.byMeal.getValue(dinner.id).values[0]!!, 0.0)
+        assertNull(index.byMeal.getValue(lunch.id).values[3])
+    }
+
+    @Test
+    fun `a linked check wins its hour over an old one`() {
+        val lunch = meal(day)
+        val linked = check(lunch, 1, 8.0f)
+        val old = oldCheck(minutes(62), 9.9f)
+        val index = buildAfterMeal(listOf(lunch, linked, old), now = minutes(120))
+        assertEquals(8.0, index.byMeal.getValue(lunch.id).values[0]!!, 0.0)
+    }
+
+    @Test
+    fun `an old reading with a note or a manual source is not taken for a check`() {
+        val lunch = meal(day)
+        val withNote = oldCheck(minutes(60), 8.0f).copy(notes = "после прогулки")
+        val manual = oldCheck(minutes(120), 7.0f).copy(sugarSource = SugarSource.MANUAL)
+        val index = buildAfterMeal(listOf(lunch, withNote, manual), now = minutes(300))
+        assertTrue(index.hidden.isEmpty())
+    }
 }
