@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.2.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.1.0-beta.1...v0.2.0-beta.1) (2026-09-26)
+
+
+### Features
+
+* **backup:** export by period and merge on import instead of replacing ([#96](https://github.com/neojelll/DiaX-Tracker/issues/96)) ([cfd6479](https://github.com/neojelll/DiaX-Tracker/commit/cfd6479d2a89e0bbcbb10963eb7901594564bbbc))
+* **backup:** make the automatic backup toggle actually back up ([#98](https://github.com/neojelll/DiaX-Tracker/issues/98)) ([360a7f3](https://github.com/neojelll/DiaX-Tracker/commit/360a7f389975ba38400364a42635f3fd48a4819e))
+* **history:** drop the edit pencil, tap the card to edit ([#93](https://github.com/neojelll/DiaX-Tracker/issues/93)) ([4c7dd25](https://github.com/neojelll/DiaX-Tracker/commit/4c7dd25a3864995f612d7297235db297c7353fdd))
+* **history:** meal tile opens a read-only composition sheet ([#94](https://github.com/neojelll/DiaX-Tracker/issues/94)) ([004013b](https://github.com/neojelll/DiaX-Tracker/commit/004013bf7c77c2840980f2ffa06605449b723496))
+* **history:** show sugar after a meal as a pill on the meal card ([#104](https://github.com/neojelll/DiaX-Tracker/issues/104)) ([2effde4](https://github.com/neojelll/DiaX-Tracker/commit/2effde45390b82bf767e68ea00611c375a0588b3))
+* **notifications:** yesterday's meal reminder instead of placeholders ([1c90551](https://github.com/neojelll/DiaX-Tracker/commit/1c9055140346cda26fbdffdd0a0658c9f34fe104))
+* **toasts:** redesigned toasts with undo for deletions ([75c16f3](https://github.com/neojelll/DiaX-Tracker/commit/75c16f3029ac56263cb3c6261b5fc3044c873bfc))
+
+
+### Bug Fixes
+
+* **history:** drop the "Сегодня" date filter chip ([#89](https://github.com/neojelll/DiaX-Tracker/issues/89)) ([e1284c6](https://github.com/neojelll/DiaX-Tracker/commit/e1284c64be79b7f151a87748dd7f1f6b57216cfc))
+* **history:** match ingredient names in search, not just the meal label ([#88](https://github.com/neojelll/DiaX-Tracker/issues/88)) ([4f5a559](https://github.com/neojelll/DiaX-Tracker/commit/4f5a5593dcbbda213f57f1d94fbdeb53685f25d0))
+* **insulin:** slow the active-insulin recompute tick to 1 minute ([#71](https://github.com/neojelll/DiaX-Tracker/issues/71)) ([79e8b17](https://github.com/neojelll/DiaX-Tracker/commit/79e8b17d130e060312f33f7c2b697181484c29bc))
+* **nav:** clear system navigation bar under GlukoNavBar and GlukoSheet ([#68](https://github.com/neojelll/DiaX-Tracker/issues/68)) ([48559d2](https://github.com/neojelll/DiaX-Tracker/commit/48559d22e139e431cc56c76dbe74186d1b854b6f))
+* **photo:** add in-app camera capture with the new photo picker design ([#92](https://github.com/neojelll/DiaX-Tracker/issues/92)) ([e871bcb](https://github.com/neojelll/DiaX-Tracker/commit/e871bcb0b9c4f9a41f93cf049c9de0870d9de2ed))
+* **sensor:** stamp post-meal checks with their exact target time ([#95](https://github.com/neojelll/DiaX-Tracker/issues/95)) ([f08a669](https://github.com/neojelll/DiaX-Tracker/commit/f08a66980880f9e8f82c58fc3e6ef674849a7270))
+* **ui:** stop the sugar/insulin/search field cursor clipping against the corner ([#86](https://github.com/neojelll/DiaX-Tracker/issues/86)) ([d1e8d28](https://github.com/neojelll/DiaX-Tracker/commit/d1e8d28fcb1a6a776bd8857b5f578e4ff1e70c98))
+
 ## [0.1.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.2.0...v0.1.0-beta.1) (2026-09-20)
 
 
