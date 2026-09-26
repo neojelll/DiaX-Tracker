@@ -88,9 +88,14 @@ object BackupImporter {
 
             live.withTransaction {
                 val diaryDao = live.diaryDao()
-                for (entry in backupEntries.sortedBy { it.createdAt }) {
+                // Backup id -> id in the live database, so an automatic check keeps pointing at its
+                // meal. Meals come before their checks (a check is always later), hence the order.
+                val liveIds = HashMap<Long, Long>()
+                for (backupEntry in backupEntries.sortedBy { it.createdAt }) {
+                    val entry = backupEntry.withSourceIn(liveIds)
                     val duplicate = findDuplicateEntry(diaryDao.getEntriesAt(entry.createdAt), entry)
                     if (duplicate != null) {
+                        liveIds[backupEntry.id] = duplicate.id
                         skipped++
                         // The record is already here but its photo is gone (deleted, or lost earlier):
                         // the archive can give it back.
@@ -105,9 +110,9 @@ object BackupImporter {
                     }
                     val photoPath = adoptPhoto(entry.photoPath, archivePhotos, photosDir)
                         ?.also { copiedPhotos += File(it) }
-                    diaryDao.insertWithProducts(
+                    liveIds[backupEntry.id] = diaryDao.insertWithProducts(
                         entry.copy(id = 0, photoPath = photoPath),
-                        backupProducts[entry.id].orEmpty().map { it.copy(id = 0, diaryEntryId = 0) }
+                        backupProducts[backupEntry.id].orEmpty().map { it.copy(id = 0, diaryEntryId = 0) }
                     )
                     added++
                 }
@@ -248,6 +253,16 @@ object BackupImporter {
  * values at the same moment are a genuine conflict and both are kept, so importing never loses
  * data. The photo path is ignored: it points into a different app data folder in the archive.
  */
+/**
+ * The entry with its meal link translated through [liveIds]; a link to a meal that isn't in the
+ * archive is dropped, so it can't point at some unrelated live entry.
+ */
+internal fun DiaryEntry.withSourceIn(liveIds: Map<Long, Long>): DiaryEntry {
+    val source = sourceEntryId ?: return this
+    val mapped = liveIds[source] ?: return copy(sourceEntryId = null, sourceHour = null)
+    return copy(sourceEntryId = mapped)
+}
+
 internal fun findDuplicateEntry(existing: List<DiaryEntry>, candidate: DiaryEntry): DiaryEntry? {
     val normalized = candidate.copy(id = 0, photoPath = null)
     return existing.firstOrNull { it.copy(id = 0, photoPath = null) == normalized }

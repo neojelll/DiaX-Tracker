@@ -28,7 +28,15 @@ class PostMealCheckWorker(
         ) ?: return Result.success()
 
         val dao = db.diaryDao()
-        if (dao.countEntriesBetween(target.minus(MIN_GAP_BETWEEN_AUTO_ENTRIES), target.plus(MIN_GAP_BETWEEN_AUTO_ENTRIES)) > 0) {
+        val sourceId = inputData.getLong(PostMealScheduler.KEY_SOURCE_ENTRY_ID, 0L).takeIf { it > 0L }
+        val hour = inputData.getInt(PostMealScheduler.KEY_HOUR, 0).takeIf { it in 1..4 }
+
+        if (sourceId != null && hour != null) {
+            // Each meal owns its four checks: whether another meal has a check nearby is irrelevant,
+            // only this meal's own hour matters. A meal deleted since is nothing to check for.
+            if (dao.getEntryById(sourceId) == null || dao.countAutoChecks(sourceId, hour) > 0) return Result.success()
+        } else if (dao.countEntriesBetween(target.minus(MIN_GAP_BETWEEN_AUTO_ENTRIES), target.plus(MIN_GAP_BETWEEN_AUTO_ENTRIES)) > 0) {
+            // Work enqueued by an older version knows no meal; it keeps the old "nothing else nearby" rule.
             return Result.success()
         }
 
@@ -39,7 +47,9 @@ class PostMealCheckWorker(
                 shortInsulinDose = null,
                 longInsulinDose = null,
                 notes = "",
-                createdAt = target
+                createdAt = target,
+                sourceEntryId = sourceId.takeIf { hour != null },
+                sourceHour = hour.takeIf { sourceId != null }
             )
         )
         return Result.success()

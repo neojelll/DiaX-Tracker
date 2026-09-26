@@ -25,6 +25,8 @@ internal fun pendingFollowUps(entryTime: LocalDateTime, now: LocalDateTime): Lis
 
 object PostMealScheduler {
     const val KEY_TARGET_MILLIS = "target_millis"
+    const val KEY_SOURCE_ENTRY_ID = "source_entry_id"
+    const val KEY_HOUR = "hour"
 
     /**
      * Schedules a sugar check at +1h/+2h/+3h/+4h after [entryTime]. WorkManager's initial delay is
@@ -45,7 +47,13 @@ object PostMealScheduler {
                 ExistingWorkPolicy.REPLACE,
                 OneTimeWorkRequestBuilder<PostMealCheckWorker>()
                     .setInitialDelay(followUp.delay.toMillis(), TimeUnit.MILLISECONDS)
-                    .setInputData(workDataOf(KEY_TARGET_MILLIS to targetMillis))
+                    .setInputData(
+                        workDataOf(
+                            KEY_TARGET_MILLIS to targetMillis,
+                            KEY_SOURCE_ENTRY_ID to entryId,
+                            KEY_HOUR to followUp.hours.toInt()
+                        )
+                    )
                     .addTag(tag)
                     .build()
             )

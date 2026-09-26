@@ -252,4 +252,8 @@
     <string name="notif_empty">Пока пусто. Напомним, что вы ели вчера в это время.</string>
     <string name="notif_category_report">Отчёт</string>
     <string name="notif_yesterday_meal">Вчера в %1$s вы ели: %2$s</string>
+    <string name="after_meal_label">после еды</string>
+    <string name="after_meal_peak">пик %1$s</string>
+    <string name="after_meal_none">замеров пока нет</string>
+    <string name="after_meal_hour">%1$dч</string>
 </resources>
