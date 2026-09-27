@@ -19,11 +19,11 @@ import into an older one. See [Limitations](#limitations) below.
 ## Contents
 
 - [Features](#features)
-- [Getting the app](#getting-the-app)
+- [How to download](#how-to-download)
 - [Connecting a sensor source](#connecting-a-sensor-source)
 - [Your data, backup and privacy](#your-data-backup-and-privacy)
 - [Limitations](#limitations)
-- [What this app is not](#what-this-app-is-not)
+- [Before you start](#before-you-start)
 - [License](#license)
 
 ## Features
@@ -60,7 +60,7 @@ import into an older one. See [Limitations](#limitations) below.
 
 - Russian and English
 
-## Getting the app
+## How to download
 
 Download the latest APK from the [Releases page](https://github.com/neojelll/DiaX-Tracker/releases/latest)
 and install it (you'll need to allow installs from that source once). Requires Android 8.0
@@ -110,9 +110,9 @@ the broadcast setting in the source app first.
   Android's background scheduling (WorkManager); aggressive battery optimisation on some
   phones (Xiaomi, Oppo/Realme, and similar) can delay or skip a run. Exclude the app from
   battery optimisation if you rely on these.
-- Not on Google Play yet - see [Getting the app](#getting-the-app).
+- Not on Google Play yet - see [How to download](#how-to-download).
 
-## What this app is not
+## Before you start
 
 DiaX-Tracker is a personal diary for your own records, not a medical device. The app does
 not give treatment recommendations or calculate insulin doses: every figure on screen
