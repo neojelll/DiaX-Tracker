@@ -24,8 +24,6 @@ import into an older one. See [Limitations](#limitations) below.
 - [Your data, backup and privacy](#your-data-backup-and-privacy)
 - [Limitations](#limitations)
 - [What this app is not](#what-this-app-is-not)
-- [Building from source](#building-from-source)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Features
@@ -123,30 +121,7 @@ informational and does not replace a doctor's advice. The user makes all treatme
 decisions independently and bears full responsibility for them. The full text is in the
 disclaimer shown on first launch.
 
-## Building from source
-
-Requires Android Studio (or Gradle + JDK 17) and a connected device/emulator running
-Android 8.0 (API 26) or newer.
-
-```bash
-./gradlew installDebug
-```
-
-**Stack**: Kotlin, Jetpack Compose, Material3, Room, WorkManager, Coil.
-
-## Contributing
-
-This is currently a solo, personal project, but issues and pull requests are welcome.
-
-- Branches: `[issue-number/]type/slug` (e.g. `104/feat/after-meal-sugar`).
-- Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/)
-  (`feat: …`, `fix: …`, …) - a squash-merged PR's title becomes the commit on `main`, and
-  the changelog is generated from it.
-- `./gradlew testDebugUnitTest lintDebug` should pass before opening a PR; CI runs the same
-  checks.
-- See the [open issues](https://github.com/neojelll/DiaX-Tracker/issues) for what's planned
-  or being considered - most start as a loosely defined idea and get refined before anyone
-  picks them up.
+Want to build it yourself or contribute? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
