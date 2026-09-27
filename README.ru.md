@@ -5,8 +5,9 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/neojelll/DiaX-Tracker/ci.yml?branch=main&style=flat-square)](https://github.com/neojelll/DiaX-Tracker/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/neojelll/DiaX-Tracker?include_prereleases&style=flat-square)](https://github.com/neojelll/DiaX-Tracker/releases/latest)
 
-Личный дневник для людей с диабетом: сахар, инсулин, еда и заметки — в одном месте, без облака
-и без аккаунтов. Все данные хранятся только на устройстве.
+DiaX-Tracker — дневник для людей с диабетом, главная задача которого — избавить от ручного
+ввода цифр и сэкономить ваше время. Сахар, инсулин, еда и заметки — в одном месте, без
+облака и без аккаунтов: все данные хранятся только на устройстве.
 
 **Статус: бета.** Приложение активно развивается, часть функций ещё не отшлифована, а смена
 структуры данных между версиями может означать, что архив из более новой версии не откроется

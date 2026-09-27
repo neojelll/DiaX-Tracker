@@ -5,8 +5,9 @@ English | [Русский](README.ru.md)
 [![CI](https://img.shields.io/github/actions/workflow/status/neojelll/DiaX-Tracker/ci.yml?branch=main&style=flat-square)](https://github.com/neojelll/DiaX-Tracker/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/neojelll/DiaX-Tracker?include_prereleases&style=flat-square)](https://github.com/neojelll/DiaX-Tracker/releases/latest)
 
-A personal diary for people with diabetes: blood sugar, insulin, meals, and notes — all in
-one place, with no cloud and no accounts. All data stays on the device.
+DiaX-Tracker is a diary for people with diabetes, built mainly to spare you manual data
+entry and save your time. Blood sugar, insulin, meals, and notes — all in one place, with
+no cloud and no accounts: all data stays on the device.
 
 **Status: beta.** The app is in active development; some features are still rough, and a
 database change between versions can mean an archive exported by a newer version won't
