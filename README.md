@@ -1,128 +1,130 @@
 # DiaX-Tracker
 
-English | [Русский](README.ru.md)
+[English](README.en.md) | Русский
 
 [![CI](https://img.shields.io/github/actions/workflow/status/neojelll/DiaX-Tracker/ci.yml?branch=main&style=flat-square)](https://github.com/neojelll/DiaX-Tracker/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/neojelll/DiaX-Tracker?include_prereleases&style=flat-square)](https://github.com/neojelll/DiaX-Tracker/releases/latest)
 
-DiaX-Tracker is a diary for people with diabetes, built mainly to spare you manual data
-entry and save your time. Blood sugar, insulin, meals, and notes — all in one place.
+DiaX-Tracker — дневник для людей с диабетом, главная задача которого — избавить от ручного
+ввода цифр и сэкономить ваше время. Сахар, инсулин, еда и заметки — всё в одном месте.
 
-**Status: beta.** The app is in active development; some features are still rough, and a
-database change between versions can mean an archive exported by a newer version won't
-import into an older one. See [Limitations](#limitations) below.
+**Статус: бета.** Приложение активно развивается, часть функций ещё не отшлифована, а смена
+структуры данных между версиями может означать, что архив из более новой версии не откроется
+в старой. Подробнее — в разделе [Ограничения](#ограничения) ниже.
 
-| Entry | History | Meal presets |
+| Запись | История | Пресеты питания |
 | --- | --- | --- |
-| ![Entry screen](docs/screenshots/entry.jpg) | ![Entry history](docs/screenshots/history.jpg) | ![Meal presets](docs/screenshots/meal-presets.jpg) |
+| ![Экран записи](docs/screenshots/entry.jpg) | ![История записей](docs/screenshots/history.jpg) | ![Пресеты питания](docs/screenshots/meal-presets.jpg) |
 
-## Contents
+## Содержание
 
-- [Features](#features)
-- [How to download](#how-to-download)
-- [Connecting a sensor source](#connecting-a-sensor-source)
-- [Your data, backup and privacy](#your-data-backup-and-privacy)
-- [Limitations](#limitations)
-- [Before you start](#before-you-start)
-- [License](#license)
+- [Возможности](#возможности)
+- [Как скачать](#как-скачать)
+- [Подключение источника сахара](#подключение-источника-сахара)
+- [Ваши данные, копии и приватность](#ваши-данные-копии-и-приватность)
+- [Ограничения](#ограничения)
+- [Прежде чем начать](#прежде-чем-начать)
+- [Лицензия](#лицензия)
 
-## Features
+## Возможности
 
-### Logging
+### Ведение записей
 
-- Quick entry: blood sugar, carb units (XE), short/long insulin, meal, a photo (camera or
-  gallery), and a comment
-- Meal presets with ingredients and automatic carb-unit calculation
-- Automatic blood sugar fill-in from **xDrip+** and **Juggluco** — no need to retype sensor
-  readings by hand
+- Быстрая запись: сахар, ХЕ, короткий/длинный инсулин, приём пищи, фото (камера или
+  галерея) и комментарий
+- Пресеты питания с составом и автоматическим подсчётом ХЕ
+- Автоматическая подстановка сахара из **xDrip+** и **Juggluco** — не нужно переписывать
+  показания датчика вручную
 
-### On the home screen
+### На главном экране
 
-- Active insulin: calculated with a pharmacokinetic model (exponential decay, as in
-  Loop/AndroidAPS/OpenAPS), with configurable action duration
+- Активный инсулин: расчёт по фармакокинетической модели (экспоненциальный спад, как в
+  Loop/AndroidAPS/OpenAPS), с настраиваемой длительностью действия
 
-### History
+### История
 
-- Search, date filters, and highlighting for out-of-range values
-- Tap a card to edit it, tap a meal to see its composition
-- "Sugar after a meal": automatic checks at +1h/+2h/+3h/+4h, shown as a pill on the meal's
-  own card
-- A reminder of what was eaten at this same time yesterday
+- Поиск, фильтры по датам и подсветка значений вне целевого диапазона
+- Тап по карточке открывает редактирование, тап по приёму пищи показывает его состав
+- «Сахар после еды»: автоматические замеры через +1ч/+2ч/+3ч/+4ч, показываются пилюлей на
+  карточке самого приёма пищи
+- Напоминание о том, что вы ели в это же время вчера
 
-### Data
+### Данные
 
-- Export to a ZIP archive (a week, a month, or everything) and import that merges instead of
-  replacing, skipping duplicates
-- Automatic nightly backup to a folder you choose, keeping the newest 7 copies
-- Undo for deleting an entry, a meal, or everything
+- Экспорт в ZIP-архив (неделя, месяц или всё) и импорт, который добавляет записи, а не
+  заменяет их, пропуская дубликаты
+- Автоматическая резервная копия каждый вечер в выбранную вами папку, хранятся 7 последних
+- Отмена удаления записи, приёма пищи или всех записей
 
-### Interface
+### Интерфейс
 
-- Russian and English
+- Русский и английский
 
-## How to download
+## Как скачать
 
-Download the latest APK from the [Releases page](https://github.com/neojelll/DiaX-Tracker/releases/latest)
-and install it (you'll need to allow installs from that source once). Requires Android 8.0
-(API 26) or newer.
+Скачайте последний APK со [страницы релизов](https://github.com/neojelll/DiaX-Tracker/releases/latest)
+и установите (один раз нужно будет разрешить установку из этого источника). Требуется
+Android 8.0 (API 26) или новее.
 
-The app isn't on Google Play yet.
+Приложения пока нет в Google Play.
 
-## Connecting a sensor source
+## Подключение источника сахара
 
-DiaX-Tracker doesn't talk to a sensor directly — it receives readings that another app
-already broadcasts on the device:
+DiaX-Tracker не общается с датчиком напрямую — он принимает показания, которые уже
+транслирует на устройстве другое приложение:
 
-- **xDrip+**: in xDrip+'s settings, under *Inter-app settings*, enable
-  *"BroadcastReceiver mode"* (or the mmol/L equivalent your build uses to send local
-  broadcasts) so it sends the standard `com.eveningoutpost.dexdrip.BgEstimate` broadcast.
-- **Juggluco / JugglucoNG**: in Juggluco's settings, add DiaX-Tracker as a *Glucodata*
-  recipient (or enable its xDrip-compatible broadcast mode).
+- **xDrip+**: в настройках xDrip+, в разделе *Inter-app settings*, включите
+  *«BroadcastReceiver mode»* (или аналог для ммоль/л в вашей сборке), чтобы приложение
+  отправляло стандартную трансляцию `com.eveningoutpost.dexdrip.BgEstimate`.
+- **Juggluco / JugglucoNG**: в настройках Juggluco добавьте DiaX-Tracker получателем
+  *Glucodata* (или включите режим трансляции, совместимый с xDrip).
 
-Once enabled, readings appear in DiaX-Tracker automatically — nothing needs to be
-configured on the DiaX-Tracker side. If a screen ever shows a stale-sensor warning, re-check
-the broadcast setting in the source app first.
+После включения показания появятся в DiaX-Tracker автоматически — настраивать что-то со
+стороны DiaX-Tracker не нужно. Если на экране появится предупреждение об устаревших
+данных датчика, сначала проверьте настройку трансляции в приложении-источнике.
 
-## Your data, backup and privacy
+## Ваши данные, копии и приватность
 
-- Everything - entries, photos, presets, sensor readings - is stored locally in the app's
-  own storage. Nothing is sent anywhere; there is no server, account, or analytics.
-- **Export**: Settings → export a ZIP archive for a week, a month, or all your data.
-- **Import**: adds the entries from an archive to what's already there; entries that match
-  exactly are skipped as duplicates, and nothing existing is changed or deleted.
-- **Automatic backup**: turn it on in Settings and pick a folder (e.g. one synced by your
-  own cloud provider); every evening the app writes a new archive there and keeps the
-  newest 7, deleting only its own older ones.
-- **Permissions**: a foreground service to receive sensor broadcasts and run the automatic
-  backup and reminder checks in the background. The camera and photo picker are opened as
-  the system's own apps, so no separate storage/camera permission is requested.
-- Uninstalling the app deletes its data. Export or turn on automatic backup first if you
-  want to keep it.
+- Всё — записи, фото, пресеты, показания датчика — хранится локально, в собственном
+  хранилище приложения. Никуда ничего не отправляется: нет ни сервера, ни аккаунта, ни
+  аналитики.
+- **Экспорт**: в настройках можно выгрузить ZIP-архив за неделю, месяц или все данные.
+- **Импорт**: добавляет записи из архива к уже существующим; полностью совпадающие записи
+  пропускаются как дубликаты, ничего из имеющегося не меняется и не удаляется.
+- **Автоматическая копия**: включается в настройках с выбором папки (например,
+  синхронизируемой вашим облачным сервисом); каждый вечер приложение записывает туда новый
+  архив и хранит 7 последних, удаляя только свои же более старые копии.
+- **Разрешения**: фоновая служба нужна, чтобы принимать трансляции от датчика и выполнять
+  автокопию и напоминания в фоне. Камера и выбор фото открываются как системные приложения,
+  поэтому отдельное разрешение на камеру или хранилище не запрашивается.
+- Удаление приложения удаляет и его данные. Если хотите их сохранить, сначала сделайте
+  экспорт или включите автокопию.
 
-## Limitations
+## Ограничения
 
-- **Beta software**: expect rough edges and occasional bugs.
-- **Schema changes**: a database change between versions is not undone by downgrading —
-  going back to an older build after updating isn't supported. An archive exported by a
-  newer version may not import into an older one; the other direction (old archive into a
-  new version) is supported.
-- **Background reliability**: automatic backup and the post-meal sugar checks depend on
-  Android's background scheduling (WorkManager); aggressive battery optimisation on some
-  phones (Xiaomi, Oppo/Realme, and similar) can delay or skip a run. Exclude the app from
-  battery optimisation if you rely on these.
-- Not on Google Play yet - see [How to download](#how-to-download).
+- **Бета-версия**: возможны шероховатости и отдельные баги.
+- **Смена структуры данных**: изменение схемы базы между версиями не отменяется откатом —
+  вернуться на более старую сборку после обновления не получится. Архив, выгруженный
+  новой версией, может не открыться в старой; в обратную сторону (старый архив в новой
+  версии) импорт работает.
+- **Надёжность фоновых задач**: автокопия и замеры сахара после еды зависят от фонового
+  планировщика Android (WorkManager); агрессивная экономия батареи на некоторых телефонах
+  (Xiaomi, Oppo/Realme и похожих) может задержать или пропустить запуск. Если это важно,
+  исключите приложение из оптимизации батареи.
+- Пока нет в Google Play — см. [Как скачать](#как-скачать).
 
-## Before you start
+## Прежде чем начать
 
-DiaX-Tracker is a personal diary for your own records, not a medical device. The app does
-not give treatment recommendations or calculate insulin doses: every figure on screen
-(including the active-insulin estimate and the automatic sugar checks) is purely
-informational and does not replace a doctor's advice. The user makes all treatment
-decisions independently and bears full responsibility for them. The full text is in the
-disclaimer shown on first launch.
+DiaX-Tracker — личный дневник для собственных записей, а не медицинское изделие.
+Приложение не даёт рекомендаций по лечению и не рассчитывает дозы инсулина: все показатели
+на экране (включая оценку активного инсулина и автоматические замеры сахара после еды)
+носят исключительно информационный характер и не заменяют консультацию врача. Все решения
+о лечении пользователь принимает самостоятельно и несёт за них полную ответственность.
+Полный текст — в дисклеймере при первом запуске приложения.
 
-Want to build it yourself or contribute? See [CONTRIBUTING.md](CONTRIBUTING.md).
+Хотите собрать приложение сами или помочь проекту? См. [CONTRIBUTING.md](CONTRIBUTING.md)
+(на английском — это техническая документация для контрибьюторов).
 
-## License
+## Лицензия
 
 [MIT](LICENSE)
