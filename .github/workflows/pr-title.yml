@@ -1,0 +1,52 @@
+name: PR title
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    steps:
+      # The action below checks the subject's format but not the total length, so the
+      # commit-conventions skill's 70-char budget needs this separate step. The title
+      # is read via env, not `${{ }}` inside run: - a PR title is attacker-controlled,
+      # and inlining it would let a crafted one execute as shell.
+      - name: Check title length
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          len=$(printf '%s' "$TITLE" | wc -m)
+          if [ "$len" -gt 70 ]; then
+            echo "::error::PR title is $len characters (limit 70, leaving room for the \" (#123)\" GitHub appends on squash-merge): $TITLE"
+            exit 1
+          fi
+
+      - uses: amannn/action-semantic-pull-request@v5
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            refactor
+            test
+            perf
+            ci
+            build
+            revert
+            style
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The summary after "type: " (or "type(scope): ") must start with a lowercase
+            letter, e.g. "feat: add X", not "feat: Add X".
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
