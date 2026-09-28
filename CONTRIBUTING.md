@@ -4,8 +4,9 @@ This is currently a solo, personal project, but issues and pull requests are wel
 
 ## Building from source
 
-Requires Android Studio (or Gradle + JDK 17) and a connected device/emulator running
-Android 8.0 (API 26) or newer.
+Requires Android Studio (or Gradle) and a connected device/emulator running Android 8.0
+(API 26) or newer. The JDK is not something to set up by hand: the build declares a Gradle
+toolchain (JDK 17), which Gradle provisions itself if none is already on the machine.
 
 ```bash
 ./gradlew installDebug
