@@ -15,6 +15,18 @@ jobs:
   check-title:
     runs-on: ubuntu-latest
     steps:
+      # The action below has no total-length input, only per-subject regexes - the
+      # commit-conventions skill's 70-char budget (room for the " (#123)" GitHub
+      # appends on squash-merge) needs its own check.
+      - name: Check title length
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          len=$(printf '%s' "$title" | wc -m)
+          if [ "$len" -gt 70 ]; then
+            echo "::error::PR title is $len characters (limit 70, leaving room for the \" (#123)\" GitHub appends on squash-merge): $title"
+            exit 1
+          fi
+
       - uses: amannn/action-semantic-pull-request@v5
         with:
           types: |
