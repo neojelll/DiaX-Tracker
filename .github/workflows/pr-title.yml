@@ -15,13 +15,10 @@ jobs:
   check-title:
     runs-on: ubuntu-latest
     steps:
-      # The action below has no total-length input, only per-subject regexes - the
-      # commit-conventions skill's 70-char budget (room for the " (#123)" GitHub
-      # appends on squash-merge) needs its own check. The title comes in via env,
-      # never interpolated into the script itself - a PR title is attacker-controlled
-      # text (this repo takes PRs from anyone), and `${{ }}` inside `run:` would paste
-      # it into the shell script before it runs, letting a crafted title break out and
-      # execute arbitrary commands on the runner.
+      # The action below checks the subject's format but not the total length, so the
+      # commit-conventions skill's 70-char budget needs this separate step. The title
+      # is read via env, not `${{ }}` inside run: - a PR title is attacker-controlled,
+      # and inlining it would let a crafted one execute as shell.
       - name: Check title length
         env:
           TITLE: ${{ github.event.pull_request.title }}
