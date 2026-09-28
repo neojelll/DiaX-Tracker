@@ -11,6 +11,12 @@ on:
     branches:
       - main
 
+# A new push to the same PR (or to main) makes the previous run's result moot -
+# cancel it instead of burning time finishing a check nobody will read.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     # Skip on a title/description-only edit - nothing to (re)build, and the previous
