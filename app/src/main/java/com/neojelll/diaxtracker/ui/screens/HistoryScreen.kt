@@ -72,7 +72,6 @@ import com.neojelll.diaxtracker.ui.components.PrimaryButton
 import com.neojelll.diaxtracker.ui.components.SecondaryButton
 import com.neojelll.diaxtracker.ui.components.SheetHeader
 import com.neojelll.diaxtracker.ui.components.XeBadge
-import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.numeric
 import com.neojelll.diaxtracker.ui.components.plainClickable
 import com.neojelll.diaxtracker.ui.components.shadowSoft
@@ -292,7 +291,12 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     val sugarColor = entry.bloodSugar?.let { glucoseColor(it, glucoseRange.low, glucoseRange.high) } ?: GlukoColors.Ink
                     val statCount = listOfNotNull(entry.bloodSugar, entry.shortInsulinDose, entry.longInsulinDose).size
                     val pill = afterMeal.byMeal[entry.id]
-                    if (entry.mealLabel == null && statCount <= 1 && entry.notes.isBlank() && entry.photoPath == null && pill == null) {
+                    // carbsGrams excluded from statCount on purpose: the compact row has no carbs
+                    // display at all, so an entry that would only show its carbs there needs the
+                    // full card instead, or that value is invisible in the feed.
+                    if (entry.mealLabel == null && entry.carbsGrams == null && statCount <= 1 &&
+                        entry.notes.isBlank() && entry.photoPath == null && pill == null
+                    ) {
                         CompactRecordRow(entry, sugarColor) { overlays.openRecordEdit(entry.id) }
                     } else {
                         val caption = photoCaption(entry.createdAt)
@@ -449,80 +453,34 @@ private fun FullRecordCard(
                 }
             }
 
-            if (afterMeal != null) {
+            val hasPreset = entry.mealLabel != null
+            val hasPhoto = entry.photoPath != null
+            val hasCarbs = entry.carbsGrams != null
+            // An entry with none of the three has nothing for this row to show - skip it
+            // entirely rather than render an empty tile pair, and skip the divider above it
+            // too (an afterMeal pill only ever exists on a meal entry, which always has
+            // a preset or carbs, so this also gates the pill correctly).
+            val hasMediaRow = hasPreset || hasCarbs || hasPhoto
+
+            if (hasMediaRow) {
                 Spacer(Modifier.height(13.dp))
                 GlukoDivider()
-                AfterMealPill(afterMeal)
+                if (afterMeal != null) AfterMealPill(afterMeal)
                 Spacer(Modifier.height(13.dp))
-            } else {
-                Spacer(Modifier.height(13.dp))
-                GlukoDivider()
-                Spacer(Modifier.height(13.dp))
-            }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
-                Column(
-                    Modifier
-                        .weight(1f)
-                        .height(RecordMediaHeight)
-                        .clip(RoundedCornerShape(GlukoRadius.tile))
-                        .background(GlukoColors.Tile)
-                        // Only a real preset has a recorded composition to show; anything else falls
-                        // back to editing, like the rest of the card.
-                        .clickable(onClick = if (entry.mealLabel != null) onOpenComposition else onEdit)
-                        .padding(horizontal = 13.dp, vertical = 11.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            entry.mealLabel ?: stringResource(R.string.record_no_preset),
-                            style = GlukoType.Body, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        entry.carbsGrams?.let { XeBadge(carbsText(it)) }
-                    }
-                    Text(
-                        products.sortedBy { it.sortOrder }.joinToString(", ") { it.name },
-                        style = GlukoType.CardLabel.copy(fontSize = 11.sp),
-                        maxLines = 1, overflow = TextOverflow.Ellipsis
-                    )
-                    if (entry.mealLabel != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(R.string.record_composition), style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary))
-                            Spacer(Modifier.width(5.dp))
-                            LucideIcon(LucidePaths.ChevronRight, 11.dp, GlukoColors.TextTertiary, strokeWidth = 2.2f)
-                        }
-                    }
-                }
-
-                if (entry.photoPath != null) {
-                    Box(
-                        Modifier
-                            .width(88.dp).height(RecordMediaHeight)
-                            .clip(RoundedCornerShape(GlukoRadius.tile))
-                            .clickable(onClick = onOpenPhoto),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        AsyncImage(
-                            model = java.io.File(entry.photoPath),
-                            contentDescription = stringResource(R.string.entry_photo),
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(GlukoRadius.tile))
-                        )
-                        Box(
-                            Modifier.align(Alignment.BottomEnd).padding(6.dp).width(20.dp).heightIn(min = 20.dp)
-                                .clip(RoundedCornerShape(GlukoRadius.pill)).background(GlukoColors.Surface),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            LucideIcon(LucidePaths.Expand, 11.dp, strokeWidth = 2.2f)
-                        }
-                    }
+                if (hasCarbs && !hasPreset && !hasPhoto) {
+                    // Nothing else in the row to sit next to - a plain line reads better than
+                    // a tile with a single line of text floating in it.
+                    Text(carbsText(entry.carbsGrams!!), style = GlukoType.Body)
                 } else {
-                    Box(
-                        Modifier.width(88.dp).height(RecordMediaHeight).dashedBorder(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(stringResource(R.string.record_no_photo), style = GlukoType.CardLabel.copy(color = GlukoColors.Placeholder), textAlign = TextAlign.Center)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
+                        when {
+                            hasPreset -> PresetTile(entry, products, Modifier.weight(1f), onOpenComposition)
+                            hasCarbs -> CarbsTile(entry.carbsGrams!!, Modifier.weight(1f))
+                        }
+                        // The only case with nothing beside it (no preset, no carbs) - Row's default
+                        // start alignment already puts it on the left, nothing extra needed.
+                        if (hasPhoto) RecordPhotoTile(entry.photoPath!!, onOpenPhoto)
                     }
                 }
             }
@@ -533,6 +491,75 @@ private fun FullRecordCard(
                 Spacer(Modifier.height(12.dp))
                 Text(entry.notes, style = GlukoType.Note, maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
+        }
+    }
+}
+
+@Composable
+private fun PresetTile(entry: DiaryEntry, products: List<DiaryEntryProduct>, modifier: Modifier, onOpenComposition: () -> Unit) {
+    Column(
+        modifier
+            .height(RecordMediaHeight)
+            .clip(RoundedCornerShape(GlukoRadius.tile))
+            .background(GlukoColors.Tile)
+            .clickable(onClick = onOpenComposition)
+            .padding(horizontal = 13.dp, vertical = 11.dp),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(entry.mealLabel!!, style = GlukoType.Body, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.width(8.dp))
+            entry.carbsGrams?.let { XeBadge(carbsText(it)) }
+        }
+        Text(
+            products.sortedBy { it.sortOrder }.joinToString(", ") { it.name },
+            style = GlukoType.CardLabel.copy(fontSize = 11.sp),
+            maxLines = 1, overflow = TextOverflow.Ellipsis
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.record_composition), style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary))
+            Spacer(Modifier.width(5.dp))
+            LucideIcon(LucidePaths.ChevronRight, 11.dp, GlukoColors.TextTertiary, strokeWidth = 2.2f)
+        }
+    }
+}
+
+/** No preset to name, so no composition link and no click override - taps fall through to the card's own onEdit. */
+@Composable
+private fun CarbsTile(carbsGrams: Float, modifier: Modifier) {
+    Box(
+        modifier
+            .height(RecordMediaHeight)
+            .clip(RoundedCornerShape(GlukoRadius.tile))
+            .background(GlukoColors.Tile)
+            .padding(horizontal = 13.dp, vertical = 11.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(carbsText(carbsGrams), style = GlukoType.Body)
+    }
+}
+
+@Composable
+private fun RecordPhotoTile(photoPath: String, onOpenPhoto: () -> Unit) {
+    Box(
+        Modifier
+            .width(88.dp).height(RecordMediaHeight)
+            .clip(RoundedCornerShape(GlukoRadius.tile))
+            .clickable(onClick = onOpenPhoto),
+        contentAlignment = Alignment.Center
+    ) {
+        AsyncImage(
+            model = java.io.File(photoPath),
+            contentDescription = stringResource(R.string.entry_photo),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(GlukoRadius.tile))
+        )
+        Box(
+            Modifier.align(Alignment.BottomEnd).padding(6.dp).width(20.dp).heightIn(min = 20.dp)
+                .clip(RoundedCornerShape(GlukoRadius.pill)).background(GlukoColors.Surface),
+            contentAlignment = Alignment.Center
+        ) {
+            LucideIcon(LucidePaths.Expand, 11.dp, strokeWidth = 2.2f)
         }
     }
 }

@@ -138,7 +138,6 @@
     <string name="record_composition">состав</string>
     <string name="record_composition_snapshot">Состав на момент записи</string>
     <string name="record_composition_empty">Состав не сохранён</string>
-    <string name="record_no_photo">без фото</string>
     <string name="record_measurement_tag">замер</string>
     <string name="record_edit_title">Редактировать запись</string>
     <string name="delete_entry_pill">Удалить запись</string>
