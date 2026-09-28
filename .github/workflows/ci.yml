@@ -2,12 +2,20 @@ name: CI
 
 on:
   pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
   push:
     branches:
       - main
 
 jobs:
   build-and-test:
+    # Skip on a title/description-only edit - nothing to (re)build, and the previous
+    # run's status for this commit SHA still stands.
+    if: github.event_name == 'push' || github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,3 +41,60 @@ jobs:
         with:
           name: test-results
           path: app/build/reports/tests/testDebugUnitTest
+
+  check-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      # The action below checks the subject's format but not the total length, so the
+      # commit-conventions skill's 70-char budget needs this separate step. The title
+      # is read via env, not `${{ }}` inside run: - a PR title is attacker-controlled,
+      # and inlining it would let a crafted one execute as shell.
+      - name: Check title length
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          len=$(printf '%s' "$TITLE" | wc -m)
+          if [ "$len" -gt 70 ]; then
+            echo "::error::PR title is $len characters (limit 70, leaving room for the \" (#123)\" GitHub appends on squash-merge): $TITLE"
+            exit 1
+          fi
+
+      - uses: amannn/action-semantic-pull-request@v5
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            refactor
+            test
+            perf
+            ci
+            build
+            revert
+            style
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The summary after "type: " (or "type(scope): ") must start with a lowercase
+            letter, e.g. "feat: add X", not "feat: Add X".
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Single required check for branch protection: everything above gets `needs:`-ed in
+  # here instead of being added to the protection rule one by one. A job that was
+  # skipped on purpose (see the `if:`s above) doesn't fail the gate - only an actual
+  # failure or cancellation does.
+  ci-gate:
+    name: CI gate
+    if: always()
+    needs:
+      - build-and-test
+      - check-title
+    runs-on: ubuntu-latest
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
