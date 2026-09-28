@@ -17,13 +17,18 @@ jobs:
     steps:
       # The action below has no total-length input, only per-subject regexes - the
       # commit-conventions skill's 70-char budget (room for the " (#123)" GitHub
-      # appends on squash-merge) needs its own check.
+      # appends on squash-merge) needs its own check. The title comes in via env,
+      # never interpolated into the script itself - a PR title is attacker-controlled
+      # text (this repo takes PRs from anyone), and `${{ }}` inside `run:` would paste
+      # it into the shell script before it runs, letting a crafted title break out and
+      # execute arbitrary commands on the runner.
       - name: Check title length
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
         run: |
-          title="${{ github.event.pull_request.title }}"
-          len=$(printf '%s' "$title" | wc -m)
+          len=$(printf '%s' "$TITLE" | wc -m)
           if [ "$len" -gt 70 ]; then
-            echo "::error::PR title is $len characters (limit 70, leaving room for the \" (#123)\" GitHub appends on squash-merge): $title"
+            echo "::error::PR title is $len characters (limit 70, leaving room for the \" (#123)\" GitHub appends on squash-merge): $TITLE"
             exit 1
           fi
 
