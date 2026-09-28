@@ -11,6 +11,11 @@ on:
     branches:
       - main
 
+# Least-privilege default for the whole workflow: only what checkout needs. A job
+# that needs more scopes it for itself (see check-title below); ci-gate needs none.
+permissions:
+  contents: read
+
 # A new push to the same PR (or to main) makes the previous run's result moot -
 # cancel it instead of burning time finishing a check nobody will read.
 concurrency:
@@ -97,6 +102,7 @@ jobs:
   ci-gate:
     name: CI gate
     if: always()
+    permissions: {}
     needs:
       - build-and-test
       - check-title
