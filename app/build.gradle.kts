@@ -60,6 +60,18 @@ android {
                 signingConfigs.getByName("debug")
             }
         }
+        // A release build under its own applicationId, so it installs next to the real app
+        // instead of over it: own database, prefs, files and permissions. Every on-device
+        // experiment (PR builds, migrations, import/backup fixes) goes here, never onto the
+        // only copy of the diary. Debug-signed - it never updates the real install, so it
+        // doesn't need the release keystore. Name and icon differ via src/dev/res.
+        create("dev") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
