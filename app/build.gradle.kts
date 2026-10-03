@@ -7,6 +7,15 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+// Gradle/AGP itself needs JDK 17 to run - this makes that a fact Gradle enforces (provisioning
+// a matching JDK via its toolchain resolver if none is on the machine) instead of a line in
+// CONTRIBUTING.md nobody's build actually checks. Unrelated to compileOptions/kotlinOptions
+// below, which target Java 11 *bytecode* for the app itself - the JDK that compiles it and the
+// bytecode level it compiles down to are independent knobs.
+kotlin {
+    jvmToolchain(17)
+}
+
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) {
