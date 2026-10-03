@@ -46,6 +46,11 @@ jobs:
       - name: Lint
         run: ./gradlew lintDebug
 
+      # Tests above cover the shared code; this only keeps the dev variant (its own
+      # applicationId, signing and resource overrides) from silently breaking.
+      - name: Build dev variant
+        run: ./gradlew assembleDev
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
