@@ -322,7 +322,8 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
 @Composable
 private fun historySummary(count: Int, days: Int): String {
     val entriesLabel = pluralStringResource(R.plurals.day_records_count, count, count)
-    return "$entriesLabel · $days"
+    val daysLabel = pluralStringResource(R.plurals.history_days_count, days, days)
+    return "$entriesLabel · $daysLabel"
 }
 
 @Composable

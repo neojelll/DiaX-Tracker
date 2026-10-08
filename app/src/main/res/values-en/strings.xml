@@ -123,6 +123,10 @@
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>
     </plurals>
+    <plurals name="history_days_count">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
 
     <string name="sensor_notification_channel">Glucose Sensor</string>
     <string name="sensor_notification_text">Listening for sensor data</string>
