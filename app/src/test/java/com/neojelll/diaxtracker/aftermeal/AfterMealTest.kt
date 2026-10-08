@@ -1,4 +1,4 @@
-package com.neojelll.diaxtracker.ui.aftermeal
+package com.neojelll.diaxtracker.aftermeal
 
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.SugarSource

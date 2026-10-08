@@ -12,8 +12,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.aftermeal.feedRecords
 import com.neojelll.diaxtracker.backup.BackupExporter
-import com.neojelll.diaxtracker.ui.aftermeal.feedRecords
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime

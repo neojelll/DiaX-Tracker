@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.aftermeal.AfterMeal
+import com.neojelll.diaxtracker.aftermeal.buildAfterMeal
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
@@ -59,8 +61,6 @@ import com.neojelll.diaxtracker.ui.components.GlukoSheet
 import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
-import com.neojelll.diaxtracker.ui.aftermeal.AfterMeal
-import com.neojelll.diaxtracker.ui.aftermeal.buildAfterMeal
 import com.neojelll.diaxtracker.ui.components.AfterMealPill
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
