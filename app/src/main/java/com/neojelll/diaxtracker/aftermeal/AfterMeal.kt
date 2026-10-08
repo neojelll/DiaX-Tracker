@@ -1,4 +1,4 @@
-package com.neojelll.diaxtracker.ui.aftermeal
+package com.neojelll.diaxtracker.aftermeal
 
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.SugarSource
@@ -19,7 +19,14 @@ class AfterMealIndex(
     val byMeal: Map<Long, AfterMeal>,
     /** Checks shown inside a pill, so the feed doesn't list them a second time. */
     val hidden: Set<Long>
-)
+) {
+    /**
+     * The entries that are records of their own: everything except the checks shown inside a pill,
+     * which belong to their meal. The one definition of a record - History, export and import all
+     * count by it, so they can't disagree.
+     */
+    fun records(entries: List<DiaryEntry>): List<DiaryEntry> = entries.filter { it.id !in hidden }
+}
 
 private val PILL_APPEARS_AFTER: Duration = Duration.ofHours(1)
 private val LEGACY_FIRST_OFFSET: Duration = Duration.ofMinutes(30)
@@ -63,6 +70,10 @@ fun buildAfterMeal(entries: List<DiaryEntry>, now: LocalDateTime): AfterMealInde
     }
     return AfterMealIndex(byMeal, hidden)
 }
+
+/** [AfterMealIndex.records] for callers that don't need the pills themselves. */
+fun feedRecords(entries: List<DiaryEntry>, now: LocalDateTime): List<DiaryEntry> =
+    buildAfterMeal(entries, now).records(entries)
 
 /**
  * Old automatic checks have no stored meal. They are recognised as sensor readings with nothing

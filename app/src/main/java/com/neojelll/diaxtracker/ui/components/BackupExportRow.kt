@@ -12,9 +12,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.aftermeal.feedRecords
 import com.neojelll.diaxtracker.backup.BackupExporter
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,7 +50,8 @@ fun BackupExportRow(viewModel: DiaryViewModel) {
 
     if (showSheet) {
         val from = period.startsAt(LocalDate.now())
-        val inPeriod = entries.filter { from == null || it.createdAt >= from }
+        // Pills are worked out over all entries: a meal just before the period still owns its checks inside it.
+        val inPeriod = feedRecords(entries, LocalDateTime.now()).filter { from == null || it.createdAt >= from }
         ExportSheet(
             period = period,
             recordsCount = inPeriod.size,

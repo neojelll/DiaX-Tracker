@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.aftermeal.AfterMeal
+import com.neojelll.diaxtracker.aftermeal.buildAfterMeal
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
@@ -59,8 +61,6 @@ import com.neojelll.diaxtracker.ui.components.GlukoSheet
 import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
-import com.neojelll.diaxtracker.ui.aftermeal.AfterMeal
-import com.neojelll.diaxtracker.ui.aftermeal.buildAfterMeal
 import com.neojelll.diaxtracker.ui.components.AfterMealPill
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
@@ -136,10 +136,11 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
     }
     val afterMeal = remember(entries, now) { buildAfterMeal(entries, now) }
+    val records = remember(entries, afterMeal) { afterMeal.records(entries) }
 
-    val filtered = remember(entries, afterMeal, productNamesByEntry, searchQuery, dateFilter, sortDescending) {
-        val byDateAndText = entries.filter { entry ->
-            entry.id !in afterMeal.hidden && entry.matches(dateFilter) && (
+    val filtered = remember(records, productNamesByEntry, searchQuery, dateFilter, sortDescending) {
+        val byDateAndText = records.filter { entry ->
+            entry.matches(dateFilter) && (
                 searchQuery.isBlank() ||
                     entry.notes.contains(searchQuery, ignoreCase = true) ||
                     entry.mealLabel?.contains(searchQuery, ignoreCase = true) == true ||
@@ -280,7 +281,7 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }) { row ->
             when (row) {
                 is HistoryRow.DayHeader -> {
-                    DayHeaderRow(row.date, entries.count { it.id !in afterMeal.hidden && it.createdAt.toLocalDate() == row.date && it.matches(dateFilter) })
+                    DayHeaderRow(row.date, records.count { it.createdAt.toLocalDate() == row.date && it.matches(dateFilter) })
                     Spacer(Modifier.height(10.dp))
                 }
                 is HistoryRow.Entry -> {

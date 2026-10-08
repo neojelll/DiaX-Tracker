@@ -1,4 +1,4 @@
-package com.neojelll.diaxtracker.ui.aftermeal
+package com.neojelll.diaxtracker.aftermeal
 
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.SugarSource
@@ -139,5 +139,17 @@ class AfterMealTest {
         val manual = oldCheck(minutes(120), 7.0f).copy(sugarSource = SugarSource.MANUAL)
         val index = buildAfterMeal(listOf(lunch, withNote, manual), now = minutes(300))
         assertTrue(index.hidden.isEmpty())
+    }
+
+    @Test
+    fun `feed records leave out the checks shown inside a pill, and nothing else`() {
+        val lunch = meal(day)
+        val checks = (1..4).map { check(lunch, it, 7f + it) }
+        val reading = manualReading(minutes(150), 6.2f)
+        val deletedMeal = meal(minutes(-300))
+        val orphanCheck = check(deletedMeal, 1, 9f) // its meal is gone, so it stays an ordinary row
+
+        val records = feedRecords(listOf(orphanCheck, lunch) + checks + reading, now = minutes(300))
+        assertEquals(listOf(orphanCheck, lunch, reading), records)
     }
 }
