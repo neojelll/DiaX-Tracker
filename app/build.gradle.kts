@@ -48,17 +48,35 @@ android {
     }
 
     buildTypes {
+        // Keeps the real applicationId to release alone: nothing built for development can
+        // land on top of the real app, even by a stray installDebug.
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = false
-            signingConfig = if (keystorePropertiesFile.exists()) {
+            // The release key only in CI (GitHub Actions sets CI=true): a release build made on
+            // a computer is debug-signed even with keystore.properties present, so Android
+            // refuses it as an update to the real app - only APKs from GitHub Releases can be.
+            signingConfig = if (keystorePropertiesFile.exists() && System.getenv("CI") == "true") {
                 signingConfigs.getByName("release")
             } else {
-                logger.warn(
-                    "keystore.properties not found at $keystorePropertiesFile - " +
-                        "release build falling back to debug signing."
-                )
+                logger.warn("Not a CI build with keystore.properties - release build is debug-signed.")
                 signingConfigs.getByName("debug")
             }
+        }
+        // A release build under its own applicationId, so it installs next to the real app
+        // instead of over it: own database, prefs, files and permissions. Every on-device
+        // experiment (PR builds, migrations, import/backup fixes) goes here, never onto the
+        // only copy of the diary. Debug-signed - it never updates the real install, so it
+        // doesn't need the release keystore. Name and icon differ via src/dev/res.
+        create("dev") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
         }
     }
     compileOptions {
