@@ -48,6 +48,12 @@ android {
     }
 
     buildTypes {
+        // Keeps the real applicationId to release alone: nothing built for development can
+        // land on top of the real app, even by a stray installDebug.
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = false
             signingConfig = if (keystorePropertiesFile.exists()) {
