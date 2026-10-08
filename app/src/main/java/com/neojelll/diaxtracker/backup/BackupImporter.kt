@@ -1,10 +1,10 @@
 package com.neojelll.diaxtracker.backup
 
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.util.Log
 import androidx.room.withTransaction
+import com.neojelll.diaxtracker.aftermeal.feedRecords
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
@@ -30,7 +30,10 @@ object BackupImporter {
         data object Failure : ImportResult
     }
 
-    /** What a merge did: entries added / skipped as duplicates, photos restored for existing entries, presets and readings added. */
+    /**
+     * What a merge did: records added / skipped as duplicates (counted like History - a check inside a
+     * meal's pill comes with its meal), photos restored for existing entries, presets and readings added.
+     */
     data class Summary(
         val entriesAdded: Int,
         val duplicatesSkipped: Int,
@@ -39,7 +42,7 @@ object BackupImporter {
         val readingsAdded: Int
     )
 
-    /** What an archive holds, for showing before the person confirms: entry count and the span they cover. */
+    /** What an archive holds, for showing before the person confirms: record count (as History counts) and the span they cover. */
     data class ArchiveInfo(val entries: Int, val first: LocalDateTime?, val last: LocalDateTime?)
 
     private const val TAG = "BackupImporter"
@@ -47,6 +50,7 @@ object BackupImporter {
     private const val PHOTOS_DIR_NAME = "entry_photos"
     private const val WORK_DIR_NAME = "backup_import"
     private const val TEMP_DB_NAME = "backup_import_tmp"
+    private const val PREVIEW_DB_NAME = "backup_preview_tmp"
     private const val READINGS_PAGE_SIZE = 5000
     private val SQLITE_HEADER = "SQLite format 3\u0000".toByteArray(Charsets.US_ASCII)
 
@@ -78,6 +82,9 @@ object BackupImporter {
                 return@withContext ImportResult.InvalidFile
             }
 
+            // Only records are counted in the summary; the checks inside a pill are imported with their meal.
+            val recordIds = feedRecords(backupEntries, LocalDateTime.now()).mapTo(HashSet()) { it.id }
+
             val live = DiaryDatabase.getDatabase(context)
             val photosDir = File(context.filesDir, PHOTOS_DIR_NAME).apply { mkdirs() }
             val archivePhotos = File(workDir, PHOTOS_DIR_NAME)
@@ -96,7 +103,7 @@ object BackupImporter {
                     val duplicate = findDuplicateEntry(diaryDao.getEntriesAt(entry.createdAt), entry)
                     if (duplicate != null) {
                         liveIds[backupEntry.id] = duplicate.id
-                        skipped++
+                        if (backupEntry.id in recordIds) skipped++
                         // The record is already here but its photo is gone (deleted, or lost earlier):
                         // the archive can give it back.
                         if (duplicate.photoPath?.let { File(it).exists() } != true) {
@@ -114,7 +121,7 @@ object BackupImporter {
                         entry.copy(id = 0, photoPath = photoPath),
                         backupProducts[backupEntry.id].orEmpty().map { it.copy(id = 0, diaryEntryId = 0) }
                     )
-                    added++
+                    if (backupEntry.id in recordIds) added++
                 }
 
                 val presetDao = live.mealPresetDao()
@@ -169,20 +176,25 @@ object BackupImporter {
                 }
             }
             if (!hasSqliteHeader(dbFile)) return@withContext null
-            SQLiteDatabase.openDatabase(dbFile.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
-                db.rawQuery("SELECT COUNT(*), MIN(createdAt), MAX(createdAt) FROM diary_entries", null).use { cursor ->
-                    cursor.moveToFirst()
-                    ArchiveInfo(
-                        entries = cursor.getInt(0),
-                        first = cursor.getString(1)?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() },
-                        last = cursor.getString(2)?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() }
-                    )
-                }
+            // Opened through Room like import (so an old archive is migrated first) and counted by the
+            // same rule as History, so the preview matches what the person will see after importing.
+            context.deleteDatabase(PREVIEW_DB_NAME)
+            val archive = DiaryDatabase.newBuilder(context, PREVIEW_DB_NAME).createFromFile(dbFile).build()
+            try {
+                val records = feedRecords(archive.diaryDao().getAllEntries().first(), LocalDateTime.now())
+                ArchiveInfo(
+                    entries = records.size,
+                    first = records.minOfOrNull { it.createdAt },
+                    last = records.maxOfOrNull { it.createdAt }
+                )
+            } finally {
+                archive.close()
             }
         } catch (e: Exception) {
             Log.w(TAG, "Archive can't be inspected", e)
             null
         } finally {
+            context.deleteDatabase(PREVIEW_DB_NAME)
             workDir.deleteRecursively()
         }
     }

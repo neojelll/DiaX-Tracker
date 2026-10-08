@@ -136,10 +136,11 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
     }
     val afterMeal = remember(entries, now) { buildAfterMeal(entries, now) }
+    val records = remember(entries, afterMeal) { afterMeal.records(entries) }
 
-    val filtered = remember(entries, afterMeal, productNamesByEntry, searchQuery, dateFilter, sortDescending) {
-        val byDateAndText = entries.filter { entry ->
-            entry.id !in afterMeal.hidden && entry.matches(dateFilter) && (
+    val filtered = remember(records, productNamesByEntry, searchQuery, dateFilter, sortDescending) {
+        val byDateAndText = records.filter { entry ->
+            entry.matches(dateFilter) && (
                 searchQuery.isBlank() ||
                     entry.notes.contains(searchQuery, ignoreCase = true) ||
                     entry.mealLabel?.contains(searchQuery, ignoreCase = true) == true ||
@@ -280,7 +281,7 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }) { row ->
             when (row) {
                 is HistoryRow.DayHeader -> {
-                    DayHeaderRow(row.date, entries.count { it.id !in afterMeal.hidden && it.createdAt.toLocalDate() == row.date && it.matches(dateFilter) })
+                    DayHeaderRow(row.date, records.count { it.createdAt.toLocalDate() == row.date && it.matches(dateFilter) })
                     Spacer(Modifier.height(10.dp))
                 }
                 is HistoryRow.Entry -> {
