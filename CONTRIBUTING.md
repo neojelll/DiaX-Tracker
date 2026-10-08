@@ -30,8 +30,9 @@ with a release APK, installed by hand. A failed migration or a bug in import/bac
 the real app hits the only copy of the data; on the dev app it costs a reinstall.
 
 The build enforces this: only the `release` build type carries the real application id
-(`debug` gets `.debug`, `dev` gets `.dev`), and a local `release` build without the
-release keystore is debug-signed, so Android refuses to install it over a real
+(`debug` gets `.debug`, `dev` gets `.dev`), and the release key is used only in CI - a
+`release` build made on a computer is always debug-signed, even with
+`keystore.properties` present, so Android refuses to install it over a real
 installation.
 
 The dev app is a release build under its own id ("DiaX dev", orange icon) with its own

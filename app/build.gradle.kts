@@ -56,13 +56,13 @@ android {
         }
         release {
             isMinifyEnabled = false
-            signingConfig = if (keystorePropertiesFile.exists()) {
+            // The release key only in CI (GitHub Actions sets CI=true): a release build made on
+            // a computer is debug-signed even with keystore.properties present, so Android
+            // refuses it as an update to the real app - only APKs from GitHub Releases can be.
+            signingConfig = if (keystorePropertiesFile.exists() && System.getenv("CI") == "true") {
                 signingConfigs.getByName("release")
             } else {
-                logger.warn(
-                    "keystore.properties not found at $keystorePropertiesFile - " +
-                        "release build falling back to debug signing."
-                )
+                logger.warn("Not a CI build with keystore.properties - release build is debug-signed.")
                 signingConfigs.getByName("debug")
             }
         }
