@@ -129,6 +129,12 @@
         <item quantity="many">%d зап.</item>
         <item quantity="other">%d зап.</item>
     </plurals>
+    <plurals name="history_days_count">
+        <item quantity="one">%d дн.</item>
+        <item quantity="few">%d дн.</item>
+        <item quantity="many">%d дн.</item>
+        <item quantity="other">%d дн.</item>
+    </plurals>
 
     <string name="sensor_notification_channel">Датчик глюкозы</string>
     <string name="sensor_notification_text">Слушает данные с датчика</string>
