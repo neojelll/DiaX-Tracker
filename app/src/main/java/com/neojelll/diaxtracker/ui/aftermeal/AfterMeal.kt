@@ -64,6 +64,12 @@ fun buildAfterMeal(entries: List<DiaryEntry>, now: LocalDateTime): AfterMealInde
     return AfterMealIndex(byMeal, hidden)
 }
 
+/** The entries that are records of their own, as History shows them: checks inside a meal's pill belong to that meal. */
+fun feedRecords(entries: List<DiaryEntry>, now: LocalDateTime): List<DiaryEntry> {
+    val hidden = buildAfterMeal(entries, now).hidden
+    return entries.filter { it.id !in hidden }
+}
+
 /**
  * Old automatic checks have no stored meal. They are recognised as sensor readings with nothing
  * else in them (no food, insulin or note) and given to the last meal before them, when they come
