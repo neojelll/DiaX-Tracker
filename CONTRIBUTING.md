@@ -9,30 +9,45 @@ Requires Android Studio (or Gradle) and a connected device/emulator running Andr
 toolchain (JDK 17), which Gradle provisions itself if none is already on the machine.
 
 ```bash
-./gradlew installDebug
+./gradlew installDev
 ```
 
 **Stack**: Kotlin, Jetpack Compose, Material3, Room, WorkManager, Coil.
 
-## Trying a change on a phone with real data
+## The real app and the dev app
 
-Don't install a work-in-progress build over the app that holds a real diary - a failed
-migration or a bug in import/backup would hit the only copy of the data. Use the `dev`
-build instead: a release build under its own application id
-(`com.neojelll.diaxtracker.dev`, shown as "DiaX dev" with an orange icon) that installs
-**next to** the main app with its own database, settings, photos and permissions.
+A phone with a real diary on it has two copies of the app side by side:
 
-```bash
-./gradlew installDev
-```
+| | DiaX-Tracker (real) | DiaX dev |
+|---|---|---|
+| application id | `com.neojelll.diaxtracker` | `com.neojelll.diaxtracker.dev` |
+| data | the real diary | a disposable copy |
+| what runs on it | published releases only | whatever is being tried |
+| installed from | [GitHub Releases](https://github.com/neojelll/DiaX-Tracker/releases), by hand | the computer, `./gradlew installDev` |
 
-- It starts empty. To get realistic data in, export an archive from the main app and
+**Nothing built on a computer is ever installed over the real app.** It is updated only
+with a release APK, installed by hand. A failed migration or a bug in import/backup on
+the real app hits the only copy of the data; on the dev app it costs a reinstall.
+
+The build enforces this: only the `release` build type carries the real application id
+(`debug` gets `.debug`, `dev` gets `.dev`), and a local `release` build without the
+release keystore is debug-signed, so Android refuses to install it over a real
+installation.
+
+The dev app is a release build under its own id ("DiaX dev", orange icon) with its own
+database, settings, photos and permissions:
+
+- It starts empty. To get realistic data in, export an archive from the real app and
   import it into the dev one - which also exercises import itself.
 - Permissions (notifications, the automatic-backup folder) are granted to it separately.
 - Sensor readings reach it only if the source sends them its way: in Juggluco pick
   "DiaX dev" as a Glucodata recipient; for the xDrip-style broadcast, add
   `com.neojelll.diaxtracker.dev` wherever the sender limits it to named packages. When
   both apps receive a reading, both record it.
+- To start over: `adb shell pm clear com.neojelll.diaxtracker.dev`.
+
+`debug` (`com.neojelll.diaxtracker.debug`, "DiaX debug") is for Android Studio and
+emulators - previews, the debugger. On a phone, use `dev`.
 
 ## Making a change
 
