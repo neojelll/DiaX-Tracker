@@ -559,8 +559,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
     var formState by remember(entryId) {
         mutableStateOf(
             EntryFormState(
-                date = entry.createdAt.toLocalDate(),
-                time = entry.createdAt.toLocalTime(),
+                dateTime = entry.createdAt,
                 bloodSugar = initialBloodSugarText,
                 breadUnits = entry.breadUnits?.let { formatAmount(it) } ?: "",
                 foodLabel = entry.mealLabel ?: entry.breadUnits?.let { breadUnitsFormat.format(formatAmount(it)) } ?: "",
@@ -585,7 +584,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
     }
 
     fun save() {
-        val newCreatedAt = LocalDateTime.of(formState.date, formState.time)
+        val newCreatedAt = formState.dateTimeAt(entry.createdAt)
         val typedBloodSugar = formState.bloodSugar.toFloatOrNull()
         val sugarFieldUntouched = formState.bloodSugar == initialBloodSugarText
         val timeChanged = newCreatedAt != entry.createdAt
@@ -627,6 +626,8 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
         onDismiss()
     }
 
+    val shownAt = formState.dateTimeAt(entry.createdAt)
+
     GlukoSheet(onDismiss, maxHeightFraction = 0.9f) {
         SheetHeader(stringResource(R.string.record_edit_title), onClose = onDismiss)
 
@@ -634,12 +635,12 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
                 PickerButton(
                     Modifier.weight(1f), LucidePaths.Calendar,
-                    formState.date.format(DateTimeFormatter.ofPattern("d MMM"))
-                ) { overlays.openDatePicker(formState.date) { picked -> formState = formState.copy(date = picked) } }
+                    shownAt.format(DateTimeFormatter.ofPattern("d MMM"))
+                ) { overlays.openDatePicker(shownAt.toLocalDate()) { picked -> formState = formState.withDate(picked, entry.createdAt) } }
                 PickerButton(
                     Modifier.weight(1f), LucidePaths.Clock,
-                    formState.time.format(DateTimeFormatter.ofPattern("HH:mm"))
-                ) { overlays.openTimePicker(formState.time) { picked -> formState = formState.copy(time = picked) } }
+                    shownAt.format(DateTimeFormatter.ofPattern("HH:mm"))
+                ) { overlays.openTimePicker(shownAt.toLocalTime()) { picked -> formState = formState.withTime(picked, entry.createdAt) } }
             }
 
             Spacer(Modifier.height(16.dp))

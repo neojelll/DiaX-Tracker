@@ -54,6 +54,7 @@ import com.neojelll.diaxtracker.ui.components.PrimaryButton
 import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.numeric
 import com.neojelll.diaxtracker.ui.components.plainClickable
+import com.neojelll.diaxtracker.ui.components.rememberCurrentMinute
 import com.neojelll.diaxtracker.ui.components.toPresetOption
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
@@ -69,6 +70,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     var formState by remember { mutableStateOf(EntryFormState()) }
+    val shownAt = formState.dateTimeAt(rememberCurrentMinute())
     val toasts = rememberAppToasts()
     val sensorWarningVisible by viewModel.sensorWarningVisible.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
@@ -127,17 +129,21 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 PickerButton(
                     modifier = Modifier.weight(1f),
                     iconPath = LucidePaths.Calendar,
-                    text = formState.date.format(DateTimeFormatter.ofPattern("d MMM")),
+                    text = shownAt.format(DateTimeFormatter.ofPattern("d MMM")),
                     onClick = {
-                        overlays.openDatePicker(formState.date) { picked -> formState = formState.copy(date = picked) }
+                        overlays.openDatePicker(shownAt.toLocalDate()) { picked ->
+                            formState = formState.withDate(picked, LocalDateTime.now())
+                        }
                     }
                 )
                 PickerButton(
                     modifier = Modifier.weight(1f),
                     iconPath = LucidePaths.Clock,
-                    text = formState.time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    text = shownAt.format(DateTimeFormatter.ofPattern("HH:mm")),
                     onClick = {
-                        overlays.openTimePicker(formState.time) { picked -> formState = formState.copy(time = picked) }
+                        overlays.openTimePicker(shownAt.toLocalTime()) { picked ->
+                            formState = formState.withTime(picked, LocalDateTime.now())
+                        }
                     }
                 )
             }
@@ -256,7 +262,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         SaveEntryButton(
             enabled = formState.isFillable,
             onSave = {
-                val createdAt = LocalDateTime.of(formState.date, formState.time)
+                // The real moment of saving, not the last minute tick, while no time was picked.
+                val createdAt = formState.dateTimeAt(LocalDateTime.now())
                 viewModel.addEntry(
                     bloodSugar = formState.bloodSugar.toFloatOrNull(),
                     breadUnits = formState.breadUnits.toFloatOrNull(),
