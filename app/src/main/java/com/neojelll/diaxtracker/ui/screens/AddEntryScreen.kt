@@ -1,5 +1,6 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -62,32 +63,23 @@ import com.neojelll.diaxtracker.ui.theme.GlukoSpacing
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.theme.tabular
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     var formState by remember { mutableStateOf(EntryFormState()) }
-    val shownAt = formState.dateTimeAt(rememberCurrentMinute())
+    val now = rememberCurrentMinute()
+    val shownAt = formState.dateTimeAt(now)
     val toasts = rememberAppToasts()
     val sensorWarningVisible by viewModel.sensorWarningVisible.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
     val entries by viewModel.entries.collectAsState()
 
-    val todayCount = remember(entries) {
-        val today = LocalDate.now()
-        entries.count { it.createdAt.toLocalDate() == today }
-    }
-    val greetingRes = remember {
-        when (LocalTime.now().hour) {
-            in 5..10 -> R.string.greeting_morning
-            in 11..16 -> R.string.greeting_afternoon
-            in 17..22 -> R.string.greeting_evening
-            else -> R.string.greeting_night
-        }
-    }
+    // Both follow the clock, so they stay right while the screen sits open past an hour or midnight.
+    val today = now.toLocalDate()
+    val todayCount = remember(entries, today) { entries.count { it.createdAt.toLocalDate() == today } }
+    val greetingRes = greetingFor(now.hour)
     val manualXeFormat = stringResource(R.string.food_manual_format)
 
     val pendingPreset = overlays.pendingPresetSelection
@@ -380,4 +372,12 @@ internal fun SensorWarningBanner() {
             Text(stringResource(R.string.sensor_warning), style = GlukoType.Body)
         }
     }
+}
+
+@StringRes
+internal fun greetingFor(hour: Int): Int = when (hour) {
+    in 5..10 -> R.string.greeting_morning
+    in 11..16 -> R.string.greeting_afternoon
+    in 17..22 -> R.string.greeting_evening
+    else -> R.string.greeting_night
 }
