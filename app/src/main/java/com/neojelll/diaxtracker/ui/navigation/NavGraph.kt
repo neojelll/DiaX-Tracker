@@ -35,6 +35,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.ui.components.InsulinBanner
+import com.neojelll.diaxtracker.ui.components.LocalCarbDisplay
 import com.neojelll.diaxtracker.ui.components.DisclaimerOverlay
 import com.neojelll.diaxtracker.ui.components.GlukoNavBar
 import com.neojelll.diaxtracker.ui.components.clearFocusOnTap
@@ -89,6 +90,7 @@ fun NavGraph(navController: NavHostController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val activeInsulinEntries by viewModel.activeInsulinEntries.collectAsState()
     val insulinDurationHours by viewModel.insulinDurationHours.collectAsState()
+    val carbDisplay by viewModel.carbDisplay.collectAsState()
     val overlays = remember { OverlayController() }
     var insulinExpanded by remember { mutableStateOf(false) }
 
@@ -97,7 +99,7 @@ fun NavGraph(navController: NavHostController) {
     var navBarHeightPx by remember { mutableStateOf(0) }
     val density = LocalDensity.current
 
-    CompositionLocalProvider(LocalToast provides toastState) {
+    CompositionLocalProvider(LocalToast provides toastState, LocalCarbDisplay provides carbDisplay) {
     val toasts = rememberAppToasts()
     LaunchedEffect(viewModel) {
         viewModel.errorEvents.collect { messageRes -> toasts.error(context.getString(messageRes)) }

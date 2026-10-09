@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
-import com.neojelll.diaxtracker.data.formatXe
 import com.neojelll.diaxtracker.ui.notifications.yesterdayMeals
 import com.neojelll.diaxtracker.ui.screens.formatAmount
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -52,7 +51,7 @@ import com.neojelll.diaxtracker.ui.theme.tabular
 fun NotificationSheet(viewModel: DiaryViewModel, onDismiss: () -> Unit) {
     val entries by viewModel.entries.collectAsState()
     val meals = remember(entries) { yesterdayMeals(entries, LocalDateTime.now()) }
-    val xeFormat = stringResource(R.string.bread_units_value_format)
+    val xeFormat = carbsValueFormat()
 
     GlukoSheet(onDismiss, maxHeightFraction = 0.76f) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -94,7 +93,7 @@ private fun YesterdayMealRow(viewModel: DiaryViewModel, meal: DiaryEntry, xeForm
     LaunchedEffect(meal.id) { products = viewModel.getEntryProducts(meal.id) }
 
     val what = products.takeIf { it.isNotEmpty() }?.joinToString { it.name } ?: meal.mealLabel.orEmpty()
-    val amount = meal.carbsGrams?.let { xeFormat.format(formatXe(it)) }
+    val amount = meal.carbsGrams?.let { xeFormat.format(LocalCarbDisplay.current.format(it)) }
     val food = listOf(what, amount.orEmpty()).filter { it.isNotEmpty() }.joinToString(" · ")
     val time = meal.createdAt.format(DateTimeFormatter.ofPattern("HH:mm"))
 

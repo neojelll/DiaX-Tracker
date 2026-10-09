@@ -26,3 +26,25 @@ fun formatXe(grams: Float, gramsPerXe: Float = DEFAULT_GRAMS_PER_XE): String {
 /** Typed XE ("2.5" or "2,5") to grams; null if it isn't a number. */
 fun parseXeToGrams(text: String, gramsPerXe: Float = DEFAULT_GRAMS_PER_XE): Float? =
     text.replace(',', '.').toFloatOrNull()?.let { xeToGrams(it, gramsPerXe) }
+
+/** The unit carbohydrates are shown and typed in. Storage is always grams. */
+enum class CarbUnit { XE, GRAMS }
+
+/**
+ * How carbohydrates are shown and typed, from the settings. The one place every screen goes through:
+ * [format] for showing a stored amount, [parse] for turning what was typed back into grams.
+ */
+data class CarbDisplay(val unit: CarbUnit = CarbUnit.XE, val gramsPerXe: Float = DEFAULT_GRAMS_PER_XE) {
+    /** The number alone in the display unit - XE to one decimal, grams whole. Dot decimal: it goes back into fields. */
+    fun format(grams: Float): String = when (unit) {
+        CarbUnit.XE -> formatXe(grams, gramsPerXe)
+        CarbUnit.GRAMS -> grams.roundToInt().toString()
+    }
+
+    /** What was typed, in the display unit, as grams; null if it isn't a number. */
+    fun parse(text: String): Float? = when (unit) {
+        CarbUnit.XE -> parseXeToGrams(text, gramsPerXe)
+        CarbUnit.GRAMS -> text.replace(',', '.').toFloatOrNull()
+    }
+}
+

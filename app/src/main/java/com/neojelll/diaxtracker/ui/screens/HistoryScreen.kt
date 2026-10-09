@@ -51,8 +51,6 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.SugarSource
-import com.neojelll.diaxtracker.data.formatXe
-import com.neojelll.diaxtracker.data.parseXeToGrams
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FilterChip
 import com.neojelll.diaxtracker.ui.components.FoodPicker
@@ -61,10 +59,13 @@ import com.neojelll.diaxtracker.ui.components.GlukoDivider
 import com.neojelll.diaxtracker.ui.components.GlukoField
 import com.neojelll.diaxtracker.ui.components.GlukoSheet
 import com.neojelll.diaxtracker.ui.components.Kicker
+import com.neojelll.diaxtracker.ui.components.LocalCarbDisplay
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.AfterMealPill
 import com.neojelll.diaxtracker.ui.components.OverlayController
+import com.neojelll.diaxtracker.ui.components.carbsText
+import com.neojelll.diaxtracker.ui.components.carbsValueFormat
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.PhotoButton
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
@@ -478,7 +479,7 @@ private fun FullRecordCard(
                             style = GlukoType.Body, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis
                         )
                         Spacer(Modifier.width(8.dp))
-                        entry.carbsGrams?.let { XeBadge(stringResource(R.string.bread_units_value_format, formatXe(it))) }
+                        entry.carbsGrams?.let { XeBadge(carbsText(it)) }
                     }
                     Text(
                         products.sortedBy { it.sortOrder }.joinToString(", ") { it.name },
@@ -550,8 +551,9 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
     val entries by viewModel.entries.collectAsState()
     val entry = entries.find { it.id == entryId } ?: run { onDismiss(); return }
     val mealPresets by viewModel.mealPresets.collectAsState()
-    val breadUnitsFormat = stringResource(R.string.bread_units_value_format)
-    val manualXeFormat = stringResource(R.string.food_manual_format)
+    val carbDisplay = LocalCarbDisplay.current
+    val carbsFormat = carbsValueFormat()
+    val manualCarbsFormat = stringResource(R.string.food_manual_format, carbsFormat)
     var showDeleteConfirm by remember { mutableStateOf(false) }
     val toasts = rememberAppToasts()
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
@@ -564,8 +566,8 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             EntryFormState(
                 dateTime = entry.createdAt,
                 bloodSugar = initialBloodSugarText,
-                breadUnits = entry.carbsGrams?.let { formatXe(it) } ?: "",
-                foodLabel = entry.mealLabel ?: entry.carbsGrams?.let { breadUnitsFormat.format(formatXe(it)) } ?: "",
+                carbs = entry.carbsGrams?.let { carbDisplay.format(it) } ?: "",
+                foodLabel = entry.mealLabel ?: entry.carbsGrams?.let { carbsFormat.format(carbDisplay.format(it)) } ?: "",
                 mealLabel = entry.mealLabel,
                 shortInsulinDose = entry.shortInsulinDose?.toString() ?: "",
                 longInsulinDose = entry.longInsulinDose?.toString() ?: "",
@@ -580,7 +582,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             val products = viewModel.getEntryProducts(entryId)
             if (products.isNotEmpty()) {
                 formState = formState.copy(
-                    mealProducts = products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, formatXe(it.carbsGrams)) }
+                    mealProducts = products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, carbDisplay.format(it.carbsGrams)) }
                 )
             }
         }
@@ -607,7 +609,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                 entry.copy(
                     bloodSugar = newBloodSugar,
                     sugarSource = newSugarSource,
-                    carbsGrams = parseXeToGrams(formState.breadUnits),
+                    carbsGrams = carbDisplay.parse(formState.carbs),
                     mealLabel = formState.mealLabel,
                     shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
                     longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
@@ -619,7 +621,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                     DiaryEntryProduct(
                         diaryEntryId = entry.id,
                         name = product.name,
-                        carbsGrams = parseXeToGrams(product.breadUnits) ?: 0f,
+                        carbsGrams = carbDisplay.parse(product.carbs) ?: 0f,
                         sortOrder = index
                     )
                 }
@@ -685,15 +687,15 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                 value = formState.foodLabel,
                 expanded = formState.foodExpanded,
                 presets = mealPresets.map { it.toPresetOption() },
-                manualXe = formState.manualXe,
+                manualCarbs = formState.manualCarbs,
                 placeholder = stringResource(R.string.food_placeholder_edit),
                 onToggle = { formState = formState.copy(foodExpanded = !formState.foodExpanded) },
                 onPick = { option ->
                     val preset = mealPresets.find { it.preset.id == option.id }
-                    if (preset != null) formState = applyPresetPick(formState, preset, option)
+                    if (preset != null) formState = applyPresetPick(formState, preset, option, carbDisplay)
                 },
-                onManualXeChange = { formState = updateManualXe(formState, it, manualXeFormat) },
-                onManualXeDone = { formState = finishManualXe(formState) },
+                onManualCarbsChange = { formState = updateManualCarbs(formState, it, manualCarbsFormat) },
+                onManualCarbsDone = { formState = finishManualCarbs(formState) },
                 onCreatePreset = { overlays.openPresetEdit(null) }
             )
 
