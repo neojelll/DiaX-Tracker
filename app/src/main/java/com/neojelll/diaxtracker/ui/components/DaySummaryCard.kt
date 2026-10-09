@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.insulin.DayInsulin
 import com.neojelll.diaxtracker.sensor.LatestSensorReading
 import com.neojelll.diaxtracker.sensor.SensorFreshness
 import com.neojelll.diaxtracker.sensor.sensorFreshness
@@ -36,17 +37,43 @@ import com.neojelll.diaxtracker.ui.theme.Ruda
 
 /**
  * The day summary above the entry form: one white card, columns split by vertical hairlines, each
- * reading label 11sp -> value -> note 10.5sp. Sugar and today's carbohydrates; the insulin column
- * joins them in #159.
+ * reading label 11sp -> value -> note 10.5sp: sugar, today's carbohydrates, today's insulin.
  */
 @Composable
-fun DaySummaryCard(sensorReading: LatestSensorReading?, nowMillis: Long, carbsGramsToday: Float) {
+fun DaySummaryCard(sensorReading: LatestSensorReading?, nowMillis: Long, carbsGramsToday: Float, insulinToday: DayInsulin) {
     GlukoCard(padding = PaddingValues(start = 14.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             SugarColumn(sensorReading, nowMillis, Modifier.weight(1f).padding(end = 10.dp))
             VerticalHairline()
             CarbsColumn(carbsGramsToday, Modifier.weight(1f).padding(horizontal = 10.dp))
+            VerticalHairline()
+            InsulinColumn(insulinToday, Modifier.weight(1f).padding(start = 10.dp))
         }
+    }
+}
+
+/**
+ * Two lines, label left and number right, a hairline between them. No total on purpose: short and
+ * long don't add up to anything meaningful. The long line hides when none was logged today.
+ */
+@Composable
+private fun InsulinColumn(insulin: DayInsulin, modifier: Modifier) {
+    SummaryColumn(modifier, stringResource(R.string.summary_insulin_label)) {
+        InsulinLine(stringResource(R.string.summary_insulin_short), formatSummaryValue(insulin.short))
+        insulin.long?.let {
+            Spacer(Modifier.height(5.dp))
+            GlukoDivider()
+            Spacer(Modifier.height(5.dp))
+            InsulinLine(stringResource(R.string.summary_insulin_long), formatSummaryValue(it))
+        }
+    }
+}
+
+@Composable
+private fun InsulinLine(label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+        Text(label, style = SummarySub, modifier = Modifier.weight(1f), maxLines = 1)
+        Text(value, style = SummaryValue.copy(fontSize = 15.sp))
     }
 }
 

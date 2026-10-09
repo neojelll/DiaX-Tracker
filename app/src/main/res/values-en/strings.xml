@@ -54,6 +54,9 @@
     <string name="summary_sugar_label">Sugar</string>
     <string name="summary_carbs_label">Carbs</string>
     <string name="summary_carbs_today">today</string>
+    <string name="summary_insulin_label">Insulin, u</string>
+    <string name="summary_insulin_short">short</string>
+    <string name="summary_insulin_long">long</string>
     <string name="summary_sensor_just_now">just now</string>
     <string name="summary_sensor_minutes_ago">%d min ago</string>
     <string name="summary_sensor_hours_ago">%d h ago</string>
