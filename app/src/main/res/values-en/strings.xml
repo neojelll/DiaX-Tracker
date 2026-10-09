@@ -70,6 +70,7 @@
     <string name="food_picker_manual_kicker">Bread units without a preset</string>
     <string name="food_picker_create_preset">Create preset</string>
     <string name="sheet_done">Done</string>
+    <string name="sheet_now">Now</string>
     <string name="sheet_time_title">Time</string>
     <string name="sheet_hours_label">Hours</string>
     <string name="sheet_minutes_label">Minutes</string>

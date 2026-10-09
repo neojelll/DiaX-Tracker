@@ -75,6 +75,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     var formState by remember { mutableStateOf(EntryFormState()) }
     val now = rememberCurrentMinute()
     val shownAt = formState.dateTimeAt(now)
+    // "Сейчас" in the pickers only once something was picked - while live it would do nothing.
+    val backToNow: (() -> Unit)? = if (formState.isPinned) ({ formState = formState.followingClock() }) else null
     val toasts = rememberAppToasts()
     val sensorWarningVisible by viewModel.sensorWarningVisible.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
@@ -130,12 +132,12 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     date = shownAt.format(DateTimeFormatter.ofPattern("d MMM")),
                     time = shownAt.format(DateTimeFormatter.ofPattern("HH:mm")),
                     onDate = {
-                        overlays.openDatePicker(shownAt.toLocalDate()) { picked ->
+                        overlays.openDatePicker(shownAt.toLocalDate(), onNow = backToNow) { picked ->
                             formState = formState.withDate(picked, LocalDateTime.now())
                         }
                     },
                     onTime = {
-                        overlays.openTimePicker(shownAt.toLocalTime()) { picked ->
+                        overlays.openTimePicker(shownAt.toLocalTime(), onNow = backToNow) { picked ->
                             formState = formState.withTime(picked, LocalDateTime.now())
                         }
                     }

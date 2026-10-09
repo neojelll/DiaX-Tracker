@@ -30,6 +30,13 @@ internal data class EntryFormState(
         get() = bloodSugar.isNotBlank() || breadUnits.isNotBlank() ||
             shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
 
+    /** Whether a date or time was picked, rather than following the clock. */
+    val isPinned: Boolean
+        get() = dateTime != null
+
+    /** Drops a picked moment: the form follows the clock again. */
+    fun followingClock(): EntryFormState = copy(dateTime = null)
+
     /** What the form shows and saves: the picked moment, or [now] while none has been picked. */
     fun dateTimeAt(now: LocalDateTime): LocalDateTime = dateTime ?: now
 

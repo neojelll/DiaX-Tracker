@@ -188,12 +188,14 @@ private fun OverlayLayer(
         is Overlay.DatePicker -> DateSheet(
             initialDate = overlay.initial,
             onDone = { picked -> overlays.dismiss(); overlay.onPick(picked) },
+            onNow = overlay.onNow?.let { now -> { overlays.dismiss(); now() } },
             onDismiss = overlays::dismiss
         )
 
         is Overlay.TimePicker -> TimeSheet(
             initial = overlay.initial,
             onDone = { picked -> overlays.dismiss(); overlay.onPick(picked) },
+            onNow = overlay.onNow?.let { now -> { overlays.dismiss(); now() } },
             onDismiss = overlays::dismiss
         )
 

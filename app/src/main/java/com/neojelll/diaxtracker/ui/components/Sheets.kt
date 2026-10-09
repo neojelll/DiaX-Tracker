@@ -142,7 +142,8 @@ fun SheetHeader(title: String, subtitle: String? = null, onClose: () -> Unit) {
 fun DateSheet(
     initialDate: LocalDate,
     onDone: (LocalDate) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onNow: (() -> Unit)? = null
 ) {
     val locale = LocalConfiguration.current.locales[0]
     var visibleMonth by remember { mutableStateOf(YearMonth.from(initialDate)) }
@@ -214,7 +215,7 @@ fun DateSheet(
             }
         }
         Spacer(Modifier.height(14.dp))
-        PrimaryButton(stringResource(R.string.sheet_done), onClick = { onDone(selected) })
+        SheetActions(onNow) { onDone(selected) }
     }
 }
 
@@ -223,7 +224,8 @@ fun DateSheet(
 fun TimeSheet(
     initial: LocalTime,
     onDone: (LocalTime) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onNow: (() -> Unit)? = null
 ) {
     var hour by remember { mutableStateOf(initial.hour) }
     var minute by remember { mutableStateOf((initial.minute / 5) * 5) }
@@ -240,7 +242,20 @@ fun TimeSheet(
             WheelColumn(stringResource(R.string.sheet_minutes_label), (0..55 step 5).toList(), minute, Modifier.weight(1f)) { minute = it }
         }
         Spacer(Modifier.height(14.dp))
-        PrimaryButton(stringResource(R.string.sheet_done), onClick = { onDone(LocalTime.of(hour, minute)) })
+        SheetActions(onNow) { onDone(LocalTime.of(hour, minute)) }
+    }
+}
+
+/**
+ * "Готово", and under it "Сейчас" when the caller can go back to following the clock - primary
+ * full width with the secondary below, as in the record edit sheet.
+ */
+@Composable
+private fun SheetActions(onNow: (() -> Unit)?, onDone: () -> Unit) {
+    PrimaryButton(stringResource(R.string.sheet_done), onClick = onDone)
+    if (onNow != null) {
+        Spacer(Modifier.height(9.dp))
+        SecondaryButton(stringResource(R.string.sheet_now), Modifier.fillMaxWidth(), onClick = onNow)
     }
 }
 
