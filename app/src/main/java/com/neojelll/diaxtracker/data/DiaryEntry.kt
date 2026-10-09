@@ -12,7 +12,8 @@ data class DiaryEntry(
     val id: Long = 0,
     val bloodSugar: Float?,
     val sugarSource: SugarSource? = null,
-    val breadUnits: Float? = null,
+    /** Carbohydrates of the meal, in grams - shown as XE through Carbs.kt. */
+    val carbsGrams: Float? = null,
     val mealLabel: String? = null,
     val shortInsulinDose: Float?,
     val longInsulinDose: Float?,
@@ -26,4 +27,4 @@ data class DiaryEntry(
 )
 
 /** Food was logged: a preset or a manual amount. Sugar checks and insulin-only entries aren't meals. */
-fun DiaryEntry.isMeal(): Boolean = mealLabel != null || breadUnits != null
+fun DiaryEntry.isMeal(): Boolean = mealLabel != null || carbsGrams != null

@@ -143,7 +143,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addEntry(
         bloodSugar: Float?,
-        breadUnits: Float?,
+        carbsGrams: Float?,
         mealLabel: String?,
         mealProducts: List<DiaryEntryProduct>,
         shortInsulinDose: Float?,
@@ -162,7 +162,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                         sensorReading != null -> SugarSource.SENSOR
                         else -> null
                     },
-                    breadUnits = breadUnits,
+                    carbsGrams = carbsGrams,
                     mealLabel = mealLabel,
                     shortInsulinDose = shortInsulinDose,
                     longInsulinDose = longInsulinDose,
@@ -173,7 +173,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                 mealProducts
             )
             // Sugar checks after a meal are for meals; an insulin-only entry has nothing to follow.
-            if (mealLabel != null || breadUnits != null) {
+            if (mealLabel != null || carbsGrams != null) {
                 PostMealScheduler.scheduleFollowUps(getApplication(), entryId, createdAt)
             }
         }

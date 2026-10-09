@@ -51,6 +51,8 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.SugarSource
+import com.neojelll.diaxtracker.data.formatXe
+import com.neojelll.diaxtracker.data.parseXeToGrams
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FilterChip
 import com.neojelll.diaxtracker.ui.components.FoodPicker
@@ -476,7 +478,7 @@ private fun FullRecordCard(
                             style = GlukoType.Body, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis
                         )
                         Spacer(Modifier.width(8.dp))
-                        entry.breadUnits?.let { XeBadge(stringResource(R.string.bread_units_value_format, formatAmount(it))) }
+                        entry.carbsGrams?.let { XeBadge(stringResource(R.string.bread_units_value_format, formatXe(it))) }
                     }
                     Text(
                         products.sortedBy { it.sortOrder }.joinToString(", ") { it.name },
@@ -562,8 +564,8 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             EntryFormState(
                 dateTime = entry.createdAt,
                 bloodSugar = initialBloodSugarText,
-                breadUnits = entry.breadUnits?.let { formatAmount(it) } ?: "",
-                foodLabel = entry.mealLabel ?: entry.breadUnits?.let { breadUnitsFormat.format(formatAmount(it)) } ?: "",
+                breadUnits = entry.carbsGrams?.let { formatXe(it) } ?: "",
+                foodLabel = entry.mealLabel ?: entry.carbsGrams?.let { breadUnitsFormat.format(formatXe(it)) } ?: "",
                 mealLabel = entry.mealLabel,
                 shortInsulinDose = entry.shortInsulinDose?.toString() ?: "",
                 longInsulinDose = entry.longInsulinDose?.toString() ?: "",
@@ -578,7 +580,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             val products = viewModel.getEntryProducts(entryId)
             if (products.isNotEmpty()) {
                 formState = formState.copy(
-                    mealProducts = products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, formatAmount(it.breadUnits)) }
+                    mealProducts = products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, formatXe(it.carbsGrams)) }
                 )
             }
         }
@@ -605,7 +607,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                 entry.copy(
                     bloodSugar = newBloodSugar,
                     sugarSource = newSugarSource,
-                    breadUnits = formState.breadUnits.toFloatOrNull(),
+                    carbsGrams = parseXeToGrams(formState.breadUnits),
                     mealLabel = formState.mealLabel,
                     shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
                     longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
@@ -617,7 +619,7 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                     DiaryEntryProduct(
                         diaryEntryId = entry.id,
                         name = product.name,
-                        breadUnits = product.breadUnits.toFloatOrNull() ?: 0f,
+                        carbsGrams = parseXeToGrams(product.breadUnits) ?: 0f,
                         sortOrder = index
                     )
                 }

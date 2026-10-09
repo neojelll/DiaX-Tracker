@@ -22,6 +22,7 @@ data class MealPresetProduct(
     val id: Long = 0,
     val mealPresetId: Long,
     val name: String,
-    val breadUnits: Float,
+    /** In grams. */
+    val carbsGrams: Float,
     val sortOrder: Int
 )

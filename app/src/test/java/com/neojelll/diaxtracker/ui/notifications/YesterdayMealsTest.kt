@@ -8,10 +8,10 @@ import org.junit.Test
 class YesterdayMealsTest {
     private val now = LocalDateTime.of(2026, 9, 25, 13, 0)
 
-    private fun entry(at: LocalDateTime, label: String? = null, xe: Float? = null, sugar: Float? = null) =
+    private fun entry(at: LocalDateTime, label: String? = null, carbsGrams: Float? = null, sugar: Float? = null) =
         DiaryEntry(
             id = at.hashCode().toLong(), bloodSugar = sugar, shortInsulinDose = null, longInsulinDose = null,
-            notes = "", mealLabel = label, breadUnits = xe, createdAt = at
+            notes = "", mealLabel = label, carbsGrams = carbsGrams, createdAt = at
         )
 
     @Test
@@ -22,10 +22,10 @@ class YesterdayMealsTest {
 
     @Test
     fun `the window is one hour either side and inclusive`() {
-        val early = entry(LocalDateTime.of(2026, 9, 24, 12, 0), xe = 3f)
-        val late = entry(LocalDateTime.of(2026, 9, 24, 14, 0), xe = 3f)
-        val tooEarly = entry(LocalDateTime.of(2026, 9, 24, 11, 59), xe = 3f)
-        val tooLate = entry(LocalDateTime.of(2026, 9, 24, 14, 1), xe = 3f)
+        val early = entry(LocalDateTime.of(2026, 9, 24, 12, 0), carbsGrams = 30f)
+        val late = entry(LocalDateTime.of(2026, 9, 24, 14, 0), carbsGrams = 30f)
+        val tooEarly = entry(LocalDateTime.of(2026, 9, 24, 11, 59), carbsGrams = 30f)
+        val tooLate = entry(LocalDateTime.of(2026, 9, 24, 14, 1), carbsGrams = 30f)
         assertEquals(listOf(early, late), yesterdayMeals(listOf(tooLate, late, tooEarly, early), now))
     }
 

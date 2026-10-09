@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.MealPresetProduct
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
+import com.neojelll.diaxtracker.data.formatXe
+import com.neojelll.diaxtracker.data.parseXeToGrams
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
@@ -152,7 +154,7 @@ private fun PresetCard(preset: MealPresetWithProducts, onClick: () -> Unit) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(preset.preset.name, style = GlukoType.Body.copy(fontSize = 14.sp), modifier = Modifier.weight(1f), maxLines = 1)
             Spacer(Modifier.width(8.dp))
-            XeBadge(stringResource(R.string.bread_units_value_format, formatAmount(preset.totalBreadUnits)), GlukoColors.Tile)
+            XeBadge(stringResource(R.string.bread_units_value_format, formatXe(preset.totalCarbsGrams)), GlukoColors.Tile)
         }
         Spacer(Modifier.height(10.dp))
         visibleProducts.forEach { product ->
@@ -161,7 +163,7 @@ private fun PresetCard(preset: MealPresetWithProducts, onClick: () -> Unit) {
                     product.name, style = GlukoType.Hint.copy(color = GlukoColors.TextLabel),
                     modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
-                Text(stringResource(R.string.bread_units_value_format, formatAmount(product.breadUnits)), style = GlukoType.Hint.copy(color = GlukoColors.TextSecondary).tabular)
+                Text(stringResource(R.string.bread_units_value_format, formatXe(product.carbsGrams)), style = GlukoType.Hint.copy(color = GlukoColors.TextSecondary).tabular)
             }
         }
         if (hiddenCount > 0) {
@@ -197,12 +199,12 @@ fun PresetDetailSheet(
         }
         Spacer(Modifier.height(16.dp))
 
-        TotalBreadUnitsTile(preset.totalBreadUnits)
+        TotalCarbsTile(preset.totalCarbsGrams)
         Spacer(Modifier.height(16.dp))
 
         Kicker(stringResource(R.string.preset_detail_composition))
         Spacer(Modifier.height(4.dp))
-        CompositionRows(preset.products.sortedBy { it.sortOrder }.map { it.name to it.breadUnits })
+        CompositionRows(preset.products.sortedBy { it.sortOrder }.map { it.name to it.carbsGrams })
         Spacer(Modifier.height(16.dp))
 
         PrimaryButton(stringResource(R.string.preset_detail_pick), onClick = onPick)
@@ -216,23 +218,23 @@ fun PresetDetailSheet(
 
 /** "Total carbs / N ХЕ" tile shared by the preset detail sheet and the read-only record sheet. */
 @Composable
-internal fun TotalBreadUnitsTile(totalBreadUnits: Float) {
+internal fun TotalCarbsTile(totalCarbsGrams: Float) {
     GlukoTile(padding = PaddingValues(horizontal = 14.dp, vertical = 13.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.preset_detail_total_carbs), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary), modifier = Modifier.weight(1f))
-            Text(stringResource(R.string.bread_units_value_format, formatAmount(totalBreadUnits)), style = GlukoType.Value.copy(fontSize = 19.sp).tabular)
+            Text(stringResource(R.string.bread_units_value_format, formatXe(totalCarbsGrams)), style = GlukoType.Value.copy(fontSize = 19.sp).tabular)
         }
     }
 }
 
-/** One row per product - name left, bread units right - with thin dividers between rows. */
+/** One row per product - name left, its carbohydrates (grams, shown as XE) right - with thin dividers between rows. */
 @Composable
 internal fun CompositionRows(products: List<Pair<String, Float>>) {
-    products.forEachIndexed { index, (name, breadUnits) ->
+    products.forEachIndexed { index, (name, carbsGrams) ->
         if (index > 0) GlukoDivider()
         Row(Modifier.fillMaxWidth().padding(vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(name, style = GlukoType.Body, modifier = Modifier.weight(1f))
-            Text(stringResource(R.string.bread_units_value_format, formatAmount(breadUnits)), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary).tabular)
+            Text(stringResource(R.string.bread_units_value_format, formatXe(carbsGrams)), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary).tabular)
         }
     }
 }
@@ -254,11 +256,12 @@ fun PresetEditSheet(
             if (initial.isNullOrEmpty()) {
                 add(ProductDraft(nextKey++, "", ""))
             } else {
-                initial.forEach { add(ProductDraft(nextKey++, it.name, formatAmount(it.breadUnits))) }
+                initial.forEach { add(ProductDraft(nextKey++, it.name, formatXe(it.carbsGrams))) }
             }
         }
     }
-    val total = products.sumOf { (it.amount.toFloatOrNull() ?: 0f).toDouble() }.toFloat()
+    // Summed in grams and rounded once, like every other carbohydrate total.
+    val totalGrams = products.sumOf { (parseXeToGrams(it.amount) ?: 0f).toDouble() }.toFloat()
     val isValid = name.isNotBlank() && products.isNotEmpty() &&
         products.all { it.name.isNotBlank() && (it.amount.isBlank() || it.amount.toFloatOrNull() != null) }
 
@@ -330,7 +333,7 @@ fun PresetEditSheet(
             GlukoTile(padding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.meal_breakdown_total_label), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary), modifier = Modifier.weight(1f))
-                    Text(stringResource(R.string.bread_units_value_format, formatAmount(total)), style = GlukoType.Value.tabular)
+                    Text(stringResource(R.string.bread_units_value_format, formatXe(totalGrams)), style = GlukoType.Value.tabular)
                 }
             }
 
@@ -349,7 +352,7 @@ fun PresetEditSheet(
                         name.trim(),
                         comment.trim(),
                         products.mapIndexed { index, draft ->
-                            MealPresetProduct(mealPresetId = 0, name = draft.name.trim(), breadUnits = draft.amount.toFloatOrNull() ?: 0f, sortOrder = index)
+                            MealPresetProduct(mealPresetId = 0, name = draft.name.trim(), carbsGrams = parseXeToGrams(draft.amount) ?: 0f, sortOrder = index)
                         }
                     )
                 }

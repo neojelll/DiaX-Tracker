@@ -22,6 +22,7 @@ data class DiaryEntryProduct(
     val id: Long = 0,
     val diaryEntryId: Long,
     val name: String,
-    val breadUnits: Float,
+    /** In grams. */
+    val carbsGrams: Float,
     val sortOrder: Int
 )

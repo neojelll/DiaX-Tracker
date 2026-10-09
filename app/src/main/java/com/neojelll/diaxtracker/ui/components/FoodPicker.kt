@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
+import com.neojelll.diaxtracker.data.formatXe
 import com.neojelll.diaxtracker.ui.screens.formatAmount
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
@@ -48,8 +49,8 @@ fun MealPresetWithProducts.toPresetOption(): PresetOption {
     return PresetOption(
         id = preset.id,
         title = preset.name,
-        xeLabel = unitFormat.format(formatAmount(totalBreadUnits)),
-        items = products.sortedBy { it.sortOrder }.map { it.name to unitFormat.format(formatAmount(it.breadUnits)) },
+        xeLabel = unitFormat.format(formatXe(totalCarbsGrams)),
+        items = products.sortedBy { it.sortOrder }.map { it.name to unitFormat.format(formatXe(it.carbsGrams)) },
         comment = preset.comment
     )
 }
