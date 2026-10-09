@@ -27,7 +27,6 @@
     <string name="ok">OK</string>
     <string name="save_changes_button">Save Changes</string>
 
-    <string name="sensor_warning">No recent sensor data — enter blood sugar manually</string>
     <string name="insulin_active_banner">Fast-acting insulin still active — %1$s left</string>
     <string name="insulin_active_banner_multi_title">Multiple fast-acting insulin doses still active</string>
     <string name="insulin_active_dose_line">%1$s units — %2$s left</string>
@@ -52,6 +51,12 @@
 
     <string name="sugar_level_label">Blood sugar level</string>
     <string name="sugar_card_label">Blood sugar</string>
+    <string name="summary_sugar_label">Sugar</string>
+    <string name="summary_sensor_just_now">just now</string>
+    <string name="summary_sensor_minutes_ago">%d min ago</string>
+    <string name="summary_sensor_hours_ago">%d h ago</string>
+    <string name="summary_sensor_days_ago">%d d ago</string>
+    <string name="summary_sensor_no_data">no data</string>
     <string name="mmol_unit">mmol/L</string>
     <string name="units_short">u</string>
     <string name="food_placeholder_home">What did you eat</string>

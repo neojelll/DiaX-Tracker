@@ -29,7 +29,6 @@
     <string name="ok">ОК</string>
     <string name="save_changes_button">Сохранить изменения</string>
 
-    <string name="sensor_warning">Нет свежих данных с датчика — сахар нужно ввести вручную</string>
     <string name="insulin_active_banner">Короткий инсулин ещё действует — осталось %1$s</string>
     <string name="insulin_active_banner_multi_title">Несколько доз короткого инсулина ещё активны</string>
     <string name="insulin_active_dose_line">%1$s ед. — осталось %2$s</string>
@@ -54,6 +53,12 @@
 
     <string name="sugar_level_label">Уровень сахара в крови</string>
     <string name="sugar_card_label">Сахар в крови</string>
+    <string name="summary_sugar_label">Сахар</string>
+    <string name="summary_sensor_just_now">только что</string>
+    <string name="summary_sensor_minutes_ago">%d мин назад</string>
+    <string name="summary_sensor_hours_ago">%d ч назад</string>
+    <string name="summary_sensor_days_ago">%d дн. назад</string>
+    <string name="summary_sensor_no_data">нет данных</string>
     <string name="mmol_unit">ммоль/л</string>
     <string name="units_short">ед</string>
     <string name="food_placeholder_home">Приём пищи</string>

@@ -25,6 +25,7 @@ import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.data.isMeal
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.sensor.PostMealScheduler
+import com.neojelll.diaxtracker.sensor.LatestSensorReading
 import com.neojelll.diaxtracker.sensor.SensorReadingStore
 import com.neojelll.diaxtracker.sensor.nearestSensorReading
 import kotlinx.coroutines.CancellationException
@@ -76,8 +77,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         initialValue = emptyList()
     )
 
-    private val _sensorWarningVisible = MutableStateFlow(computeSensorWarningVisible())
-    val sensorWarningVisible: StateFlow<Boolean> = _sensorWarningVisible.asStateFlow()
+    private val _latestSensorReading = MutableStateFlow(sensorReadingStore.latest())
+    /** The last reading from the sensor source, however old - for the day summary's sugar column. */
+    val latestSensorReading: StateFlow<LatestSensorReading?> = _latestSensorReading.asStateFlow()
 
     private val _glucoseRange = MutableStateFlow(glucoseRangeStore.getRange())
     val glucoseRange: StateFlow<GlucoseRange> = _glucoseRange.asStateFlow()
@@ -132,18 +134,12 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     init {
         viewModelScope.launch {
             while (true) {
-                _sensorWarningVisible.value = computeSensorWarningVisible()
+                _latestSensorReading.value = sensorReadingStore.latest()
                 delay(SENSOR_POLL_INTERVAL_MILLIS)
             }
         }
     }
 
-    // Only worth flagging for someone who's been getting readings recently - otherwise this is
-    // either a fresh install with no sensor at all, or a sensor pairing abandoned a while ago,
-    // and neither should nag the person about "stale" data that was never really flowing.
-    private fun computeSensorWarningVisible(): Boolean =
-        sensorReadingStore.getLatestReading() == null &&
-            sensorReadingStore.hasReadingWithin(SensorReadingStore.RECENT_ACTIVITY_WINDOW_MILLIS)
 
     fun addEntry(
         bloodSugar: Float?,
