@@ -37,6 +37,7 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.ui.components.InsulinBanner
 import com.neojelll.diaxtracker.ui.components.DisclaimerOverlay
 import com.neojelll.diaxtracker.ui.components.GlukoNavBar
+import com.neojelll.diaxtracker.ui.components.clearFocusOnTap
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.NavBarItem
 import com.neojelll.diaxtracker.ui.components.NotificationSheet
@@ -121,7 +122,8 @@ fun NavGraph(navController: NavHostController) {
                     onToggle = { insulinExpanded = !insulinExpanded }
                 )
 
-                Box(Modifier.weight(1f)) {
+                // One place for every screen: a tap on empty space closes the keyboard.
+                Box(Modifier.weight(1f).clearFocusOnTap()) {
                     NavHost(navController = navController, startDestination = ROUTE_ADD_ENTRY) {
                         composable(ROUTE_ADD_ENTRY) { AddEntryScreen(viewModel, overlays) }
                         composable(ROUTE_MEAL_PRESETS) { MealPresetsScreen(viewModel, overlays) }

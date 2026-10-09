@@ -42,6 +42,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,6 +73,8 @@ fun GlukoSheet(
     content: @Composable ColumnScope.() -> Unit = {}
 ) {
     val noRipple = remember { MutableInteractionSource() }
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
     // Floor preserves the current gesture-nav look (real gesture inset is typically
     // <= 26.dp); the live navigationBars inset dominates only on 3-button nav, keeping
     // sheet content clear of the system bar. Mirrors the GlukoNavBar fix in NavGraph.kt.
@@ -95,7 +99,12 @@ fun GlukoSheet(
                     )
                 )
                 .background(GlukoColors.Surface)
-                .clickable(interactionSource = noRipple, indication = null) {}
+                // Catches taps on the sheet's empty space - so they don't fall through to the scrim
+                // and dismiss it - and closes the keyboard, as a tap outside a field does on screens.
+                .clickable(interactionSource = noRipple, indication = null) {
+                    keyboard?.hide()
+                    focusManager.clearFocus()
+                }
                 .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = maxOf(26.dp, navBarInset))
         ) {
             Box(
