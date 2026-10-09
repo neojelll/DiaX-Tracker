@@ -82,6 +82,25 @@ fun GlukoCard(
     )
 }
 
+/** [GlukoCard] with uneven padding, for cards whose header row needs a different inset. */
+@Composable
+fun GlukoCard(
+    padding: PaddingValues,
+    modifier: Modifier = Modifier,
+    radius: Dp = GlukoRadius.card,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadowSoft(radius)
+            .clip(RoundedCornerShape(radius))
+            .background(GlukoColors.Surface)
+            .padding(padding),
+        content = content
+    )
+}
+
 /** Nested tile inside a card: fields and small blocks. */
 @Composable
 fun GlukoTile(

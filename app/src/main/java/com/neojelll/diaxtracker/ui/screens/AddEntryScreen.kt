@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,12 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.ui.components.CircleButton
@@ -71,6 +76,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     var formState by remember { mutableStateOf(EntryFormState()) }
     val now = rememberCurrentMinute()
     val shownAt = formState.dateTimeAt(now)
+    // "Сейчас" in the pickers only once something was picked - while live it would do nothing.
+    val backToNow: (() -> Unit)? = if (formState.isPinned) ({ formState = formState.followingClock() }) else null
     val toasts = rememberAppToasts()
     val sensorWarningVisible by viewModel.sensorWarningVisible.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
@@ -116,50 +123,42 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             Spacer(Modifier.height(GlukoSpacing.cardGap))
         }
 
-        GlukoCard(padding = 10.dp) {
-            Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
-                PickerButton(
-                    modifier = Modifier.weight(1f),
-                    iconPath = LucidePaths.Calendar,
-                    text = shownAt.format(DateTimeFormatter.ofPattern("d MMM")),
-                    onClick = {
-                        overlays.openDatePicker(shownAt.toLocalDate()) { picked ->
+        // Sugar card: label on the left, the date/time chip on the right.
+        GlukoCard(padding = PaddingValues(start = 16.dp, end = 14.dp, top = 12.dp, bottom = 14.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                LucideIcon(LucidePaths.Droplet, 14.dp, GlukoColors.TextLabel, strokeWidth = 1.7f)
+                Spacer(Modifier.width(7.dp))
+                Text(stringResource(R.string.sugar_card_label), style = GlukoType.Label, modifier = Modifier.weight(1f))
+                DateTimeChip(
+                    date = shownAt.format(DateTimeFormatter.ofPattern("d MMM")),
+                    time = shownAt.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    onDate = {
+                        overlays.openDatePicker(shownAt.toLocalDate(), onNow = backToNow) { picked ->
                             formState = formState.withDate(picked, LocalDateTime.now())
                         }
-                    }
-                )
-                PickerButton(
-                    modifier = Modifier.weight(1f),
-                    iconPath = LucidePaths.Clock,
-                    text = shownAt.format(DateTimeFormatter.ofPattern("HH:mm")),
-                    onClick = {
-                        overlays.openTimePicker(shownAt.toLocalTime()) { picked ->
+                    },
+                    onTime = {
+                        overlays.openTimePicker(shownAt.toLocalTime(), onNow = backToNow) { picked ->
                             formState = formState.withTime(picked, LocalDateTime.now())
                         }
                     }
                 )
             }
-        }
-        Spacer(Modifier.height(GlukoSpacing.cardGap))
-
-        GlukoCard {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                LucideIcon(LucidePaths.Droplet, 14.dp, GlukoColors.TextLabel, strokeWidth = 1.7f)
-                Spacer(Modifier.width(7.dp))
-                Text(stringResource(R.string.sugar_level_label), style = GlukoType.Label)
-            }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(2.dp))
             Row(verticalAlignment = Alignment.Bottom) {
                 GlukoField(
                     value = formState.bloodSugar,
                     onValueChange = { formState = formState.copy(bloodSugar = numeric(it)) },
                     placeholder = "0.0",
-                    modifier = Modifier.width(92.dp),
+                    modifier = Modifier.width(84.dp),
                     textStyle = GlukoType.DisplaySugar.tabular,
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Done,
                     background = GlukoColors.Surface,
-                    padding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                    padding = PaddingValues(0.dp),
+                    // No rounded clip: with zero padding it would crop the cursor at the corner (#80).
+                    // The field is the card's own white, so the rounding wasn't visible anyway.
+                    shape = RectangleShape,
                     cursorBrush = SolidColor(GlukoColors.CursorSoft)
                 )
                 Text(stringResource(R.string.mmol_unit), style = GlukoType.Label)
@@ -307,6 +306,43 @@ internal fun SaveEntryButton(
         ) {
             Text(text, style = GlukoType.ButtonPrimary.copy(color = GlukoColors.Surface))
         }
+    }
+}
+
+/**
+ * The "📅 10 сент | 🕒 17:02" chip in the sugar card header. Two halves, each its own tap target
+ * opening its own sheet. Pill on Tile, padding 3dp; halves 9x5dp, white while pressed.
+ */
+@Composable
+private fun DateTimeChip(date: String, time: String, onDate: () -> Unit, onTime: () -> Unit) {
+    Row(
+        Modifier
+            .clip(RoundedCornerShape(GlukoRadius.pill))
+            .background(GlukoColors.Tile)
+            .padding(3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ChipHalf(LucidePaths.Calendar, date, onDate)
+        Box(Modifier.width(1.dp).height(12.dp).background(GlukoColors.Border))
+        ChipHalf(LucidePaths.Clock, time, onTime)
+    }
+}
+
+@Composable
+private fun ChipHalf(icon: String, text: String, onClick: () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    Row(
+        Modifier
+            .clip(RoundedCornerShape(GlukoRadius.pill))
+            .background(if (pressed) GlukoColors.Surface else Color.Transparent)
+            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
+            .padding(horizontal = 9.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        LucideIcon(icon, 12.dp, strokeWidth = 2f)
+        Spacer(Modifier.width(5.dp))
+        Text(text, style = GlukoType.Body.copy(fontSize = 12.sp).tabular, maxLines = 1)
     }
 }
 

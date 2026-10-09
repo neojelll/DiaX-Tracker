@@ -51,6 +51,7 @@
     <string name="entry_photo">Entry Photo</string>
 
     <string name="sugar_level_label">Blood sugar level</string>
+    <string name="sugar_card_label">Blood sugar</string>
     <string name="mmol_unit">mmol/L</string>
     <string name="units_short">u</string>
     <string name="food_placeholder_home">What did you eat</string>
@@ -70,6 +71,7 @@
     <string name="food_picker_manual_kicker">Bread units without a preset</string>
     <string name="food_picker_create_preset">Create preset</string>
     <string name="sheet_done">Done</string>
+    <string name="sheet_now">Now</string>
     <string name="sheet_time_title">Time</string>
     <string name="sheet_hours_label">Hours</string>
     <string name="sheet_minutes_label">Minutes</string>

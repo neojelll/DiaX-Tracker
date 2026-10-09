@@ -10,8 +10,9 @@ import java.time.LocalTime
 
 /** Everything that can be shown on top of the four tabs. */
 sealed interface Overlay {
-    data class DatePicker(val initial: LocalDate, val onPick: (LocalDate) -> Unit) : Overlay
-    data class TimePicker(val initial: LocalTime, val onPick: (LocalTime) -> Unit) : Overlay
+    /** [onNow]: back to following the clock; null hides the "Сейчас" action. */
+    data class DatePicker(val initial: LocalDate, val onPick: (LocalDate) -> Unit, val onNow: (() -> Unit)? = null) : Overlay
+    data class TimePicker(val initial: LocalTime, val onPick: (LocalTime) -> Unit, val onNow: (() -> Unit)? = null) : Overlay
     data object Notifications : Overlay
     data class RecordEdit(val entryId: Long) : Overlay
     data class RecordComposition(val entryId: Long) : Overlay
@@ -57,12 +58,12 @@ class OverlayController {
         backing.add(overlay)
     }
 
-    fun openDatePicker(initial: LocalDate, onPick: (LocalDate) -> Unit) {
-        push(Overlay.DatePicker(initial, onPick))
+    fun openDatePicker(initial: LocalDate, onNow: (() -> Unit)? = null, onPick: (LocalDate) -> Unit) {
+        push(Overlay.DatePicker(initial, onPick, onNow))
     }
 
-    fun openTimePicker(initial: LocalTime, onPick: (LocalTime) -> Unit) {
-        push(Overlay.TimePicker(initial, onPick))
+    fun openTimePicker(initial: LocalTime, onNow: (() -> Unit)? = null, onPick: (LocalTime) -> Unit) {
+        push(Overlay.TimePicker(initial, onPick, onNow))
     }
 
     fun openPhotoActions(hasPhoto: Boolean, onCamera: () -> Unit, onGallery: () -> Unit, onRemove: () -> Unit) {
