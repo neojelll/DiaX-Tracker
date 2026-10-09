@@ -41,6 +41,10 @@ object GlukoColors {
     val PhotoOverlay = Color(0xB80D0D0D)
     val Scrim = Color(0x570D0D0D)
     val PresetCubeBorder = Color(0xFFEFEDEB)
+    // Day summary, sugar column: the only colour in the app - a quiet "sensor is live" signal.
+    val SensorFreshDot = Color(0xFF2FA36B)
+    val SensorFreshText = Color(0xFF2A8A5C)
+    val SensorStaleDot = Color(0xFFC9C5BF)
 }
 
 /** Ruda variable font (wght axis); only weights 400/500 are used anywhere in the app. */

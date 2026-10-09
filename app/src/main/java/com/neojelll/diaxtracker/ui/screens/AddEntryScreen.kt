@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.ui.components.CircleButton
+import com.neojelll.diaxtracker.ui.components.DaySummaryCard
 import com.neojelll.diaxtracker.ui.components.FoodPicker
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.GlukoCard
@@ -69,6 +70,7 @@ import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.theme.tabular
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -79,7 +81,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     // "Сейчас" in the pickers only once something was picked - while live it would do nothing.
     val backToNow: (() -> Unit)? = if (formState.isPinned) ({ formState = formState.followingClock() }) else null
     val toasts = rememberAppToasts()
-    val sensorWarningVisible by viewModel.sensorWarningVisible.collectAsState()
+    val latestSensorReading by viewModel.latestSensorReading.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
     val entries by viewModel.entries.collectAsState()
 
@@ -118,10 +120,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
         Spacer(Modifier.height(14.dp))
 
-        if (sensorWarningVisible) {
-            SensorWarningBanner()
-            Spacer(Modifier.height(GlukoSpacing.cardGap))
-        }
+        DaySummaryCard(latestSensorReading, nowMillis = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        Spacer(Modifier.height(8.dp))
 
         // Sugar card: label on the left, the date/time chip on the right.
         GlukoCard(padding = PaddingValues(start = 16.dp, end = 14.dp, top = 12.dp, bottom = 14.dp)) {
@@ -395,17 +395,6 @@ internal fun NotificationButton(onClick: () -> Unit) {
     Box {
         CircleButton(42.dp, GlukoColors.Surface, onClick) {
             LucideIcon(LucidePaths.Bell, 19.dp, strokeWidth = 1.7f)
-        }
-    }
-}
-
-@Composable
-internal fun SensorWarningBanner() {
-    GlukoCard {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            LucideIcon(LucidePaths.AlertTriangle, 16.dp, GlukoColors.Ink, strokeWidth = 1.7f)
-            Spacer(Modifier.width(10.dp))
-            Text(stringResource(R.string.sensor_warning), style = GlukoType.Body)
         }
     }
 }
