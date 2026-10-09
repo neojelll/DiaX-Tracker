@@ -404,12 +404,16 @@ private fun InsulinTile(modifier: Modifier, label: String, value: String, onChan
     }
 }
 
+/** The bell without a round background: icon 21dp, tap area 29dp (4dp padding), pill-clipped press. */
 @Composable
 internal fun NotificationButton(onClick: () -> Unit) {
-    Box {
-        CircleButton(42.dp, GlukoColors.Surface, onClick) {
-            LucideIcon(LucidePaths.Bell, 19.dp, strokeWidth = 1.7f)
-        }
+    Box(
+        Modifier
+            .clip(RoundedCornerShape(GlukoRadius.pill))
+            .clickable(onClick = onClick)
+            .padding(4.dp)
+    ) {
+        LucideIcon(LucidePaths.Bell, 21.dp, strokeWidth = 1.8f)
     }
 }
 
