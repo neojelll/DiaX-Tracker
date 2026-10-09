@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
+import com.neojelll.diaxtracker.data.formatXe
 import com.neojelll.diaxtracker.ui.notifications.yesterdayMeals
 import com.neojelll.diaxtracker.ui.screens.formatAmount
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
@@ -93,7 +94,7 @@ private fun YesterdayMealRow(viewModel: DiaryViewModel, meal: DiaryEntry, xeForm
     LaunchedEffect(meal.id) { products = viewModel.getEntryProducts(meal.id) }
 
     val what = products.takeIf { it.isNotEmpty() }?.joinToString { it.name } ?: meal.mealLabel.orEmpty()
-    val amount = meal.breadUnits?.let { xeFormat.format(formatAmount(it)) }
+    val amount = meal.carbsGrams?.let { xeFormat.format(formatXe(it)) }
     val food = listOf(what, amount.orEmpty()).filter { it.isNotEmpty() }.joinToString(" · ")
     val time = meal.createdAt.format(DateTimeFormatter.ofPattern("HH:mm"))
 

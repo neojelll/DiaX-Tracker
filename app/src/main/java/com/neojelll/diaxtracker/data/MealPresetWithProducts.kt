@@ -11,6 +11,7 @@ data class MealPresetWithProducts(
     )
     val products: List<MealPresetProduct>
 ) {
-    val totalBreadUnits: Float
-        get() = products.sumOf { it.breadUnits.toDouble() }.toFloat()
+    /** Summed in grams; rounded only when shown. */
+    val totalCarbsGrams: Float
+        get() = products.sumOf { it.carbsGrams.toDouble() }.toFloat()
 }

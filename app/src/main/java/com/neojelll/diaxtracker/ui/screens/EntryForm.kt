@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
+import com.neojelll.diaxtracker.data.formatXe
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
@@ -29,10 +30,10 @@ internal fun formatAmount(value: Float): String =
 /** Applies a picked preset to the form: real bread units/products, display label from the design. */
 internal fun applyPresetPick(state: EntryFormState, preset: MealPresetWithProducts, option: PresetOption): EntryFormState =
     state.copy(
-        breadUnits = formatAmount(preset.totalBreadUnits),
+        breadUnits = formatXe(preset.totalCarbsGrams),
         foodLabel = "${preset.preset.name} · ${option.xeLabel}",
         mealLabel = preset.preset.name,
-        mealProducts = preset.products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, formatAmount(it.breadUnits)) },
+        mealProducts = preset.products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, formatXe(it.carbsGrams)) },
         foodExpanded = false
     )
 

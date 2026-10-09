@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         DiaryEntryProduct::class,
         SensorReadingLog::class
     ],
-    version = 11,
+    version = 12,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -134,6 +134,68 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * Bread units become grams of carbohydrates (x10 - the diary's XE were 10 g) in all three
+         * tables that held them. SQLite before Android 11 can't rename a column, so each table is
+         * rebuilt: create the new one, copy with the conversion, drop the old, rename the new.
+         * Foreign keys aren't enforced while Room migrates, so dropping diary_entries doesn't
+         * cascade into diary_entry_products.
+         */
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE diary_entries_new (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, bloodSugar REAL, sugarSource TEXT, " +
+                        "carbsGrams REAL, mealLabel TEXT, shortInsulinDose REAL, longInsulinDose REAL, " +
+                        "notes TEXT NOT NULL, photoPath TEXT, createdAt TEXT NOT NULL, " +
+                        "sourceEntryId INTEGER, sourceHour INTEGER)"
+                )
+                db.execSQL(
+                    "INSERT INTO diary_entries_new (id, bloodSugar, sugarSource, carbsGrams, mealLabel, " +
+                        "shortInsulinDose, longInsulinDose, notes, photoPath, createdAt, sourceEntryId, sourceHour) " +
+                        "SELECT id, bloodSugar, sugarSource, breadUnits * 10, mealLabel, " +
+                        "shortInsulinDose, longInsulinDose, notes, photoPath, createdAt, sourceEntryId, sourceHour " +
+                        "FROM diary_entries"
+                )
+                db.execSQL("DROP TABLE diary_entries")
+                db.execSQL("ALTER TABLE diary_entries_new RENAME TO diary_entries")
+
+                db.execSQL(
+                    "CREATE TABLE diary_entry_products_new (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, diaryEntryId INTEGER NOT NULL, " +
+                        "name TEXT NOT NULL, carbsGrams REAL NOT NULL, sortOrder INTEGER NOT NULL, " +
+                        "FOREIGN KEY(diaryEntryId) REFERENCES diary_entries(id) ON UPDATE NO ACTION ON DELETE CASCADE)"
+                )
+                db.execSQL(
+                    "INSERT INTO diary_entry_products_new (id, diaryEntryId, name, carbsGrams, sortOrder) " +
+                        "SELECT id, diaryEntryId, name, breadUnits * 10, sortOrder FROM diary_entry_products"
+                )
+                db.execSQL("DROP TABLE diary_entry_products")
+                db.execSQL("ALTER TABLE diary_entry_products_new RENAME TO diary_entry_products")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_diary_entry_products_diaryEntryId " +
+                        "ON diary_entry_products(diaryEntryId)"
+                )
+
+                db.execSQL(
+                    "CREATE TABLE meal_preset_products_new (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, mealPresetId INTEGER NOT NULL, " +
+                        "name TEXT NOT NULL, carbsGrams REAL NOT NULL, sortOrder INTEGER NOT NULL, " +
+                        "FOREIGN KEY(mealPresetId) REFERENCES meal_presets(id) ON UPDATE NO ACTION ON DELETE CASCADE)"
+                )
+                db.execSQL(
+                    "INSERT INTO meal_preset_products_new (id, mealPresetId, name, carbsGrams, sortOrder) " +
+                        "SELECT id, mealPresetId, name, breadUnits * 10, sortOrder FROM meal_preset_products"
+                )
+                db.execSQL("DROP TABLE meal_preset_products")
+                db.execSQL("ALTER TABLE meal_preset_products_new RENAME TO meal_preset_products")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_meal_preset_products_mealPresetId " +
+                        "ON meal_preset_products(mealPresetId)"
+                )
+            }
+        }
+
         /** Builder with every migration attached - also used to bring an imported backup up to date. */
         fun newBuilder(context: Context, name: String): RoomDatabase.Builder<DiaryDatabase> =
             Room.databaseBuilder(context.applicationContext, DiaryDatabase::class.java, name)
@@ -145,7 +207,8 @@ abstract class DiaryDatabase : RoomDatabase() {
                     MIGRATION_7_8,
                     MIGRATION_8_9,
                     MIGRATION_9_10,
-                    MIGRATION_10_11
+                    MIGRATION_10_11,
+                    MIGRATION_11_12
                 )
 
         fun getDatabase(context: Context): DiaryDatabase {

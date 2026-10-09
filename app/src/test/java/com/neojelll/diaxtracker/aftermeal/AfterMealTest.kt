@@ -17,7 +17,7 @@ class AfterMealTest {
 
     private fun meal(at: LocalDateTime, label: String? = "Обед") = DiaryEntry(
         id = nextId++, bloodSugar = null, shortInsulinDose = null, longInsulinDose = null,
-        notes = "", mealLabel = label, breadUnits = if (label == null) 3f else null, createdAt = at
+        notes = "", mealLabel = label, carbsGrams = if (label == null) 30f else null, createdAt = at
     )
 
     private fun check(of: DiaryEntry, hour: Int, sugar: Float, at: LocalDateTime = of.createdAt.plusHours(hour.toLong())) = DiaryEntry(
@@ -95,7 +95,7 @@ class AfterMealTest {
 
     @Test
     fun `an entry that is no longer a meal has no pill`() {
-        val notMeal = meal(day).copy(mealLabel = null, breadUnits = null)
+        val notMeal = meal(day).copy(mealLabel = null, carbsGrams = null)
         assertNull(buildAfterMeal(listOf(notMeal), minutes(300)).byMeal[notMeal.id])
     }
 

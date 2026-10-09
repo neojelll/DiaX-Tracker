@@ -43,8 +43,8 @@ fun RecordCompositionSheet(viewModel: DiaryViewModel, entryId: Long, onDismiss: 
     var products by remember(entryId) { mutableStateOf<List<DiaryEntryProduct>?>(null) }
     LaunchedEffect(entryId) { products = viewModel.getEntryProducts(entryId) }
 
-    val rows = products.orEmpty().sortedBy { it.sortOrder }.map { it.name to it.breadUnits }
-    val totalBreadUnits = entry.breadUnits ?: rows.takeIf { it.isNotEmpty() }?.sumOf { it.second.toDouble() }?.toFloat()
+    val rows = products.orEmpty().sortedBy { it.sortOrder }.map { it.name to it.carbsGrams }
+    val totalCarbsGrams = entry.carbsGrams ?: rows.takeIf { it.isNotEmpty() }?.sumOf { it.second.toDouble() }?.toFloat()
 
     GlukoSheet(onDismiss, maxHeightFraction = 0.76f) {
         SheetHeader(
@@ -53,8 +53,8 @@ fun RecordCompositionSheet(viewModel: DiaryViewModel, entryId: Long, onDismiss: 
             onClose = onDismiss
         )
 
-        if (totalBreadUnits != null) {
-            TotalBreadUnitsTile(totalBreadUnits)
+        if (totalCarbsGrams != null) {
+            TotalCarbsTile(totalCarbsGrams)
             Spacer(Modifier.height(16.dp))
         }
 

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
+import com.neojelll.diaxtracker.data.parseXeToGrams
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.DaySummaryCard
 import com.neojelll.diaxtracker.ui.components.FoodPicker
@@ -257,13 +258,13 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 val createdAt = formState.dateTimeAt(LocalDateTime.now())
                 viewModel.addEntry(
                     bloodSugar = formState.bloodSugar.toFloatOrNull(),
-                    breadUnits = formState.breadUnits.toFloatOrNull(),
+                    carbsGrams = parseXeToGrams(formState.breadUnits),
                     mealLabel = formState.mealLabel,
                     mealProducts = formState.mealProducts.mapIndexed { index, product ->
                         DiaryEntryProduct(
                             diaryEntryId = 0,
                             name = product.name,
-                            breadUnits = product.breadUnits.toFloatOrNull() ?: 0f,
+                            carbsGrams = parseXeToGrams(product.breadUnits) ?: 0f,
                             sortOrder = index
                         )
                     },

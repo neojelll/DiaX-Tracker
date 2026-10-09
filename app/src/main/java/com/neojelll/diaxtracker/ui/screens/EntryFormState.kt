@@ -8,12 +8,14 @@ import java.time.LocalTime
 // (storage, backup, display) actually requires one.
 internal const val NOTES_MAX_LENGTH = 2500
 
+/** [breadUnits]: the product's carbohydrates as typed/shown, in XE; stored as grams on save. */
 internal data class MealProductEntry(val name: String, val breadUnits: String)
 
 internal data class EntryFormState(
     /** The moment picked for the entry; null until the person picks one - the form follows the clock till then. */
     val dateTime: LocalDateTime? = null,
     val bloodSugar: String = "",
+    /** Carbohydrates as typed/shown, in XE - converted to grams on save (Carbs.kt). */
     val breadUnits: String = "",
     val foodLabel: String = "",
     val mealLabel: String? = null,
