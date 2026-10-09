@@ -10,6 +10,8 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.backup.AutoBackupScheduler
 import com.neojelll.diaxtracker.data.AutoBackupState
 import com.neojelll.diaxtracker.data.BackupPreferencesStore
+import com.neojelll.diaxtracker.data.CarbDisplay
+import com.neojelll.diaxtracker.data.CarbSettingsStore
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
@@ -55,6 +57,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val sensorReadingStore = SensorReadingStore(application)
     private val glucoseRangeStore = GlucoseRangeStore(application)
     private val insulinSettingsStore = InsulinSettingsStore(application)
+    private val carbSettingsStore = CarbSettingsStore(application)
     private val backupPreferencesStore = BackupPreferencesStore(application)
     private val disclaimerStore = DisclaimerStore(application)
 
@@ -86,6 +89,10 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _insulinDurationHours = MutableStateFlow(insulinSettingsStore.getDurationHours())
     val insulinDurationHours: StateFlow<Float> = _insulinDurationHours.asStateFlow()
+
+    private val _carbDisplay = MutableStateFlow(carbSettingsStore.get())
+    /** How carbohydrates are shown and typed (unit, grams per XE). */
+    val carbDisplay: StateFlow<CarbDisplay> = _carbDisplay.asStateFlow()
 
     val autoBackup: StateFlow<AutoBackupState> = backupPreferencesStore.observe().stateIn(
         scope = viewModelScope,
@@ -251,6 +258,11 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun setInsulinDurationHours(hours: Float) {
         insulinSettingsStore.saveDurationHours(hours)
         _insulinDurationHours.value = hours
+    }
+
+    fun setCarbDisplay(display: CarbDisplay) {
+        carbSettingsStore.save(display)
+        _carbDisplay.value = display
     }
 
     /** Returns whether the backup was turned on; on failure an error is already reported. */

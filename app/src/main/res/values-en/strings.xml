@@ -98,6 +98,14 @@
     <string name="sugar_label">Sugar</string>
     <string name="bread_units_short_label">Bread Units</string>
     <string name="bread_units_value_format">%1$s BU</string>
+    <string name="carbs_grams_value_format">%1$s g</string>
+    <string name="carbs_grams_short_label">g</string>
+    <string name="food_picker_manual_kicker_grams">Carbs without a preset, g</string>
+    <string name="carbs_setting_title">Carbohydrates</string>
+    <string name="carbs_unit_xe">Bread units</string>
+    <string name="carbs_unit_grams">Grams</string>
+    <string name="carbs_grams_per_xe_label">Grams in 1 BU</string>
+    <string name="carbs_setting_hint">Entries are stored in grams — this only changes how they are shown and typed.</string>
     <string name="short_insulin_short_label">Fast-Acting Insulin</string>
     <string name="long_insulin_short_label">Long-Acting Insulin</string>
 

@@ -102,6 +102,14 @@
     <string name="sugar_label">Сахар</string>
     <string name="bread_units_short_label">ХЕ</string>
     <string name="bread_units_value_format">%1$s ХЕ</string>
+    <string name="carbs_grams_value_format">%1$s г</string>
+    <string name="carbs_grams_short_label">г</string>
+    <string name="food_picker_manual_kicker_grams">Углеводы без пресета, г</string>
+    <string name="carbs_setting_title">Углеводы</string>
+    <string name="carbs_unit_xe">ХЕ</string>
+    <string name="carbs_unit_grams">Граммы</string>
+    <string name="carbs_grams_per_xe_label">Граммов в 1 ХЕ</string>
+    <string name="carbs_setting_hint">Записи хранятся в граммах — это меняет только то, как они показываются и вводятся.</string>
     <string name="short_insulin_short_label">Короткий инсулин</string>
     <string name="long_insulin_short_label">Длинный инсулин</string>
 

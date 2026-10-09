@@ -44,10 +44,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
-import com.neojelll.diaxtracker.data.parseXeToGrams
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.DaySummaryCard
 import com.neojelll.diaxtracker.ui.components.FoodPicker
+import com.neojelll.diaxtracker.ui.components.LocalCarbDisplay
+import com.neojelll.diaxtracker.ui.components.carbsValueFormat
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
@@ -90,13 +91,15 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val today = now.toLocalDate()
     val todayCount = remember(entries, today) { entries.count { it.createdAt.toLocalDate() == today } }
     val greetingRes = greetingFor(now.hour)
-    val manualXeFormat = stringResource(R.string.food_manual_format)
+    val carbDisplay = LocalCarbDisplay.current
+    // "%1$s ХЕ (вручную)" / "%1$s г (вручную)": the unit-aware value format inside the manual-entry one.
+    val manualCarbsFormat = stringResource(R.string.food_manual_format, carbsValueFormat())
 
     val pendingPreset = overlays.pendingPresetSelection
     val pendingPresetOption = pendingPreset?.toPresetOption()
     LaunchedEffect(pendingPreset) {
         if (pendingPreset != null && pendingPresetOption != null) {
-            formState = applyPresetPick(formState, pendingPreset, pendingPresetOption)
+            formState = applyPresetPick(formState, pendingPreset, pendingPresetOption, carbDisplay)
             overlays.consumePendingPresetSelection()
         }
     }
@@ -193,15 +196,15 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 value = formState.foodLabel,
                 expanded = formState.foodExpanded,
                 presets = mealPresets.map { it.toPresetOption() },
-                manualXe = formState.manualXe,
+                manualCarbs = formState.manualCarbs,
                 placeholder = stringResource(R.string.food_placeholder_home),
                 onToggle = { formState = formState.copy(foodExpanded = !formState.foodExpanded) },
                 onPick = { option ->
                     val preset = mealPresets.find { it.preset.id == option.id }
-                    if (preset != null) formState = applyPresetPick(formState, preset, option)
+                    if (preset != null) formState = applyPresetPick(formState, preset, option, carbDisplay)
                 },
-                onManualXeChange = { formState = updateManualXe(formState, it, manualXeFormat) },
-                onManualXeDone = { formState = finishManualXe(formState) },
+                onManualCarbsChange = { formState = updateManualCarbs(formState, it, manualCarbsFormat) },
+                onManualCarbsDone = { formState = finishManualCarbs(formState) },
                 onCreatePreset = { overlays.openPresetEdit(null) }
             )
         }
@@ -258,13 +261,13 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 val createdAt = formState.dateTimeAt(LocalDateTime.now())
                 viewModel.addEntry(
                     bloodSugar = formState.bloodSugar.toFloatOrNull(),
-                    carbsGrams = parseXeToGrams(formState.breadUnits),
+                    carbsGrams = carbDisplay.parse(formState.carbs),
                     mealLabel = formState.mealLabel,
                     mealProducts = formState.mealProducts.mapIndexed { index, product ->
                         DiaryEntryProduct(
                             diaryEntryId = 0,
                             name = product.name,
-                            carbsGrams = parseXeToGrams(product.breadUnits) ?: 0f,
+                            carbsGrams = carbDisplay.parse(product.carbs) ?: 0f,
                             sortOrder = index
                         )
                     },

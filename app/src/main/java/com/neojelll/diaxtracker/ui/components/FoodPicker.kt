@@ -32,8 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.CarbUnit
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
-import com.neojelll.diaxtracker.data.formatXe
 import com.neojelll.diaxtracker.ui.screens.formatAmount
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
@@ -45,12 +45,13 @@ data class PresetOption(val id: Long, val title: String, val xeLabel: String, va
 
 @Composable
 fun MealPresetWithProducts.toPresetOption(): PresetOption {
-    val unitFormat = stringResource(R.string.bread_units_value_format)
+    val display = LocalCarbDisplay.current
+    val unitFormat = carbsValueFormat()
     return PresetOption(
         id = preset.id,
         title = preset.name,
-        xeLabel = unitFormat.format(formatXe(totalCarbsGrams)),
-        items = products.sortedBy { it.sortOrder }.map { it.name to unitFormat.format(formatXe(it.carbsGrams)) },
+        xeLabel = unitFormat.format(display.format(totalCarbsGrams)),
+        items = products.sortedBy { it.sortOrder }.map { it.name to unitFormat.format(display.format(it.carbsGrams)) },
         comment = preset.comment
     )
 }
@@ -64,12 +65,12 @@ fun FoodPicker(
     value: String,
     expanded: Boolean,
     presets: List<PresetOption>,
-    manualXe: String,
+    manualCarbs: String,
     placeholder: String,
     onToggle: () -> Unit,
     onPick: (PresetOption) -> Unit,
-    onManualXeChange: (String) -> Unit,
-    onManualXeDone: () -> Unit,
+    onManualCarbsChange: (String) -> Unit,
+    onManualCarbsDone: () -> Unit,
     onCreatePreset: () -> Unit
 ) {
     Column {
@@ -96,16 +97,21 @@ fun FoodPicker(
 
         AnimatedVisibility(expanded, enter = fadeIn(), exit = fadeOut()) {
             Column(Modifier.padding(top = 11.dp)) {
-                Kicker(stringResource(R.string.food_picker_manual_kicker))
+                Kicker(
+                    stringResource(
+                        if (LocalCarbDisplay.current.unit == CarbUnit.GRAMS) R.string.food_picker_manual_kicker_grams
+                        else R.string.food_picker_manual_kicker
+                    )
+                )
                 Spacer(Modifier.height(9.dp))
                 GlukoField(
-                    value = manualXe,
-                    onValueChange = { onManualXeChange(numeric(it)) },
+                    value = manualCarbs,
+                    onValueChange = { onManualCarbsChange(numeric(it)) },
                     placeholder = "0",
                     textStyle = GlukoType.Body.tabular,
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Done,
-                    onDone = onManualXeDone,
+                    onDone = onManualCarbsDone,
                     padding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)
                 )
 

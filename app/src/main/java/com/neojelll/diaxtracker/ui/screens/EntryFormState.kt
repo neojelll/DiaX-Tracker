@@ -8,15 +8,15 @@ import java.time.LocalTime
 // (storage, backup, display) actually requires one.
 internal const val NOTES_MAX_LENGTH = 2500
 
-/** [breadUnits]: the product's carbohydrates as typed/shown, in XE; stored as grams on save. */
-internal data class MealProductEntry(val name: String, val breadUnits: String)
+/** [carbs]: the product's carbohydrates as typed/shown, in the display unit (CarbDisplay); grams on save. */
+internal data class MealProductEntry(val name: String, val carbs: String)
 
 internal data class EntryFormState(
     /** The moment picked for the entry; null until the person picks one - the form follows the clock till then. */
     val dateTime: LocalDateTime? = null,
     val bloodSugar: String = "",
-    /** Carbohydrates as typed/shown, in XE - converted to grams on save (Carbs.kt). */
-    val breadUnits: String = "",
+    /** Carbohydrates as typed/shown, in the display unit (CarbDisplay) - converted to grams on save. */
+    val carbs: String = "",
     val foodLabel: String = "",
     val mealLabel: String? = null,
     val mealProducts: List<MealProductEntry> = emptyList(),
@@ -25,11 +25,11 @@ internal data class EntryFormState(
     val notes: String = "",
     val photoPath: String? = null,
     val foodExpanded: Boolean = false,
-    val manualXe: String = "",
+    val manualCarbs: String = "",
     val detailsExpanded: Boolean = false
 ) {
     val isFillable: Boolean
-        get() = bloodSugar.isNotBlank() || breadUnits.isNotBlank() ||
+        get() = bloodSugar.isNotBlank() || carbs.isNotBlank() ||
             shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
 
     /** Whether a date or time was picked, rather than following the clock. */

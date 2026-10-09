@@ -13,8 +13,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.CarbDisplay
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
-import com.neojelll.diaxtracker.data.formatXe
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
@@ -28,12 +28,12 @@ internal fun formatAmount(value: Float): String =
     if (value == value.toInt().toFloat()) value.toInt().toString() else value.toString()
 
 /** Applies a picked preset to the form: real bread units/products, display label from the design. */
-internal fun applyPresetPick(state: EntryFormState, preset: MealPresetWithProducts, option: PresetOption): EntryFormState =
+internal fun applyPresetPick(state: EntryFormState, preset: MealPresetWithProducts, option: PresetOption, display: CarbDisplay): EntryFormState =
     state.copy(
-        breadUnits = formatXe(preset.totalCarbsGrams),
+        carbs = display.format(preset.totalCarbsGrams),
         foodLabel = "${preset.preset.name} · ${option.xeLabel}",
         mealLabel = preset.preset.name,
-        mealProducts = preset.products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, formatXe(it.carbsGrams)) },
+        mealProducts = preset.products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, display.format(it.carbsGrams)) },
         foodExpanded = false
     )
 
@@ -41,11 +41,11 @@ internal fun applyPresetPick(state: EntryFormState, preset: MealPresetWithProduc
  * Live preview while typing manual bread units: updates the draft text and, once it parses,
  * the committed food label too - the picker stays open so typing can continue.
  */
-internal fun updateManualXe(state: EntryFormState, rawInput: String, manualFormat: String): EntryFormState {
-    val updated = state.copy(manualXe = rawInput)
+internal fun updateManualCarbs(state: EntryFormState, rawInput: String, manualFormat: String): EntryFormState {
+    val updated = state.copy(manualCarbs = rawInput)
     val value = rawInput.replace(',', '.').toFloatOrNull() ?: return updated
     return updated.copy(
-        breadUnits = formatAmount(value),
+        carbs = formatAmount(value),
         foodLabel = manualFormat.format(formatAmount(value)),
         mealLabel = null,
         mealProducts = emptyList()
@@ -53,9 +53,9 @@ internal fun updateManualXe(state: EntryFormState, rawInput: String, manualForma
 }
 
 /** Closes the picker and clears the draft input once the keyboard's Done action commits a valid value. */
-internal fun finishManualXe(state: EntryFormState): EntryFormState =
-    if (state.manualXe.replace(',', '.').toFloatOrNull() != null) {
-        state.copy(foodExpanded = false, manualXe = "")
+internal fun finishManualCarbs(state: EntryFormState): EntryFormState =
+    if (state.manualCarbs.replace(',', '.').toFloatOrNull() != null) {
+        state.copy(foodExpanded = false, manualCarbs = "")
     } else {
         state
     }
