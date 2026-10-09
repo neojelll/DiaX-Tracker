@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,16 +36,37 @@ import com.neojelll.diaxtracker.ui.theme.Ruda
 
 /**
  * The day summary above the entry form: one white card, columns split by vertical hairlines, each
- * reading label 11sp -> value -> note 10.5sp. Sugar for now; carbohydrates and insulin columns join
- * it (#160, #159).
+ * reading label 11sp -> value -> note 10.5sp. Sugar and today's carbohydrates; the insulin column
+ * joins them in #159.
  */
 @Composable
-fun DaySummaryCard(sensorReading: LatestSensorReading?, nowMillis: Long) {
+fun DaySummaryCard(sensorReading: LatestSensorReading?, nowMillis: Long, carbsGramsToday: Float) {
     GlukoCard(padding = PaddingValues(start = 14.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             SugarColumn(sensorReading, nowMillis, Modifier.weight(1f).padding(end = 10.dp))
+            VerticalHairline()
+            CarbsColumn(carbsGramsToday, Modifier.weight(1f).padding(horizontal = 10.dp))
         }
     }
+}
+
+/** Today's carbohydrates in the unit from the settings: number, the unit small beside it, "за день" under. */
+@Composable
+private fun CarbsColumn(gramsToday: Float, modifier: Modifier) {
+    SummaryColumn(modifier, stringResource(R.string.summary_carbs_label)) {
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(LocalCarbDisplay.current.format(gramsToday), style = SummaryValue)
+            Spacer(Modifier.width(2.dp))
+            Text(carbsUnitLabel(), style = SummarySub)
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(stringResource(R.string.summary_carbs_today), style = SummarySub)
+    }
+}
+
+@Composable
+private fun VerticalHairline() {
+    Box(Modifier.width(1.dp).fillMaxHeight().background(GlukoColors.Divider))
 }
 
 /**

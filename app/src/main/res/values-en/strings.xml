@@ -52,6 +52,8 @@
     <string name="sugar_level_label">Blood sugar level</string>
     <string name="sugar_card_label">Blood sugar</string>
     <string name="summary_sugar_label">Sugar</string>
+    <string name="summary_carbs_label">Carbs</string>
+    <string name="summary_carbs_today">today</string>
     <string name="summary_sensor_just_now">just now</string>
     <string name="summary_sensor_minutes_ago">%d min ago</string>
     <string name="summary_sensor_hours_ago">%d h ago</string>

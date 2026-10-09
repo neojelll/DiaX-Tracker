@@ -1,5 +1,6 @@
 package com.neojelll.diaxtracker.data
 
+import java.time.LocalDate
 import kotlin.math.roundToInt
 
 /*
@@ -46,5 +47,19 @@ data class CarbDisplay(val unit: CarbUnit = CarbUnit.XE, val gramsPerXe: Float =
         CarbUnit.XE -> parseXeToGrams(text, gramsPerXe)
         CarbUnit.GRAMS -> text.replace(',', '.').toFloatOrNull()
     }
+}
+
+/**
+ * Carbohydrates eaten on [day], in grams. An entry's own total counts; only an entry without one
+ * (older records) falls back to the sum of its products - the same rule as the record composition sheet.
+ */
+fun carbsGramsOn(day: LocalDate, entries: List<DiaryEntry>, products: List<DiaryEntryProduct>): Float {
+    val productsByEntry = products.groupBy { it.diaryEntryId }
+    return entries
+        .filter { it.createdAt.toLocalDate() == day }
+        .sumOf { entry ->
+            (entry.carbsGrams ?: productsByEntry[entry.id]?.sumOf { it.carbsGrams.toDouble() }?.toFloat() ?: 0f).toDouble()
+        }
+        .toFloat()
 }
 
