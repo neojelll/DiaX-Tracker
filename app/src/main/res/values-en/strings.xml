@@ -51,6 +51,7 @@
     <string name="entry_photo">Entry Photo</string>
 
     <string name="sugar_level_label">Blood sugar level</string>
+    <string name="sugar_card_label">Blood sugar</string>
     <string name="mmol_unit">mmol/L</string>
     <string name="units_short">u</string>
     <string name="food_placeholder_home">What did you eat</string>

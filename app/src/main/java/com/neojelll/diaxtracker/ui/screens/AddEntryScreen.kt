@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -127,7 +128,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 LucideIcon(LucidePaths.Droplet, 14.dp, GlukoColors.TextLabel, strokeWidth = 1.7f)
                 Spacer(Modifier.width(7.dp))
-                Text(stringResource(R.string.sugar_level_label), style = GlukoType.Label, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.sugar_card_label), style = GlukoType.Label, modifier = Modifier.weight(1f))
                 DateTimeChip(
                     date = shownAt.format(DateTimeFormatter.ofPattern("d MMM")),
                     time = shownAt.format(DateTimeFormatter.ofPattern("HH:mm")),
@@ -149,12 +150,15 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     value = formState.bloodSugar,
                     onValueChange = { formState = formState.copy(bloodSugar = numeric(it)) },
                     placeholder = "0.0",
-                    modifier = Modifier.width(92.dp),
+                    modifier = Modifier.width(84.dp),
                     textStyle = GlukoType.DisplaySugar.tabular,
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Done,
                     background = GlukoColors.Surface,
-                    padding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+                    padding = PaddingValues(0.dp),
+                    // No rounded clip: with zero padding it would crop the cursor at the corner (#80).
+                    // The field is the card's own white, so the rounding wasn't visible anyway.
+                    shape = RectangleShape,
                     cursorBrush = SolidColor(GlukoColors.CursorSoft)
                 )
                 Text(stringResource(R.string.mmol_unit), style = GlukoType.Label)

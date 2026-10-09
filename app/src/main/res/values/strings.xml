@@ -53,6 +53,7 @@
     <string name="entry_photo">Фото записи</string>
 
     <string name="sugar_level_label">Уровень сахара в крови</string>
+    <string name="sugar_card_label">Сахар в крови</string>
     <string name="mmol_unit">ммоль/л</string>
     <string name="units_short">ед</string>
     <string name="food_placeholder_home">Приём пищи</string>
