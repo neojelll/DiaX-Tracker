@@ -26,7 +26,10 @@ internal data class EntryFormState(
     val photoPath: String? = null,
     val foodExpanded: Boolean = false,
     val manualCarbs: String = "",
-    val detailsExpanded: Boolean = false
+    /** The preset picked on the add-entry screen; null when none, or once carbs were typed by hand. */
+    val presetId: Long? = null,
+    /** Whether the comment field is unfolded in the details block. */
+    val noteOpen: Boolean = false
 ) {
     val isFillable: Boolean
         get() = bloodSugar.isNotBlank() || carbs.isNotBlank() ||

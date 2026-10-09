@@ -33,9 +33,14 @@ internal fun applyPresetPick(state: EntryFormState, preset: MealPresetWithProduc
         carbs = display.format(preset.totalCarbsGrams),
         foodLabel = "${preset.preset.name} · ${option.xeLabel}",
         mealLabel = preset.preset.name,
+        presetId = preset.preset.id,
         mealProducts = preset.products.sortedBy { it.sortOrder }.map { MealProductEntry(it.name, display.format(it.carbsGrams)) },
         foodExpanded = false
     )
+
+/** Carbs typed by hand on the add-entry screen: the preset is dropped - the two are either/or. */
+internal fun typeCarbs(state: EntryFormState, text: String): EntryFormState =
+    state.copy(carbs = text, presetId = null, mealLabel = null, mealProducts = emptyList(), foodLabel = "")
 
 /**
  * Live preview while typing manual bread units: updates the draft text and, once it parses,

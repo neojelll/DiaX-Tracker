@@ -1,9 +1,6 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -46,25 +43,18 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.carbsGramsOn
 import com.neojelll.diaxtracker.insulin.insulinOn
-import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.DaySummaryCard
-import com.neojelll.diaxtracker.ui.components.FoodPicker
 import com.neojelll.diaxtracker.ui.components.LocalCarbDisplay
-import com.neojelll.diaxtracker.ui.components.carbsValueFormat
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
 import com.neojelll.diaxtracker.ui.components.GlukoField
 import com.neojelll.diaxtracker.ui.components.GlukoTile
-import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.OverlayController
-import com.neojelll.diaxtracker.ui.components.PhotoTile
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
-import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.numeric
-import com.neojelll.diaxtracker.ui.components.plainClickable
 import com.neojelll.diaxtracker.ui.components.rememberCurrentMinute
 import com.neojelll.diaxtracker.ui.components.toPresetOption
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
@@ -97,8 +87,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val insulinToday = remember(entries, today) { insulinOn(today, entries) }
     val greetingRes = greetingFor(now.hour)
     val carbDisplay = LocalCarbDisplay.current
-    // "%1$s ХЕ (вручную)" / "%1$s г (вручную)": the unit-aware value format inside the manual-entry one.
-    val manualCarbsFormat = stringResource(R.string.food_manual_format, carbsValueFormat())
+    val presetOptions = mealPresets.map { it.toPresetOption() }
 
     val pendingPreset = overlays.pendingPresetSelection
     val pendingPresetOption = pendingPreset?.toPresetOption()
@@ -199,69 +188,35 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
         Spacer(Modifier.height(GlukoSpacing.cardGap))
 
-        GlukoCard {
-            Kicker(stringResource(R.string.food_label))
-            Spacer(Modifier.height(8.dp))
-            FoodPicker(
-                value = formState.foodLabel,
-                expanded = formState.foodExpanded,
-                presets = mealPresets.map { it.toPresetOption() },
-                manualCarbs = formState.manualCarbs,
-                placeholder = stringResource(R.string.food_placeholder_home),
-                onToggle = { formState = formState.copy(foodExpanded = !formState.foodExpanded) },
-                onPick = { option ->
-                    val preset = mealPresets.find { it.preset.id == option.id }
-                    if (preset != null) formState = applyPresetPick(formState, preset, option, carbDisplay)
-                },
-                onManualCarbsChange = { formState = updateManualCarbs(formState, it, manualCarbsFormat) },
-                onManualCarbsDone = { formState = finishManualCarbs(formState) },
-                onCreatePreset = { overlays.openPresetEdit(null) }
-            )
-        }
+        FoodRow(
+            selected = presetOptions.firstOrNull { it.id == formState.presetId },
+            carbs = formState.carbs,
+            presets = presetOptions,
+            expanded = formState.foodExpanded,
+            onToggle = { formState = formState.copy(foodExpanded = !formState.foodExpanded) },
+            onPick = { option ->
+                val preset = mealPresets.find { it.preset.id == option.id }
+                if (preset != null) formState = applyPresetPick(formState, preset, option, carbDisplay)
+            },
+            onCarbsChange = { formState = typeCarbs(formState, it) },
+            onCreatePreset = { overlays.openPresetEdit(null) }
+        )
         Spacer(Modifier.height(GlukoSpacing.cardGap))
 
-        GlukoCard {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .plainClickable { formState = formState.copy(detailsExpanded = !formState.detailsExpanded) },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.details_toggle_title), style = GlukoType.Body)
-                    Spacer(Modifier.height(2.dp))
-                    Text(stringResource(R.string.details_toggle_hint), style = GlukoType.Hint)
-                }
-                CircleButton(26.dp, GlukoColors.Tile) {
-                    LucideIcon(
-                        if (formState.detailsExpanded) LucidePaths.ChevronUp else LucidePaths.ChevronDown,
-                        13.dp, strokeWidth = 2.2f
-                    )
-                }
-            }
-            AnimatedVisibility(formState.detailsExpanded, enter = fadeIn(), exit = fadeOut()) {
-                Column(Modifier.padding(top = 13.dp)) {
-                    GlukoField(
-                        value = formState.notes,
-                        onValueChange = { formState = formState.copy(notes = it.take(NOTES_MAX_LENGTH)) },
-                        placeholder = stringResource(R.string.comment_placeholder),
-                        singleLine = false,
-                        minLines = 3
-                    )
-                    Spacer(Modifier.height(9.dp))
-                    val photoPicker = rememberPhotoPicker(
-                        photoPath = formState.photoPath,
-                        onPhotoChanged = { formState = formState.copy(photoPath = it) },
-                        overlays = overlays
-                    )
-                    PhotoTile(
-                        photoPath = formState.photoPath,
-                        onOpenPicker = photoPicker.open,
-                        onRemove = photoPicker.remove
-                    )
-                }
-            }
-        }
+        val photoPicker = rememberPhotoPicker(
+            photoPath = formState.photoPath,
+            onPhotoChanged = { formState = formState.copy(photoPath = it) },
+            overlays = overlays
+        )
+        DetailsRow(
+            note = formState.notes,
+            noteOpen = formState.noteOpen,
+            photoPath = formState.photoPath,
+            onToggleNote = { formState = formState.copy(noteOpen = !formState.noteOpen) },
+            onNoteChange = { formState = formState.copy(notes = it.take(NOTES_MAX_LENGTH)) },
+            onAddPhoto = photoPicker.open,
+            onRemovePhoto = photoPicker.remove
+        )
         Spacer(Modifier.height(GlukoSpacing.cardGap))
 
         SaveEntryButton(
