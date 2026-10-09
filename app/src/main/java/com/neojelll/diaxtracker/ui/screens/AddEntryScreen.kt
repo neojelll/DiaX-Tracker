@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.carbsGramsOn
+import com.neojelll.diaxtracker.insulin.insulinOn
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.DaySummaryCard
 import com.neojelll.diaxtracker.ui.components.FoodPicker
@@ -93,6 +94,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val todayCount = remember(entries, today) { entries.count { it.createdAt.toLocalDate() == today } }
     val entryProducts by viewModel.entryProducts.collectAsState()
     val carbsGramsToday = remember(entries, entryProducts, today) { carbsGramsOn(today, entries, entryProducts) }
+    val insulinToday = remember(entries, today) { insulinOn(today, entries) }
     val greetingRes = greetingFor(now.hour)
     val carbDisplay = LocalCarbDisplay.current
     // "%1$s ХЕ (вручную)" / "%1$s г (вручную)": the unit-aware value format inside the manual-entry one.
@@ -130,7 +132,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         DaySummaryCard(
             latestSensorReading,
             nowMillis = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-            carbsGramsToday = carbsGramsToday
+            carbsGramsToday = carbsGramsToday,
+            insulinToday = insulinToday
         )
         Spacer(Modifier.height(8.dp))
 

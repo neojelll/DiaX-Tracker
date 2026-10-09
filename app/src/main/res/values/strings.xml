@@ -56,6 +56,9 @@
     <string name="summary_sugar_label">Сахар</string>
     <string name="summary_carbs_label">Углеводы</string>
     <string name="summary_carbs_today">за день</string>
+    <string name="summary_insulin_label">Инсулин, ед</string>
+    <string name="summary_insulin_short">короткий</string>
+    <string name="summary_insulin_long">длинный</string>
     <string name="summary_sensor_just_now">только что</string>
     <string name="summary_sensor_minutes_ago">%d мин назад</string>
     <string name="summary_sensor_hours_ago">%d ч назад</string>
