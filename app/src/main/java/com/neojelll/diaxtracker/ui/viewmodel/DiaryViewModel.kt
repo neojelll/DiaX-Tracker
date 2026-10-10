@@ -157,7 +157,8 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         longInsulinDose: Float?,
         notes: String,
         photoPath: String?,
-        createdAt: LocalDateTime
+        createdAt: LocalDateTime,
+        onSaved: (entryId: Long) -> Unit = {}
     ) {
         launchSafely {
             val sensorReading = sensorReadingNear(createdAt)
@@ -183,7 +184,31 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
             if (mealLabel != null || carbsGrams != null) {
                 PostMealScheduler.scheduleFollowUps(getApplication(), entryId, createdAt)
             }
+            onSaved(entryId)
         }
+    }
+
+    /**
+     * Takes back an entry just saved from the add-entry screen (the toast's undo). Its photo file is
+     * kept - the form takes the photo back along with everything else.
+     */
+    fun unsaveEntry(entryId: Long) {
+        launchSafely {
+            PostMealScheduler.cancelFollowUps(getApplication(), entryId)
+            repository.deleteById(entryId)
+        }
+    }
+
+    /**
+     * A photo dropped by clearing the add-entry form: deleted once the undo window has passed. The
+     * returned function keeps it - call it when the clear is undone.
+     */
+    fun discardFormPhoto(path: String): () -> Unit {
+        val deletion = viewModelScope.launch {
+            delay(UNDO_WINDOW_MILLIS)
+            PhotoStore.deletePhoto(path)
+        }
+        return { deletion.cancel() }
     }
 
     suspend fun sensorReadingNear(referenceTime: LocalDateTime): Float? {

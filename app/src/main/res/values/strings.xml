@@ -257,6 +257,8 @@
     <string name="toast_undo">Вернуть</string>
     <string name="toast_restored">Восстановлено</string>
     <string name="toast_record_saved">Запись сохранена</string>
+    <string name="toast_form_cleared">Форма очищена</string>
+    <string name="form_clear">Очистить форму</string>
     <string name="toast_record_edited">Изменения сохранены</string>
     <string name="toast_record_deleted">Запись удалена</string>
     <string name="toast_preset_created">Приём пищи создан</string>

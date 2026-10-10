@@ -245,7 +245,8 @@ class AppToasts(private val context: android.content.Context, private val state:
     private fun moment(at: LocalDateTime) =
         toastMoment(at, LocalDate.now(), context.getString(R.string.toast_when_today, "%1\$s"), Locale.getDefault())
 
-    fun recordSaved(at: LocalDateTime) = state.show(s(R.string.toast_record_saved), moment(at))
+    fun recordSaved(at: LocalDateTime, undo: (() -> Unit)? = null) = state.show(s(R.string.toast_record_saved), moment(at), onUndo = undo)
+    fun formCleared(undo: () -> Unit) = state.show(s(R.string.toast_form_cleared), kind = ToastKind.Delete, onUndo = undo)
     fun recordEdited() = state.show(s(R.string.toast_record_edited))
     fun recordDeleted(at: LocalDateTime, undo: () -> Unit) =
         state.show(s(R.string.toast_record_deleted), moment(at), ToastKind.Delete, undo)

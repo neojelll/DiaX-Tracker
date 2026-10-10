@@ -1,6 +1,12 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +41,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -224,9 +233,21 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             )
 
             Spacer(Modifier.height(16.dp))
-            SaveEntryButton(
-                enabled = formState.isFillable,
+            FormActions(
+                dirty = formState.isDirty,
+                canSave = formState.isFillable,
+                onReset = {
+                    val previous = formState
+                    formState = previous.cleared()
+                    // The file stays until the undo window is over - undo brings the photo back.
+                    val keepPhoto = previous.photoPath?.let { viewModel.discardFormPhoto(it) }
+                    toasts.formCleared {
+                        keepPhoto?.invoke()
+                        formState = previous
+                    }
+                },
                 onSave = {
+                    val previous = formState
                     // The real moment of saving, not the last minute tick, while no time was picked.
                     val createdAt = formState.dateTimeAt(LocalDateTime.now())
                     viewModel.addEntry(
@@ -245,12 +266,56 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                         longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
                         notes = formState.notes.trim(),
                         photoPath = formState.photoPath,
-                        createdAt = createdAt
+                        createdAt = createdAt,
+                        // The toast waits for the id, so its undo can always take that exact entry back.
+                        onSaved = { entryId ->
+                            toasts.recordSaved(createdAt) {
+                                viewModel.unsaveEntry(entryId)
+                                formState = previous
+                            }
+                        }
                     )
-                    toasts.recordSaved(createdAt)
                     formState = EntryFormState()
                 }
             )
+        }
+    }
+}
+
+/**
+ * The form's buttons: "Сохранить запись" always there, greyed out until something worth saving is
+ * entered; a round 50dp "clear" button slides in once anything is in the form.
+ */
+@Composable
+private fun FormActions(dirty: Boolean, canSave: Boolean, onReset: () -> Unit, onSave: () -> Unit) {
+    val bg by animateColorAsState(if (canSave) GlukoColors.Ink else GlukoColors.Border, label = "saveBg")
+    val fg by animateColorAsState(if (canSave) GlukoColors.Surface else GlukoColors.Placeholder, label = "saveFg")
+    val clearLabel = stringResource(R.string.form_clear)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        AnimatedVisibility(dirty, enter = fadeIn() + expandHorizontally(), exit = fadeOut() + shrinkHorizontally()) {
+            Box(
+                Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(GlukoRadius.pill))
+                    .background(GlukoColors.Tile)
+                    .clickable(onClickLabel = clearLabel, onClick = onReset)
+                    .semantics { contentDescription = clearLabel },
+                contentAlignment = Alignment.Center
+            ) { LucideIcon(LucidePaths.RotateCcw, 16.dp, GlukoColors.Ink, strokeWidth = 2f) }
+        }
+        Row(
+            Modifier
+                .weight(1f)
+                .height(50.dp)
+                .clip(RoundedCornerShape(GlukoRadius.pill))
+                .background(bg)
+                .clickable(enabled = canSave, onClick = onSave),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(stringResource(R.string.save_entry_button), style = GlukoType.ButtonPrimary.copy(color = fg))
+            Spacer(Modifier.width(9.dp))
+            LucideIcon(LucidePaths.ArrowRight, 16.dp, fg, strokeWidth = 2f)
         }
     }
 }
