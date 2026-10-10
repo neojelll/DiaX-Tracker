@@ -222,9 +222,9 @@
     <string name="backup_toggle_failed">Не удалось сохранить копию — проверьте папку</string>
     <string name="backup_toggle_off">Выключена</string>
     <string name="delete_all_title">Удалить все записи</string>
-    <string name="delete_all_subtitle">Отменить будет нельзя</string>
+    <string name="delete_all_subtitle">Все записи и связанные фото</string>
     <string name="delete_all_confirm_title">Удалить все записи?</string>
-    <string name="delete_all_confirm_text">Это действие необратимо и удалит все записи и связанные фото.</string>
+    <string name="delete_all_confirm_text">Будут удалены все записи и связанные фото.</string>
 
     <string name="error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
 
