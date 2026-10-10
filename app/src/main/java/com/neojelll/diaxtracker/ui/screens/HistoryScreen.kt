@@ -412,11 +412,14 @@ private fun FullRecordCard(
         Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 15.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(entry.createdAt.format(DateTimeFormatter.ofPattern("HH:mm")), style = GlukoType.RecordTime.tabular)
-                Spacer(Modifier.width(9.dp))
-                Box(
-                    Modifier.clip(RoundedCornerShape(GlukoRadius.pill)).background(GlukoColors.Tile).padding(horizontal = 9.dp, vertical = 3.dp)
-                ) {
-                    Text(entry.mealLabel ?: stringResource(R.string.record_no_preset), style = GlukoType.CardLabel.copy(fontSize = 11.sp), maxLines = 1)
+                // Only a preset name is worth a tag; "no preset" would just label an absence.
+                entry.mealLabel?.let { preset ->
+                    Spacer(Modifier.width(9.dp))
+                    Box(
+                        Modifier.clip(RoundedCornerShape(GlukoRadius.pill)).background(GlukoColors.Tile).padding(horizontal = 9.dp, vertical = 3.dp)
+                    ) {
+                        Text(preset, style = GlukoType.CardLabel.copy(fontSize = 11.sp), maxLines = 1)
+                    }
                 }
             }
 
