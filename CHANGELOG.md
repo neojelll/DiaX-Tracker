@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.2.0-beta.1...v0.3.0-beta.1) (2026-10-10)
+
+
+### Features
+
+* **entry:** date/time chip in the sugar card and a Now action ([#164](https://github.com/neojelll/DiaX-Tracker/issues/164)) ([a8893b4](https://github.com/neojelll/DiaX-Tracker/commit/a8893b4d181cced0b7496f8ff0e70da1bdd8c5d0))
+* **entry:** day summary card with the sensor sugar column ([#165](https://github.com/neojelll/DiaX-Tracker/issues/165)) ([1540232](https://github.com/neojelll/DiaX-Tracker/commit/15402320505044c0100e2be0f78a52bc5b9bad2d))
+* **entry:** food and details blocks from the new design ([#174](https://github.com/neojelll/DiaX-Tracker/issues/174)) ([ef5e1df](https://github.com/neojelll/DiaX-Tracker/commit/ef5e1df41e29a85c3a4b8ec05ea4d1490d0284ff))
+* **entry:** today's carbohydrates in the day summary ([#168](https://github.com/neojelll/DiaX-Tracker/issues/168)) ([6444d27](https://github.com/neojelll/DiaX-Tracker/commit/6444d274fbb603fd9ebb2cb3e22b7d5f84fbb14d))
+* **entry:** today's insulin in the day summary ([#169](https://github.com/neojelll/DiaX-Tracker/issues/169)) ([19d63c7](https://github.com/neojelll/DiaX-Tracker/commit/19d63c76bd71396faec2f17c83612eef73ad9853))
+* **history:** adapt the media row to what an entry actually has ([#143](https://github.com/neojelll/DiaX-Tracker/issues/143)) ([d5ec04a](https://github.com/neojelll/DiaX-Tracker/commit/d5ec04acb1540e3df9e4372479c9ed29250f9e89))
+* **settings:** choose the carbohydrate unit and grams per XE ([#167](https://github.com/neojelll/DiaX-Tracker/issues/167)) ([aeaa811](https://github.com/neojelll/DiaX-Tracker/commit/aeaa811d64db763cc9476be354da15dc87eb6c3d))
+* **ui:** a plain notification bell without the round background ([#171](https://github.com/neojelll/DiaX-Tracker/issues/171)) ([520222e](https://github.com/neojelll/DiaX-Tracker/commit/520222e9ff0565482abe7c1bbb8ce72a311cac47))
+
+
+### Bug Fixes
+
+* **backup:** count records the same way in History, export and import ([#150](https://github.com/neojelll/DiaX-Tracker/issues/150)) ([788fc2e](https://github.com/neojelll/DiaX-Tracker/commit/788fc2e665801384a35ba1145ce6fc3eee66d61c))
+* **entry:** keep the greeting and today's count in step with the clock ([#154](https://github.com/neojelll/DiaX-Tracker/issues/154)) ([a0d94bb](https://github.com/neojelll/DiaX-Tracker/commit/a0d94bb9ad87746226f41f6f279bc0dc3fb1388f))
+* **entry:** keep the new entry's date and time live until picked ([#152](https://github.com/neojelll/DiaX-Tracker/issues/152)) ([dcfc7f6](https://github.com/neojelll/DiaX-Tracker/commit/dcfc7f62c795e3f33b1638803f9d30caccebc9ec))
+* **history:** label the number of days in the summary ([#156](https://github.com/neojelll/DiaX-Tracker/issues/156)) ([d02f406](https://github.com/neojelll/DiaX-Tracker/commit/d02f4066cfb970a2bf7f0dad1603ea2d7abbc2ed))
+* **settings:** drop the irreversible wording from delete all ([#175](https://github.com/neojelll/DiaX-Tracker/issues/175)) ([b7e075d](https://github.com/neojelll/DiaX-Tracker/commit/b7e075d97409cc711e576ff2b6477496cf1dc573))
+* **ui:** close the keyboard on a tap outside a text field ([#162](https://github.com/neojelll/DiaX-Tracker/issues/162)) ([0de1226](https://github.com/neojelll/DiaX-Tracker/commit/0de1226bac0424068c1f892fd221c3ea3e8be507))
+
 ## [0.2.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.1.0-beta.1...v0.2.0-beta.1) (2026-09-26)
 
 
