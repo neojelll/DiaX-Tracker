@@ -13,12 +13,6 @@
     <string name="greeting_night">Доброй ночи!</string>
     <string name="save_entry_button">Сохранить запись</string>
 
-    <plurals name="today_entries_count">
-        <item quantity="one">Сегодня %d запись</item>
-        <item quantity="few">Сегодня %d записи</item>
-        <item quantity="many">Сегодня %d записей</item>
-        <item quantity="other">Сегодня %d записей</item>
-    </plurals>
 
     <string name="edit_entry_title">Редактирование</string>
     <string name="back">Назад</string>

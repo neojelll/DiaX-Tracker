@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,11 +34,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -134,7 +137,9 @@ internal fun FoodRow(
     onToggle: () -> Unit,
     onPick: (PresetOption) -> Unit,
     onCarbsChange: (String) -> Unit,
-    onCreatePreset: () -> Unit
+    onCreatePreset: () -> Unit,
+    /** false - no card of its own: the block sits inside the shared form card. */
+    standalone: Boolean = true
 ) {
     val title = when {
         selected != null -> selected.title
@@ -144,7 +149,7 @@ internal fun FoodRow(
     val filled = selected != null || carbs.isNotBlank()
     val chevron by animateFloatAsState(if (expanded) 180f else 0f, label = "chev")
 
-    GlukoCard(padding = PaddingValues(8.dp)) {
+    FormSection(standalone) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             PlateRow(
                 modifier = Modifier.weight(1f),
@@ -284,11 +289,12 @@ internal fun DetailsRow(
     onToggleNote: () -> Unit,
     onNoteChange: (String) -> Unit,
     onAddPhoto: () -> Unit,
-    onRemovePhoto: () -> Unit
+    onRemovePhoto: () -> Unit,
+    standalone: Boolean = true
 ) {
     val hasPhoto = photoPath != null
     val add = stringResource(R.string.details_add)
-    GlukoCard(padding = PaddingValues(8.dp)) {
+    FormSection(standalone) {
         Row {
             PlateRow(
                 Modifier.weight(1f), LucidePaths.MessageCircle, note.isNotBlank() || noteOpen,
@@ -345,3 +351,22 @@ internal fun DetailsRow(
         }
     }
 }
+
+/**
+ * A form block's wrapper. On its own - a card with 8dp padding. Inside the shared form card - no
+ * background, and the row reaches 6dp to the left ([bleedStart]) so the icon squares line up in one
+ * column with sugar and insulin (PlateRow has 6dp of its own start padding).
+ */
+@Composable
+private fun FormSection(standalone: Boolean, content: @Composable ColumnScope.() -> Unit) {
+    if (standalone) GlukoCard(padding = PaddingValues(8.dp), content = content)
+    else Column(Modifier.fillMaxWidth().bleedStart(6.dp), content = content)
+}
+
+/** Widens the element to the left by [d], keeping its right edge where it was. */
+private fun Modifier.bleedStart(d: Dp): Modifier = layout { measurable, c ->
+    val px = d.roundToPx()
+    val p = measurable.measure(c.copy(minWidth = c.minWidth + px, maxWidth = c.maxWidth + px))
+    layout(p.width - px, p.height) { p.place(-px, 0) }
+}
+

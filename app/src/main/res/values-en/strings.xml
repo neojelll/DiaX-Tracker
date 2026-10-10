@@ -13,10 +13,6 @@
     <string name="greeting_night">Good night!</string>
     <string name="save_entry_button">Save Entry</string>
 
-    <plurals name="today_entries_count">
-        <item quantity="one">You have %d entry today</item>
-        <item quantity="other">You have %d entries today</item>
-    </plurals>
 
     <string name="edit_entry_title">Edit Entry</string>
     <string name="back">Back</string>
