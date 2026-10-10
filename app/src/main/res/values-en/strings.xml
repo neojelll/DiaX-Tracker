@@ -13,10 +13,6 @@
     <string name="greeting_night">Good night!</string>
     <string name="save_entry_button">Save Entry</string>
 
-    <plurals name="today_entries_count">
-        <item quantity="one">You have %d entry today</item>
-        <item quantity="other">You have %d entries today</item>
-    </plurals>
 
     <string name="edit_entry_title">Edit Entry</string>
     <string name="back">Back</string>
@@ -255,6 +251,8 @@
     <string name="toast_undo">Undo</string>
     <string name="toast_restored">Restored</string>
     <string name="toast_record_saved">Entry saved</string>
+    <string name="toast_form_cleared">Form cleared</string>
+    <string name="form_clear">Clear the form</string>
     <string name="toast_record_edited">Changes saved</string>
     <string name="toast_record_deleted">Entry deleted</string>
     <string name="toast_preset_created">Meal preset created</string>

@@ -35,6 +35,13 @@ internal data class EntryFormState(
         get() = bloodSugar.isNotBlank() || carbs.isNotBlank() ||
             shortInsulinDose.isNotBlank() || longInsulinDose.isNotBlank()
 
+    /** Something was entered - the "clear" button shows. */
+    val isDirty: Boolean
+        get() = isFillable || presetId != null || mealLabel != null || notes.isNotBlank() || photoPath != null
+
+    /** An empty form that keeps the picked date/time, if any. */
+    fun cleared(): EntryFormState = EntryFormState(dateTime = dateTime)
+
     /** Whether a date or time was picked, rather than following the clock. */
     val isPinned: Boolean
         get() = dateTime != null

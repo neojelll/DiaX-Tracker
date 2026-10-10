@@ -46,4 +46,24 @@ class EntryFormStateTest {
         assertEquals(false, live.isPinned)
         assertEquals(later, live.dateTimeAt(later))
     }
+
+    @Test
+    fun `the form is dirty once anything is in it`() {
+        assertEquals(false, EntryFormState().isDirty)
+        assertEquals(true, EntryFormState(bloodSugar = "6.4").isDirty)
+        assertEquals(true, EntryFormState(notes = "run").isDirty)
+        assertEquals(true, EntryFormState(photoPath = "/p.jpg").isDirty)
+        assertEquals(true, EntryFormState(presetId = 3L).isDirty)
+        // Only a picked date/time, nothing entered: nothing to clear.
+        assertEquals(false, EntryFormState().withTime(LocalTime.of(9, 30), now = opened).isDirty)
+    }
+
+    @Test
+    fun `clearing keeps a picked date and time, and drops everything else`() {
+        val filled = EntryFormState(bloodSugar = "6.4", notes = "run", photoPath = "/p.jpg", presetId = 3L)
+            .withTime(LocalTime.of(9, 30), now = opened)
+        val cleared = filled.cleared()
+        assertEquals(false, cleared.isDirty)
+        assertEquals(LocalDateTime.of(2026, 10, 9, 9, 30), cleared.dateTimeAt(later))
+    }
 }

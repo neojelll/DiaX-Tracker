@@ -1,6 +1,12 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,8 +40,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -81,7 +89,6 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
 
     // Both follow the clock, so they stay right while the screen sits open past an hour or midnight.
     val today = now.toLocalDate()
-    val todayCount = remember(entries, today) { entries.count { it.createdAt.toLocalDate() == today } }
     val entryProducts by viewModel.entryProducts.collectAsState()
     val carbsGramsToday = remember(entries, entryProducts, today) { carbsGramsOn(today, entries, entryProducts) }
     val insulinToday = remember(entries, today) { insulinOn(today, entries) }
@@ -105,18 +112,17 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         Modifier
             .fillMaxWidth()
             .padding(horizontal = GlukoSpacing.screenHorizontal)
-            .padding(top = 18.dp)
+            .padding(top = 12.dp)
             .verticalScroll(scrollState, enabled = scrollEnabled)
     ) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(greetingRes), style = GlukoType.ScreenTitle)
-                Spacer(Modifier.height(5.dp))
-                Text(pluralStringResource(R.plurals.today_entries_count, todayCount, todayCount), style = GlukoType.Label)
-            }
+        // Header: greeting and the bell. The day summary below replaced the "N entries today" line.
+        Row(
+            Modifier.fillMaxWidth().padding(start = 8.dp, end = 4.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text(stringResource(greetingRes), style = GlukoType.ScreenTitle, modifier = Modifier.weight(1f))
             NotificationButton(onClick = overlays::openNotifications)
         }
-        Spacer(Modifier.height(14.dp))
 
         DaySummaryCard(
             latestSensorReading,
@@ -126,7 +132,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         )
         Spacer(Modifier.height(8.dp))
 
-        // Sugar card: label on the left, the date/time chip on the right.
+        // The entry form is ONE card: sugar -> insulin -> food -> details -> buttons, sections split
+        // by hairlines across the content width; 16dp of air before the buttons instead of a line.
         GlukoCard(padding = PaddingValues(start = 16.dp, end = 14.dp, top = 12.dp, bottom = 14.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 LucideIcon(LucidePaths.Droplet, 14.dp, GlukoColors.TextLabel, strokeWidth = 1.7f)
@@ -167,9 +174,9 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 Text(stringResource(R.string.mmol_unit), style = GlukoType.Label)
             }
 
-            Spacer(Modifier.height(13.dp))
+            Spacer(Modifier.height(10.dp))
             GlukoDivider()
-            Spacer(Modifier.height(13.dp))
+            Spacer(Modifier.height(10.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
                 InsulinTile(
@@ -185,67 +192,131 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     onChange = { formState = formState.copy(longInsulinDose = numeric(it)) }
                 )
             }
+
+            Spacer(Modifier.height(12.dp))
+            GlukoDivider()
+            Spacer(Modifier.height(4.dp))
+
+            FoodRow(
+                selected = presetOptions.firstOrNull { it.id == formState.presetId },
+                carbs = formState.carbs,
+                presets = presetOptions,
+                expanded = formState.foodExpanded,
+                onToggle = { formState = formState.copy(foodExpanded = !formState.foodExpanded) },
+                onPick = { option ->
+                    val preset = mealPresets.find { it.preset.id == option.id }
+                    if (preset != null) formState = applyPresetPick(formState, preset, option, carbDisplay)
+                },
+                onCarbsChange = { formState = typeCarbs(formState, it) },
+                onCreatePreset = { overlays.openPresetEdit(null) },
+                standalone = false
+            )
+
+            Spacer(Modifier.height(4.dp))
+            GlukoDivider()
+            Spacer(Modifier.height(4.dp))
+
+            val photoPicker = rememberPhotoPicker(
+                photoPath = formState.photoPath,
+                onPhotoChanged = { formState = formState.copy(photoPath = it) },
+                overlays = overlays
+            )
+            DetailsRow(
+                note = formState.notes,
+                noteOpen = formState.noteOpen,
+                photoPath = formState.photoPath,
+                onToggleNote = { formState = formState.copy(noteOpen = !formState.noteOpen) },
+                onNoteChange = { formState = formState.copy(notes = it.take(NOTES_MAX_LENGTH)) },
+                onAddPhoto = photoPicker.open,
+                onRemovePhoto = photoPicker.remove,
+                standalone = false
+            )
+
+            Spacer(Modifier.height(16.dp))
+            FormActions(
+                dirty = formState.isDirty,
+                canSave = formState.isFillable,
+                onReset = {
+                    val previous = formState
+                    formState = previous.cleared()
+                    // The file stays until the undo window is over - undo brings the photo back.
+                    val keepPhoto = previous.photoPath?.let { viewModel.discardFormPhoto(it) }
+                    toasts.formCleared {
+                        keepPhoto?.invoke()
+                        formState = previous
+                    }
+                },
+                onSave = {
+                    val previous = formState
+                    // The real moment of saving, not the last minute tick, while no time was picked.
+                    val createdAt = formState.dateTimeAt(LocalDateTime.now())
+                    viewModel.addEntry(
+                        bloodSugar = formState.bloodSugar.toFloatOrNull(),
+                        carbsGrams = carbDisplay.parse(formState.carbs),
+                        mealLabel = formState.mealLabel,
+                        mealProducts = formState.mealProducts.mapIndexed { index, product ->
+                            DiaryEntryProduct(
+                                diaryEntryId = 0,
+                                name = product.name,
+                                carbsGrams = carbDisplay.parse(product.carbs) ?: 0f,
+                                sortOrder = index
+                            )
+                        },
+                        shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
+                        longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
+                        notes = formState.notes.trim(),
+                        photoPath = formState.photoPath,
+                        createdAt = createdAt,
+                        // The toast waits for the id, so its undo can always take that exact entry back.
+                        onSaved = { entryId ->
+                            toasts.recordSaved(createdAt) {
+                                viewModel.unsaveEntry(entryId)
+                                formState = previous
+                            }
+                        }
+                    )
+                    formState = EntryFormState()
+                }
+            )
         }
-        Spacer(Modifier.height(GlukoSpacing.cardGap))
+    }
+}
 
-        FoodRow(
-            selected = presetOptions.firstOrNull { it.id == formState.presetId },
-            carbs = formState.carbs,
-            presets = presetOptions,
-            expanded = formState.foodExpanded,
-            onToggle = { formState = formState.copy(foodExpanded = !formState.foodExpanded) },
-            onPick = { option ->
-                val preset = mealPresets.find { it.preset.id == option.id }
-                if (preset != null) formState = applyPresetPick(formState, preset, option, carbDisplay)
-            },
-            onCarbsChange = { formState = typeCarbs(formState, it) },
-            onCreatePreset = { overlays.openPresetEdit(null) }
-        )
-        Spacer(Modifier.height(GlukoSpacing.cardGap))
-
-        val photoPicker = rememberPhotoPicker(
-            photoPath = formState.photoPath,
-            onPhotoChanged = { formState = formState.copy(photoPath = it) },
-            overlays = overlays
-        )
-        DetailsRow(
-            note = formState.notes,
-            noteOpen = formState.noteOpen,
-            photoPath = formState.photoPath,
-            onToggleNote = { formState = formState.copy(noteOpen = !formState.noteOpen) },
-            onNoteChange = { formState = formState.copy(notes = it.take(NOTES_MAX_LENGTH)) },
-            onAddPhoto = photoPicker.open,
-            onRemovePhoto = photoPicker.remove
-        )
-        Spacer(Modifier.height(GlukoSpacing.cardGap))
-
-        SaveEntryButton(
-            enabled = formState.isFillable,
-            onSave = {
-                // The real moment of saving, not the last minute tick, while no time was picked.
-                val createdAt = formState.dateTimeAt(LocalDateTime.now())
-                viewModel.addEntry(
-                    bloodSugar = formState.bloodSugar.toFloatOrNull(),
-                    carbsGrams = carbDisplay.parse(formState.carbs),
-                    mealLabel = formState.mealLabel,
-                    mealProducts = formState.mealProducts.mapIndexed { index, product ->
-                        DiaryEntryProduct(
-                            diaryEntryId = 0,
-                            name = product.name,
-                            carbsGrams = carbDisplay.parse(product.carbs) ?: 0f,
-                            sortOrder = index
-                        )
-                    },
-                    shortInsulinDose = formState.shortInsulinDose.toFloatOrNull(),
-                    longInsulinDose = formState.longInsulinDose.toFloatOrNull(),
-                    notes = formState.notes.trim(),
-                    photoPath = formState.photoPath,
-                    createdAt = createdAt
-                )
-                toasts.recordSaved(createdAt)
-                formState = EntryFormState()
-            }
-        )
+/**
+ * The form's buttons: "Сохранить запись" always there, greyed out until something worth saving is
+ * entered; a round 50dp "clear" button slides in once anything is in the form.
+ */
+@Composable
+private fun FormActions(dirty: Boolean, canSave: Boolean, onReset: () -> Unit, onSave: () -> Unit) {
+    val bg by animateColorAsState(if (canSave) GlukoColors.Ink else GlukoColors.Border, label = "saveBg")
+    val fg by animateColorAsState(if (canSave) GlukoColors.Surface else GlukoColors.Placeholder, label = "saveFg")
+    val clearLabel = stringResource(R.string.form_clear)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        AnimatedVisibility(dirty, enter = fadeIn() + expandHorizontally(), exit = fadeOut() + shrinkHorizontally()) {
+            Box(
+                Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(GlukoRadius.pill))
+                    .background(GlukoColors.Tile)
+                    .clickable(onClickLabel = clearLabel, onClick = onReset)
+                    .semantics { contentDescription = clearLabel },
+                contentAlignment = Alignment.Center
+            ) { LucideIcon(LucidePaths.RotateCcw, 16.dp, GlukoColors.Ink, strokeWidth = 2f) }
+        }
+        Row(
+            Modifier
+                .weight(1f)
+                .height(50.dp)
+                .clip(RoundedCornerShape(GlukoRadius.pill))
+                .background(bg)
+                .clickable(enabled = canSave, onClick = onSave),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(stringResource(R.string.save_entry_button), style = GlukoType.ButtonPrimary.copy(color = fg))
+            Spacer(Modifier.width(9.dp))
+            LucideIcon(LucidePaths.ArrowRight, 16.dp, fg, strokeWidth = 2f)
+        }
     }
 }
 
