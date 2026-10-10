@@ -51,6 +51,19 @@ jobs:
       - name: Build dev variant
         run: ./gradlew assembleDev
 
+      # Failed tests show up right on the PR (annotations) and in the run's summary, instead of only
+      # inside the downloadable HTML report. annotate_only needs no checks:write - so it also works
+      # on Dependabot PRs, whose token is read-only.
+      - name: Report test results
+        if: always()
+        uses: mikepenz/action-junit-report@6ef3fdcfcd5f0b5d14df3e659ef19b8c6820f93d # v6.6.1
+        with:
+          report_paths: app/build/test-results/testDebugUnitTest/*.xml
+          annotate_only: true
+          job_summary: true
+          require_tests: false
+
+      # The full HTML report stays downloadable as a fallback.
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
