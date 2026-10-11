@@ -35,21 +35,27 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
 
+      # Caches Gradle User Home - dependencies, the wrapper, transformed Android libraries and the
+      # local build cache. Runs on main write the cache; PR runs only read it, so a PR can't
+      # poison what main restores. A misbehaving cache is reset by deleting it under Actions > Caches.
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      # --build-cache: reuse task outputs from earlier runs. Fine in CI - a bad entry only costs a
+      # re-run; the release build (release.yml) never uses it.
       - name: Compile
-        run: ./gradlew compileDebugKotlin
+        run: ./gradlew --build-cache compileDebugKotlin
 
       - name: Unit tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew --build-cache testDebugUnitTest
 
       - name: Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew --build-cache lintDebug
 
       # Tests above cover the shared code; this only keeps the dev variant (its own
       # applicationId, signing and resource overrides) from silently breaking.
       - name: Build dev variant
-        run: ./gradlew assembleDev
+        run: ./gradlew --build-cache assembleDev
 
       # Failed tests show up right on the PR (annotations) and in the run's summary, instead of only
       # inside the downloadable HTML report. annotate_only needs no checks:write - so it also works
