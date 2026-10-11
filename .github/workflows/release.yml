@@ -38,7 +38,10 @@ jobs:
         with:
           ref: ${{ needs.release-please.outputs.tag_name }}
 
-      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+      # Same Java setup as CI. Deliberately no Gradle caching here at all: this job decodes the
+      # signing key and builds what people install, so it downloads and compiles from scratch -
+      # nothing restored from a cache can end up in the APK.
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
           java-version: "17"
@@ -54,7 +57,9 @@ jobs:
           EOF
 
       - name: Build release APK
-        run: ./gradlew assembleRelease
+        # --no-build-cache: explicit, so turning the build cache on for the project later can't
+        # quietly reach the release.
+        run: ./gradlew --no-build-cache assembleRelease
 
       - name: Rename APK
         run: cp app/build/outputs/apk/release/app-release.apk diax-tracker-${{ needs.release-please.outputs.tag_name }}.apk
