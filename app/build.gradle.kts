@@ -33,7 +33,7 @@ android {
         targetSdk = 35
         // Play Store requires this to strictly increase - bump by hand alongside versionName.
         versionCode = 3
-        versionName = "0.2.0-beta.1" // x-release-please-version
+        versionName = "0.3.0-beta.1" // x-release-please-version
     }
 
     signingConfigs {
