@@ -14,6 +14,8 @@ internal data class MealProductEntry(val name: String, val carbs: String)
 internal data class EntryFormState(
     /** The moment picked for the entry; null until the person picks one - the form follows the clock till then. */
     val dateTime: LocalDateTime? = null,
+    /** The moment the form showed when something was first entered - from then on it stops following the clock. */
+    val heldAt: LocalDateTime? = null,
     val bloodSugar: String = "",
     /** Carbohydrates as typed/shown, in the display unit (CarbDisplay) - converted to grams on save. */
     val carbs: String = "",
@@ -42,15 +44,23 @@ internal data class EntryFormState(
     /** An empty form that keeps the picked date/time, if any. */
     fun cleared(): EntryFormState = EntryFormState(dateTime = dateTime)
 
-    /** Whether a date or time was picked, rather than following the clock. */
+    /** Whether the moment stays put - picked, or held since something was entered - rather than following the clock. */
     val isPinned: Boolean
-        get() = dateTime != null
+        get() = dateTime != null || heldAt != null
 
-    /** Drops a picked moment: the form follows the clock again. */
-    fun followingClock(): EntryFormState = copy(dateTime = null)
+    /** Back to [now]: drops a picked moment; a filled form is held at [now], an empty one follows the clock again. */
+    fun followingClock(now: LocalDateTime): EntryFormState =
+        copy(dateTime = null, heldAt = if (isDirty) now else null)
 
-    /** What the form shows and saves: the picked moment, or [now] while none has been picked. */
-    fun dateTimeAt(now: LocalDateTime): LocalDateTime = dateTime ?: now
+    /** Holds the moment shown ([now]) once something is entered, lets go once the form is empty again. */
+    fun held(now: LocalDateTime): EntryFormState = when {
+        !isDirty -> copy(heldAt = null)
+        dateTime == null && heldAt == null -> copy(heldAt = now)
+        else -> this
+    }
+
+    /** What the form shows and saves: the picked moment, the held one, or [now] while neither is there. */
+    fun dateTimeAt(now: LocalDateTime): LocalDateTime = dateTime ?: heldAt ?: now
 
     /** Picking the date pins the moment - the time it showed at that point stays as it was. */
     fun withDate(date: LocalDate, now: LocalDateTime): EntryFormState =

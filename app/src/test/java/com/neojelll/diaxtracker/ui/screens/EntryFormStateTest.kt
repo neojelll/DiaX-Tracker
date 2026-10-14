@@ -42,9 +42,39 @@ class EntryFormStateTest {
         val picked = EntryFormState().withTime(LocalTime.of(9, 30), now = opened)
         assertEquals(true, picked.isPinned)
 
-        val live = picked.followingClock()
+        val live = picked.followingClock(later)
         assertEquals(false, live.isPinned)
         assertEquals(later, live.dateTimeAt(later))
+    }
+
+    @Test
+    fun `entering something holds the time shown, instead of following the clock`() {
+        val form = EntryFormState(bloodSugar = "6.4").held(now = opened)
+        assertEquals(true, form.isPinned)
+        assertEquals(opened, form.dateTimeAt(later))
+        // Held once - later edits don't move it.
+        assertEquals(opened, form.copy(notes = "run").held(now = later).dateTimeAt(later.plusMinutes(5)))
+    }
+
+    @Test
+    fun `an emptied form follows the clock again`() {
+        val emptied = EntryFormState(bloodSugar = "6.4").held(now = opened).copy(bloodSugar = "").held(now = later)
+        assertEquals(false, emptied.isPinned)
+        assertEquals(later, emptied.dateTimeAt(later))
+    }
+
+    @Test
+    fun `a picked moment wins over the held one`() {
+        val form = EntryFormState(bloodSugar = "6.4").held(now = opened).withTime(LocalTime.of(9, 30), now = later)
+        assertEquals(LocalDateTime.of(2026, 10, 9, 9, 30), form.dateTimeAt(later))
+        assertEquals(form, form.held(now = later.plusMinutes(1)))
+    }
+
+    @Test
+    fun `back to now on a filled form holds the new now`() {
+        val form = EntryFormState(bloodSugar = "6.4").withTime(LocalTime.of(9, 30), now = opened)
+            .followingClock(later)
+        assertEquals(later, form.dateTimeAt(later.plusMinutes(5)))
     }
 
     @Test
@@ -65,5 +95,11 @@ class EntryFormStateTest {
         val cleared = filled.cleared()
         assertEquals(false, cleared.isDirty)
         assertEquals(LocalDateTime.of(2026, 10, 9, 9, 30), cleared.dateTimeAt(later))
+    }
+
+    @Test
+    fun `clearing drops a held moment - the form follows the clock again`() {
+        val cleared = EntryFormState(bloodSugar = "6.4").held(now = opened).cleared()
+        assertEquals(later, cleared.dateTimeAt(later))
     }
 }

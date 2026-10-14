@@ -81,7 +81,10 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val now = rememberCurrentMinute()
     val shownAt = formState.dateTimeAt(now)
     // "Сейчас" in the pickers only once something was picked - while live it would do nothing.
-    val backToNow: (() -> Unit)? = if (formState.isPinned) ({ formState = formState.followingClock() }) else null
+    val backToNow: (() -> Unit)? =
+        if (formState.isPinned) ({ formState = formState.followingClock(LocalDateTime.now()) }) else null
+    // Once something is entered the shown time stays put, so it can't change under the person mid-entry.
+    LaunchedEffect(formState.isDirty) { formState = formState.held(now) }
     val toasts = rememberAppToasts()
     val latestSensorReading by viewModel.latestSensorReading.collectAsState()
     val mealPresets by viewModel.mealPresets.collectAsState()
@@ -248,7 +251,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 },
                 onSave = {
                     val previous = formState
-                    // The real moment of saving, not the last minute tick, while no time was picked.
+                    // A filled form is always pinned or held, so this is the moment shown - never the save tap.
                     val createdAt = formState.dateTimeAt(LocalDateTime.now())
                     viewModel.addEntry(
                         bloodSugar = formState.bloodSugar.toFloatOrNull(),
