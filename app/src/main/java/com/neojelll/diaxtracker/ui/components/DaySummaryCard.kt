@@ -1,11 +1,11 @@
 package com.neojelll.diaxtracker.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -36,104 +36,96 @@ import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.Ruda
 
 /**
- * The day summary above the entry form: one white card, columns split by vertical hairlines, each
- * reading label 11sp -> value -> note 10.5sp: sugar, today's carbohydrates, today's insulin.
+ * The day summary above the entry form: three tiles in a row, each label 11sp -> value -> note
+ * 10.5sp. Sugar sits on ink - the screen's one dark accent; carbs and insulin on white.
  */
 @Composable
 fun DaySummaryCard(sensorReading: LatestSensorReading?, nowMillis: Long, carbsGramsToday: Float, insulinToday: DayInsulin) {
-    GlukoCard(padding = PaddingValues(start = 14.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)) {
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-            SugarColumn(sensorReading, nowMillis, Modifier.weight(1f).padding(end = 10.dp))
-            VerticalHairline()
-            CarbsColumn(carbsGramsToday, Modifier.weight(1f).padding(horizontal = 10.dp))
-            VerticalHairline()
-            InsulinColumn(insulinToday, Modifier.weight(1f).padding(start = 10.dp))
-        }
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        SugarTile(sensorReading, nowMillis, Modifier.weight(1.25f).fillMaxHeight())
+        CarbsTile(carbsGramsToday, Modifier.weight(1f).fillMaxHeight())
+        InsulinTile(insulinToday, Modifier.weight(1f).fillMaxHeight())
     }
 }
 
 /**
- * Two lines, label left and number right, a hairline between them. No total on purpose: short and
- * long don't add up to anything meaningful. The long line hides when none was logged today.
+ * "12 / 18": short, then long muted after a slash. No total on purpose: short and long don't add
+ * up to anything meaningful. Only the short number when no long was logged today.
  */
 @Composable
-private fun InsulinColumn(insulin: DayInsulin, modifier: Modifier) {
-    SummaryColumn(modifier, stringResource(R.string.summary_insulin_label)) {
-        InsulinLine(stringResource(R.string.summary_insulin_short), formatSummaryValue(insulin.short))
-        insulin.long?.let {
-            Spacer(Modifier.height(5.dp))
-            GlukoDivider()
-            Spacer(Modifier.height(5.dp))
-            InsulinLine(stringResource(R.string.summary_insulin_long), formatSummaryValue(it))
-        }
-    }
-}
-
-@Composable
-private fun InsulinLine(label: String, value: String) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-        Text(label, style = SummarySub, modifier = Modifier.weight(1f), maxLines = 1)
-        Text(value, style = SummaryValue.copy(fontSize = 15.sp))
-    }
-}
-
-/** Today's carbohydrates in the unit from the settings: number, the unit small beside it, "за день" under. */
-@Composable
-private fun CarbsColumn(gramsToday: Float, modifier: Modifier) {
-    SummaryColumn(modifier, stringResource(R.string.summary_carbs_label)) {
+private fun InsulinTile(insulin: DayInsulin, modifier: Modifier) {
+    LightTile(modifier, stringResource(R.string.summary_insulin_label)) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(LocalCarbDisplay.current.format(gramsToday), style = SummaryValue)
-            Spacer(Modifier.width(2.dp))
-            Text(carbsUnitLabel(), style = SummarySub)
+            Text(formatSummaryValue(insulin.short), style = SummaryValue, maxLines = 1)
+            insulin.long?.let {
+                Text(" / ${formatSummaryValue(it)}", style = SummaryValue.copy(fontSize = 14.sp, color = GlukoColors.TextTertiary), maxLines = 1)
+            }
         }
         Spacer(Modifier.height(6.dp))
-        Text(stringResource(R.string.summary_carbs_today), style = SummarySub)
+        val note = if (insulin.long != null) R.string.summary_insulin_split else R.string.summary_insulin_short
+        Text(stringResource(note), style = SummarySub, maxLines = 1)
     }
 }
 
+/** Today's carbohydrates in the unit from the settings; the unit goes into the note: "ХЕ за день". */
 @Composable
-private fun VerticalHairline() {
-    Box(Modifier.width(1.dp).fillMaxHeight().background(GlukoColors.Divider))
+private fun CarbsTile(gramsToday: Float, modifier: Modifier) {
+    LightTile(modifier, stringResource(R.string.summary_carbs_label)) {
+        Text(LocalCarbDisplay.current.format(gramsToday), style = SummaryValue, maxLines = 1)
+        Spacer(Modifier.height(6.dp))
+        Text("${carbsUnitLabel()} ${stringResource(R.string.summary_carbs_today)}", style = SummarySub, maxLines = 1)
+    }
 }
 
 /**
- * Fresh: green dot and "только что". Stale: the value greyed, grey dot, "N мин назад".
- * No sensor: "—" and "нет данных".
+ * On ink. Fresh: green dot and "только что". Stale: the value muted, grey dot, "N мин назад".
+ * No sensor: "—" and "нет данных". Logging, not monitoring - no trend arrow.
  */
 @Composable
-private fun SugarColumn(reading: LatestSensorReading?, nowMillis: Long, modifier: Modifier) {
+private fun SugarTile(reading: LatestSensorReading?, nowMillis: Long, modifier: Modifier) {
     val freshness = sensorFreshness(reading, nowMillis)
     val shown = reading.takeIf { freshness != SensorFreshness.NONE }
-    SummaryColumn(modifier, stringResource(R.string.summary_sugar_label)) {
-        Text(
-            shown?.let { formatSummaryValue(it.mmol) } ?: "—",
-            style = SummaryValue.copy(color = if (freshness == SensorFreshness.STALE) GlukoColors.Placeholder else GlukoColors.Ink)
-        )
-        Spacer(Modifier.height(6.dp))
+    val fresh = freshness == SensorFreshness.FRESH
+    Column(
+        modifier
+            .clip(RoundedCornerShape(GlukoRadius.panel))
+            .background(GlukoColors.Ink)
+            .padding(horizontal = 12.dp, vertical = 11.dp)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            val fresh = freshness == SensorFreshness.FRESH
             Box(
                 Modifier.size(6.dp).clip(RoundedCornerShape(GlukoRadius.pill))
                     .background(if (fresh) GlukoColors.SensorFreshDot else GlukoColors.SensorStaleDot)
             )
-            Spacer(Modifier.width(4.dp))
-            val note = when (freshness) {
-                SensorFreshness.FRESH -> stringResource(R.string.summary_sensor_just_now)
-                SensorFreshness.STALE -> sensorAge(nowMillis - reading!!.atMillis).let { (res, n) -> stringResource(res, n) }
-                SensorFreshness.NONE -> stringResource(R.string.summary_sensor_no_data)
-            }
-            Text(
-                note,
-                style = SummarySub.copy(color = if (fresh) GlukoColors.SensorFreshText else GlukoColors.TextTertiary),
-                maxLines = 1
-            )
+            Spacer(Modifier.width(5.dp))
+            Text(stringResource(R.string.summary_sugar_label), style = SummaryLabel.copy(color = GlukoColors.TextOnDark), maxLines = 1)
         }
+        Spacer(Modifier.height(5.dp))
+        Text(
+            shown?.let { formatSummaryValue(it.mmol) } ?: "—",
+            style = SummaryValue.copy(fontSize = 26.sp, lineHeight = 26.sp, color = if (fresh) GlukoColors.Surface else GlukoColors.Placeholder),
+            maxLines = 1
+        )
+        Spacer(Modifier.height(5.dp))
+        val note = when (freshness) {
+            SensorFreshness.FRESH -> stringResource(R.string.summary_sensor_just_now)
+            SensorFreshness.STALE -> sensorAge(nowMillis - reading!!.atMillis).let { (res, n) -> stringResource(res, n) }
+            SensorFreshness.NONE -> stringResource(R.string.summary_sensor_no_data)
+        }
+        Text(note, style = SummarySub.copy(color = GlukoColors.TextOnDark), maxLines = 1)
     }
 }
 
+/** A white tile with the card's soft shadow: label, then [content]. */
 @Composable
-private fun SummaryColumn(modifier: Modifier, label: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier) {
+private fun LightTile(modifier: Modifier, label: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier
+            .shadowSoft(GlukoRadius.panel)
+            .clip(RoundedCornerShape(GlukoRadius.panel))
+            .background(GlukoColors.Surface)
+            .padding(horizontal = 12.dp, vertical = 11.dp)
+    ) {
         Text(label, style = SummaryLabel, maxLines = 1)
         Spacer(Modifier.height(5.dp))
         content()
