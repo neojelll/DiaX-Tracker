@@ -18,6 +18,7 @@ import com.neojelll.diaxtracker.ui.theme.GlukoColors
 object LucidePaths {
     const val Calendar = "M8 2.5v4M16 2.5v4M3 10h18M7 4.5h10a4 4 0 0 1 4 4v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-9a4 4 0 0 1 4-4z"
     const val Clock = "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7.2v5l3 2"
+    const val CornerLeftDown = "M14 15l-5 5-5-5M20 4h-7a4 4 0 0 0-4 4v12"
     const val Droplet = "M12 3.2c3.4 3.8 6 6.9 6 10.1a6 6 0 0 1-12 0c0-3.2 2.6-6.3 6-10.1z"
     const val Syringe = "m18 2 4 4M17 7l3-3M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5m-6 6 4 4m-8 4-3.1 3.1M14 4l6 6"
     const val Camera = "M14.5 4.5h-5L8 6.5H5a2 2 0 0 0-2 2v9.5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2h-3zM12 16.1a3.1 3.1 0 1 0 0-6.2 3.1 3.1 0 0 0 0 6.2z"
