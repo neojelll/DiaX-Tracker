@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.3.0-beta.1...v0.4.0-beta.1) (2026-10-17)
+
+
+### Features
+
+* **entry:** fill sugar from the current sensor reading ([#198](https://github.com/neojelll/DiaX-Tracker/issues/198)) ([28add5d](https://github.com/neojelll/DiaX-Tracker/commit/28add5dc76d857d4dddf1eb247e3868a1744aeea))
+* **home:** show day summary as three separate tiles ([#197](https://github.com/neojelll/DiaX-Tracker/issues/197)) ([e1a65ae](https://github.com/neojelll/DiaX-Tracker/commit/e1a65ae53ca1e797642747725a87ae5dc6bb5eb9))
+
 ## [0.3.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.2.0-beta.1...v0.3.0-beta.1) (2026-10-11)
 
 
