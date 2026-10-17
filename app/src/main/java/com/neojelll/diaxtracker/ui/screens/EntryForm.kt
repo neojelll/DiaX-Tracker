@@ -16,16 +16,33 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.CarbDisplay
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import com.neojelll.diaxtracker.photo.PhotoStore
+import com.neojelll.diaxtracker.sensor.LatestSensorReading
+import com.neojelll.diaxtracker.sensor.SensorFreshness
+import com.neojelll.diaxtracker.sensor.sensorFreshness
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.PresetOption
 import java.io.File
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal fun formatAmount(value: Float): String =
     if (value == value.toInt().toFloat()) value.toInt().toString() else value.toString()
+
+/**
+ * The sensor reading the sugar field can be filled with, or null when the button shouldn't show:
+ * only a fresh reading, only into an empty field, and only while the form follows the clock - an
+ * entry for a picked earlier moment must not get the current value.
+ */
+internal fun sensorSugarToFill(state: EntryFormState, reading: LatestSensorReading?, nowMillis: Long): LatestSensorReading? =
+    reading.takeIf {
+        state.bloodSugar.isBlank() && !state.isPinned && sensorFreshness(reading, nowMillis) == SensorFreshness.FRESH
+    }
+
+/** The reading as the sugar field takes it: one decimal, dot separator (6.4). */
+internal fun sugarFieldText(mmol: Float): String = String.format(Locale.ROOT, "%.1f", mmol)
 
 /** Applies a picked preset to the form: real bread units/products, display label from the design. */
 internal fun applyPresetPick(state: EntryFormState, preset: MealPresetWithProducts, option: PresetOption, display: CarbDisplay): EntryFormState =

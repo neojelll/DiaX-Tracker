@@ -52,6 +52,7 @@
 
     <string name="sugar_level_label">Уровень сахара в крови</string>
     <string name="sugar_card_label">Сахар в крови</string>
+    <string name="sugar_fill_from_sensor">%1$s с сенсора</string>
     <string name="summary_sugar_label">Сахар</string>
     <string name="summary_carbs_label">Углеводы</string>
     <string name="summary_carbs_today">за день</string>

@@ -52,6 +52,8 @@ import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.carbsGramsOn
 import com.neojelll.diaxtracker.insulin.insulinOn
 import com.neojelll.diaxtracker.ui.components.DaySummaryCard
+import com.neojelll.diaxtracker.ui.components.dashedBorder
+import com.neojelll.diaxtracker.ui.components.formatSummaryValue
 import com.neojelll.diaxtracker.ui.components.LocalCarbDisplay
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.GlukoCard
@@ -105,6 +107,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
     }
 
+    val nowMillis = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
     val scrollState = rememberScrollState()
     val scrollEnabled by remember { derivedStateOf { scrollState.maxValue > 0 } }
 
@@ -126,7 +130,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
 
         DaySummaryCard(
             latestSensorReading,
-            nowMillis = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            nowMillis = nowMillis,
             carbsGramsToday = carbsGramsToday,
             insulinToday = insulinToday
         )
@@ -155,7 +159,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 )
             }
             Spacer(Modifier.height(2.dp))
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
                 GlukoField(
                     value = formState.bloodSugar,
                     onValueChange = { formState = formState.copy(bloodSugar = numeric(it)) },
@@ -172,6 +176,14 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     cursorBrush = SolidColor(GlukoColors.CursorSoft)
                 )
                 Text(stringResource(R.string.mmol_unit), style = GlukoType.Label)
+                Spacer(Modifier.weight(1f))
+                sensorSugarToFill(formState, latestSensorReading, nowMillis)?.let { reading ->
+                    SensorFillPill(
+                        value = formatSummaryValue(reading.mmol),
+                        onClick = { formState = formState.copy(bloodSugar = sugarFieldText(reading.mmol)) },
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
             }
 
             Spacer(Modifier.height(10.dp))
@@ -346,6 +358,27 @@ internal fun SaveEntryButton(
         ) {
             Text(text, style = GlukoType.ButtonPrimary.copy(color = GlukoColors.Surface))
         }
+    }
+}
+
+/** "6,4 с сенсора": a dashed pill beside the sugar field that puts the current sensor reading in. */
+@Composable
+private fun SensorFillPill(value: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .clip(RoundedCornerShape(GlukoRadius.pill))
+            .dashedBorder(color = GlukoColors.BorderHover, radius = GlukoRadius.pill)
+            .clickable(onClick = onClick)
+            .padding(start = 8.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        LucideIcon(LucidePaths.CornerLeftDown, 12.dp, GlukoColors.TextSecondary, strokeWidth = 2.2f)
+        Spacer(Modifier.width(5.dp))
+        Text(
+            stringResource(R.string.sugar_fill_from_sensor, value),
+            style = GlukoType.Body.copy(fontSize = 12.sp, color = GlukoColors.TextSecondary).tabular,
+            maxLines = 1
+        )
     }
 }
 
