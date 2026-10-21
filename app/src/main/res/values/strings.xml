@@ -143,6 +143,7 @@
     <string name="sugar_source_sensor">сенсор</string>
     <string name="sugar_source_manual">вручную</string>
     <string name="record_edit_title">Редактировать запись</string>
+    <string name="record_edit_button">Изменить запись</string>
     <string name="delete_entry_pill">Удалить запись</string>
     <string name="range_picker_from_title">Дата начала</string>
     <string name="range_picker_to_title">Дата окончания</string>

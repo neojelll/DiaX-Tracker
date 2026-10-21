@@ -141,6 +141,7 @@
     <string name="sugar_source_sensor">sensor</string>
     <string name="sugar_source_manual">manual</string>
     <string name="record_edit_title">Edit entry</string>
+    <string name="record_edit_button">Edit entry</string>
     <string name="delete_entry_pill">Delete entry</string>
     <string name="range_picker_from_title">Start date</string>
     <string name="range_picker_to_title">End date</string>

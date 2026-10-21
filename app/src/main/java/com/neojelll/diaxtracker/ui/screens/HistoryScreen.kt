@@ -1,13 +1,17 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,16 +31,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -51,9 +58,7 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.SugarSource
-import com.neojelll.diaxtracker.ui.components.InsulinIcon
-import com.neojelll.diaxtracker.ui.components.InsulinKind
-import com.neojelll.diaxtracker.ui.components.LocalDockClearance
+import com.neojelll.diaxtracker.ui.components.AfterMealPill
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FilterChip
 import com.neojelll.diaxtracker.ui.components.FoodPicker
@@ -61,22 +66,23 @@ import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
 import com.neojelll.diaxtracker.ui.components.GlukoField
 import com.neojelll.diaxtracker.ui.components.GlukoSheet
+import com.neojelll.diaxtracker.ui.components.InsulinIcon
+import com.neojelll.diaxtracker.ui.components.InsulinKind
 import com.neojelll.diaxtracker.ui.components.Kicker
 import com.neojelll.diaxtracker.ui.components.LocalCarbDisplay
+import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
-import com.neojelll.diaxtracker.ui.components.AfterMealPill
 import com.neojelll.diaxtracker.ui.components.OverlayController
-import com.neojelll.diaxtracker.ui.components.carbsText
-import com.neojelll.diaxtracker.ui.components.carbsValueFormat
-import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.PhotoButton
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
 import com.neojelll.diaxtracker.ui.components.SecondaryButton
 import com.neojelll.diaxtracker.ui.components.SheetHeader
-import com.neojelll.diaxtracker.ui.components.XeBadge
+import com.neojelll.diaxtracker.ui.components.carbsText
+import com.neojelll.diaxtracker.ui.components.carbsValueFormat
 import com.neojelll.diaxtracker.ui.components.numeric
 import com.neojelll.diaxtracker.ui.components.plainClickable
+import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.shadowSoft
 import com.neojelll.diaxtracker.ui.components.toPresetOption
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
@@ -127,6 +133,8 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     var searchQuery by remember { mutableStateOf("") }
     var dateFilter by remember { mutableStateOf<DateFilter>(DateFilter.All) }
     var sortDescending by remember { mutableStateOf(true) }
+    // One record open at a time; opening another closes the previous one.
+    var openedId by rememberSaveable { mutableStateOf<Long?>(null) }
 
     val productNamesByEntry = remember(entryProducts) {
         entryProducts.groupBy(DiaryEntryProduct::diaryEntryId) { it.name }
@@ -293,13 +301,21 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     val entry = row.entry
                     val sugarColor = entry.bloodSugar?.let { glucoseColor(it, glucoseRange.low, glucoseRange.high) } ?: GlukoColors.Ink
                     val caption = photoCaption(entry.createdAt)
+                    val pill = afterMeal.byMeal[entry.id]
+                    val opensUp = entry.hasMoreInside(hasAfterMeal = pill != null)
+                    val expanded = opensUp && openedId == entry.id
                     RecordCard(
                         entry = entry,
                         sugarColor = sugarColor,
-                        afterMeal = afterMeal.byMeal[entry.id],
+                        afterMeal = pill,
+                        expanded = if (opensUp) expanded else null,
                         fetchProducts = viewModel::getEntryProducts,
+                        // Nothing more inside - a tap edits, as before; otherwise it opens or closes the record.
+                        onTap = {
+                            if (!opensUp) overlays.openRecordEdit(entry.id)
+                            else openedId = if (expanded) null else entry.id
+                        },
                         onEdit = { overlays.openRecordEdit(entry.id) },
-                        onOpenComposition = { overlays.openRecordComposition(entry.id) },
                         onOpenPhoto = { overlays.openPhoto(entry.photoPath, caption) }
                     )
                     Spacer(Modifier.height(GlukoSpacing.itemGap))
@@ -354,23 +370,46 @@ private fun photoCaption(createdAt: LocalDateTime): String {
     return "${dayLabel.lowercase()}, ${createdAt.format(DateTimeFormatter.ofPattern("HH:mm"))}"
 }
 
-// Strict, not a minimum - matching the fixed-size preset cards/cubes elsewhere (MealPresetsScreen,
-// FoodPicker) - so a portrait photo can't stretch this box (and the row) taller than the preset
-// tile next to it.
-private val RecordMediaHeight = 88.dp
-
 /**
- * A History record: the one-line [RecordRow] on top; under it, only when there are any, the preset
- * and photo, the after-meal pill and the note - the bits that move into an opened record next.
+ * A History record: the one-line [RecordRow]; tapped open ([expanded] true), the rest under it -
+ * the preset and photo, sugar after the meal, the note and the edit button. [expanded] null - there
+ * is nothing more inside, the card stays a single line.
  */
 @Composable
 private fun RecordCard(
     entry: DiaryEntry,
     sugarColor: Color,
     afterMeal: AfterMeal?,
+    expanded: Boolean?,
+    fetchProducts: suspend (Long) -> List<DiaryEntryProduct>,
+    onTap: () -> Unit,
+    onEdit: () -> Unit,
+    onOpenPhoto: () -> Unit
+) {
+    val open = expanded == true
+    val lift by animateDpAsState(if (open) 12.dp else 0.dp, label = "recordLift")
+    val shape = RoundedCornerShape(GlukoRadius.record)
+    GlukoCard(
+        radius = GlukoRadius.record,
+        padding = 0.dp,
+        modifier = Modifier
+            .shadow(lift, shape, ambientColor = GlukoColors.Ink.copy(alpha = .06f), spotColor = GlukoColors.Ink.copy(alpha = .2f))
+            .plainClickable(onClick = onTap)
+    ) {
+        Column(Modifier.animateContentSize().padding(start = 14.dp, end = 14.dp, top = 11.dp, bottom = 11.dp)) {
+            RecordRow(entry, sugarColor, expanded = expanded)
+            if (open) OpenedRecord(entry, afterMeal, fetchProducts, onEdit, onOpenPhoto)
+        }
+    }
+}
+
+/** What an opened record shows: "preset | photo" (no preset - the photo full width), after the meal, the note, edit. */
+@Composable
+private fun OpenedRecord(
+    entry: DiaryEntry,
+    afterMeal: AfterMeal?,
     fetchProducts: suspend (Long) -> List<DiaryEntryProduct>,
     onEdit: () -> Unit,
-    onOpenComposition: () -> Unit,
     onOpenPhoto: () -> Unit
 ) {
     var products by remember(entry.id) { mutableStateOf<List<DiaryEntryProduct>>(emptyList()) }
@@ -378,86 +417,95 @@ private fun RecordCard(
         products = if (entry.mealLabel != null) fetchProducts(entry.id) else emptyList()
     }
 
-    GlukoCard(radius = GlukoRadius.record, padding = 0.dp, modifier = Modifier.plainClickable(onClick = onEdit)) {
-        Column(Modifier.padding(start = 14.dp, end = 14.dp, top = 11.dp, bottom = 11.dp)) {
-            RecordRow(entry, sugarColor)
-
-            val hasPreset = entry.mealLabel != null
-            val hasPhoto = entry.photoPath != null
-            if (hasPreset || hasPhoto || afterMeal != null) {
-                Spacer(Modifier.height(11.dp))
-                GlukoDivider()
-                if (afterMeal != null) AfterMealPill(afterMeal)
-                if (hasPreset || hasPhoto) {
-                    Spacer(Modifier.height(11.dp))
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
-                        if (hasPreset) PresetTile(entry, products, Modifier.weight(1f), onOpenComposition)
-                        if (hasPhoto) RecordPhotoTile(entry.photoPath!!, onOpenPhoto)
-                    }
+    Spacer(Modifier.height(11.dp))
+    GlukoDivider()
+    Spacer(Modifier.height(11.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        val preset = entry.mealLabel
+        val photo = entry.photoPath
+        if (preset != null || photo != null) {
+            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                if (preset != null) PresetBlock(preset, products, Modifier.weight(1f))
+                if (photo != null) {
+                    val size = if (preset != null) Modifier.width(96.dp).fillMaxHeight().heightIn(min = 96.dp) else Modifier.weight(1f).height(150.dp)
+                    RecordPhoto(photo, size, onOpenPhoto)
                 }
             }
+        }
+        if (afterMeal != null) AfterMealPill(afterMeal)
+        if (entry.notes.isNotBlank()) NoteBlock(entry.notes)
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(GlukoRadius.field))
+                .background(GlukoColors.Tile)
+                .clickable(onClick = onEdit)
+                .padding(vertical = 11.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            LucideIcon(LucidePaths.Pencil, 13.dp, GlukoColors.TextSecondary, strokeWidth = 2f)
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.record_edit_button), style = GlukoType.Body.copy(color = GlukoColors.TextSecondary))
+        }
+    }
+}
 
-            if (entry.notes.isNotBlank()) {
-                Spacer(Modifier.height(11.dp))
-                GlukoDivider()
-                Spacer(Modifier.height(10.dp))
-                Text(entry.notes, style = GlukoType.Note, maxLines = 3, overflow = TextOverflow.Ellipsis)
+/** The preset as recorded: its name, then each product with its carbs - the entry's own copy, not the live preset. */
+@Composable
+private fun PresetBlock(name: String, products: List<DiaryEntryProduct>, modifier: Modifier) {
+    Column(
+        modifier
+            .clip(RoundedCornerShape(GlukoRadius.field))
+            .background(GlukoColors.Tile)
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            LucideIcon(LucidePaths.Bookmark, 13.dp, GlukoColors.TextSecondary, strokeWidth = 2f)
+            Spacer(Modifier.width(6.dp))
+            Text(name, style = GlukoType.Body.copy(fontWeight = FontWeight.Medium))
+        }
+        if (products.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Text(stringResource(R.string.record_composition), style = GlukoType.CardLabel)
+            products.sortedBy { it.sortOrder }.forEach { product ->
+                Spacer(Modifier.height(5.dp))
+                Row(verticalAlignment = Alignment.Top) {
+                    Text(product.name, style = GlukoType.Body.copy(fontSize = 12.5.sp), modifier = Modifier.weight(1f))
+                    Spacer(Modifier.width(8.dp))
+                    Text(carbsText(product.carbsGrams), style = GlukoType.Hint.tabular, maxLines = 1)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun PresetTile(entry: DiaryEntry, products: List<DiaryEntryProduct>, modifier: Modifier, onOpenComposition: () -> Unit) {
-    Column(
-        modifier
-            .height(RecordMediaHeight)
-            .clip(RoundedCornerShape(GlukoRadius.tile))
-            .background(GlukoColors.Tile)
-            .clickable(onClick = onOpenComposition)
-            .padding(horizontal = 13.dp, vertical = 11.dp),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(entry.mealLabel!!, style = GlukoType.Body, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Spacer(Modifier.width(8.dp))
-            entry.carbsGrams?.let { XeBadge(carbsText(it)) }
-        }
-        Text(
-            products.sortedBy { it.sortOrder }.joinToString(", ") { it.name },
-            style = GlukoType.CardLabel.copy(fontSize = 11.sp),
-            maxLines = 1, overflow = TextOverflow.Ellipsis
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.record_composition), style = GlukoType.CardLabel.copy(color = GlukoColors.TextTertiary))
-            Spacer(Modifier.width(5.dp))
-            LucideIcon(LucidePaths.ChevronRight, 11.dp, GlukoColors.TextTertiary, strokeWidth = 2.2f)
-        }
-    }
+private fun RecordPhoto(photoPath: String, modifier: Modifier, onOpenPhoto: () -> Unit) {
+    AsyncImage(
+        model = java.io.File(photoPath),
+        contentDescription = stringResource(R.string.entry_photo),
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .clip(RoundedCornerShape(GlukoRadius.field))
+            .background(GlukoColors.PhotoStub)
+            .clickable(onClick = onOpenPhoto)
+    )
 }
 
+/** The note in full - an opened record has room for it. */
 @Composable
-private fun RecordPhotoTile(photoPath: String, onOpenPhoto: () -> Unit) {
-    Box(
+private fun NoteBlock(text: String) {
+    Row(
         Modifier
-            .width(88.dp).height(RecordMediaHeight)
-            .clip(RoundedCornerShape(GlukoRadius.tile))
-            .clickable(onClick = onOpenPhoto),
-        contentAlignment = Alignment.Center
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(GlukoRadius.field))
+            .background(GlukoColors.Tile)
+            .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
-        AsyncImage(
-            model = java.io.File(photoPath),
-            contentDescription = stringResource(R.string.entry_photo),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(GlukoRadius.tile))
-        )
-        Box(
-            Modifier.align(Alignment.BottomEnd).padding(6.dp).width(20.dp).heightIn(min = 20.dp)
-                .clip(RoundedCornerShape(GlukoRadius.pill)).background(GlukoColors.Surface),
-            contentAlignment = Alignment.Center
-        ) {
-            LucideIcon(LucidePaths.Expand, 11.dp, strokeWidth = 2.2f)
-        }
+        LucideIcon(LucidePaths.MessageCircle, 13.dp, GlukoColors.TextLabel, strokeWidth = 1.9f, modifier = Modifier.padding(top = 2.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(text, style = GlukoType.Note.copy(color = GlukoColors.Ink))
     }
 }
 
