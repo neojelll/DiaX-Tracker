@@ -95,7 +95,7 @@ private fun ExpandedCard(iob: InsulinOnBoard, onCollapse: () -> Unit) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             CircleButton(26.dp, GlukoColors.InkSoft) {
-                LucideIcon(LucidePaths.Syringe, 13.dp, GlukoColors.Surface, strokeWidth = 2f)
+                InsulinIcon(InsulinKind.SHORT, 13.dp)
             }
             Spacer(Modifier.width(9.dp))
             Text(
@@ -146,7 +146,8 @@ private fun CollapsedStrip(iob: InsulinOnBoard, onExpand: () -> Unit) {
             .padding(horizontal = 12.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LucideIcon(LucidePaths.Syringe, 12.dp, GlukoColors.Surface, strokeWidth = 2f)
+        // Active insulin is short insulin only - same icon as everywhere it's entered and shown.
+        InsulinIcon(InsulinKind.SHORT, 12.dp)
         Spacer(Modifier.width(8.dp))
         Text(
             "%.1f".format(iob.units),
