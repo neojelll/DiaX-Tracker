@@ -13,6 +13,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.time.AppClock
 
 class SensorForegroundService : Service() {
 
@@ -37,7 +38,7 @@ class SensorForegroundService : Service() {
         private fun readXDripEstimate(intent: Intent): Pair<Float, Long>? {
             val mgdl = intent.getDoubleExtra(EXTRA_BG_ESTIMATE, -1.0)
             if (mgdl <= 0.0) return null
-            val timestamp = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis())
+            val timestamp = intent.getLongExtra(EXTRA_TIME, AppClock.millis())
             return mgdlToMmol(mgdl) to timestamp
         }
     }

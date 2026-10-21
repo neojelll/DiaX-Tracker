@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.GlukoSpacing
@@ -148,7 +149,7 @@ fun DateSheet(
     val locale = LocalConfiguration.current.locales[0]
     var visibleMonth by remember { mutableStateOf(YearMonth.from(initialDate)) }
     var selected by remember { mutableStateOf(initialDate) }
-    val today = LocalDate.now()
+    val today = AppClock.today()
 
     GlukoSheet(onDismiss) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

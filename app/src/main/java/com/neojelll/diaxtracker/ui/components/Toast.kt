@@ -32,10 +32,10 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import java.time.LocalDate
@@ -243,7 +244,7 @@ class AppToasts(private val context: android.content.Context, private val state:
     private fun s(id: Int, vararg args: Any) = context.getString(id, *args)
 
     private fun moment(at: LocalDateTime) =
-        toastMoment(at, LocalDate.now(), context.getString(R.string.toast_when_today, "%1\$s"), Locale.getDefault())
+        toastMoment(at, AppClock.today(), context.getString(R.string.toast_when_today, "%1\$s"), Locale.getDefault())
 
     fun recordSaved(at: LocalDateTime, undo: (() -> Unit)? = null) = state.show(s(R.string.toast_record_saved), moment(at), onUndo = undo)
     fun formCleared(undo: () -> Unit) = state.show(s(R.string.toast_form_cleared), kind = ToastKind.Delete, onUndo = undo)

@@ -5,9 +5,9 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.neojelll.diaxtracker.time.AppClock
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
 private val FOLLOW_UP_HOURS = listOf(1L, 2L, 3L, 4L)
@@ -40,8 +40,8 @@ object PostMealScheduler {
         cancelFollowUps(context, entryId)
         val workManager = WorkManager.getInstance(context)
         val tag = tagFor(entryId)
-        pendingFollowUps(entryTime, LocalDateTime.now()).forEach { followUp ->
-            val targetMillis = followUp.target.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        pendingFollowUps(entryTime, AppClock.now()).forEach { followUp ->
+            val targetMillis = followUp.target.atZone(AppClock.zone).toInstant().toEpochMilli()
             workManager.enqueueUniqueWork(
                 "$tag:${followUp.hours}h",
                 ExistingWorkPolicy.REPLACE,

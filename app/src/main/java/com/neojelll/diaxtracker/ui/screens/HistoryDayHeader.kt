@@ -26,6 +26,7 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.CarbUnit
 import com.neojelll.diaxtracker.data.carbGoalReached
 import com.neojelll.diaxtracker.insulin.DayInsulin
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.components.InsulinIcon
 import com.neojelll.diaxtracker.ui.components.InsulinKind
 import com.neojelll.diaxtracker.ui.components.Kicker
@@ -47,7 +48,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 internal fun DayHeaderRow(date: LocalDate, carbsGrams: Float, insulin: DayInsulin, carbGoalGrams: Float?) {
     val locale = LocalConfiguration.current.locales[0]
-    val today = LocalDate.now()
+    val today = AppClock.today()
     val label = when (date) {
         today -> stringResource(R.string.today_label)
         today.minusDays(1) -> stringResource(R.string.yesterday_label)

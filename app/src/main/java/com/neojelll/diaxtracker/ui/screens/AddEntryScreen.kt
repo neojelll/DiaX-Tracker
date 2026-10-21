@@ -51,23 +51,24 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.carbsGramsOn
 import com.neojelll.diaxtracker.insulin.insulinOn
-import com.neojelll.diaxtracker.ui.components.LocalDockClearance
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.components.DaySummaryCard
-import com.neojelll.diaxtracker.ui.components.dashedBorder
-import com.neojelll.diaxtracker.ui.components.formatSummaryValue
-import com.neojelll.diaxtracker.ui.components.LocalCarbDisplay
-import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
 import com.neojelll.diaxtracker.ui.components.GlukoField
 import com.neojelll.diaxtracker.ui.components.GlukoTile
 import com.neojelll.diaxtracker.ui.components.InsulinIcon
 import com.neojelll.diaxtracker.ui.components.InsulinKind
+import com.neojelll.diaxtracker.ui.components.LocalCarbDisplay
+import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.OverlayController
 import com.neojelll.diaxtracker.ui.components.PrimaryButton
+import com.neojelll.diaxtracker.ui.components.dashedBorder
+import com.neojelll.diaxtracker.ui.components.formatSummaryValue
 import com.neojelll.diaxtracker.ui.components.numeric
+import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.components.rememberCurrentMinute
 import com.neojelll.diaxtracker.ui.components.toPresetOption
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
@@ -76,8 +77,6 @@ import com.neojelll.diaxtracker.ui.theme.GlukoSpacing
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.theme.tabular
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -111,7 +110,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         }
     }
 
-    val nowMillis = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    val nowMillis = now.atZone(AppClock.zone).toInstant().toEpochMilli()
 
     val scrollState = rememberScrollState()
     val scrollEnabled by remember { derivedStateOf { scrollState.maxValue > 0 } }
@@ -154,12 +153,12 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     time = shownAt.format(DateTimeFormatter.ofPattern("HH:mm")),
                     onDate = {
                         overlays.openDatePicker(shownAt.toLocalDate(), onNow = backToNow) { picked ->
-                            formState = formState.withDate(picked, LocalDateTime.now())
+                            formState = formState.withDate(picked, AppClock.now())
                         }
                     },
                     onTime = {
                         overlays.openTimePicker(shownAt.toLocalTime(), onNow = backToNow) { picked ->
-                            formState = formState.withTime(picked, LocalDateTime.now())
+                            formState = formState.withTime(picked, AppClock.now())
                         }
                     }
                 )
@@ -272,7 +271,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 onSave = {
                     val previous = formState
                     // The real moment of saving, not the last minute tick, while no time was picked.
-                    val createdAt = formState.dateTimeAt(LocalDateTime.now())
+                    val createdAt = formState.dateTimeAt(AppClock.now())
                     viewModel.addEntry(
                         bloodSugar = formState.bloodSugar.toFloatOrNull(),
                         bloodSugarSource = typedSugarSource(formState),

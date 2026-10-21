@@ -33,14 +33,14 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.insulin.InsulinOnBoard
 import com.neojelll.diaxtracker.insulin.activeInsulin
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.GlukoSpacing
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.theme.tabular
-import kotlinx.coroutines.delay
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.delay
 
 private const val TICK_MILLIS = 60_000L
 
@@ -53,10 +53,10 @@ fun InsulinBanner(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var now by remember(entries.map { it.id }) { mutableStateOf(LocalDateTime.now()) }
+    var now by remember(entries.map { it.id }) { mutableStateOf(AppClock.now()) }
     LaunchedEffect(entries.map { it.id }) {
         while (true) {
-            now = LocalDateTime.now()
+            now = AppClock.now()
             delay(TICK_MILLIS)
         }
     }

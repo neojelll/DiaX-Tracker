@@ -4,11 +4,11 @@ import android.content.Context
 import android.util.Log
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.SensorReadingLog
+import com.neojelll.diaxtracker.time.AppClock
+import java.time.Instant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
 
 private const val TAG = "SensorReadingIngest"
 
@@ -20,7 +20,7 @@ fun persistSensorReading(context: Context, bloodSugar: Float, timestamp: Long) {
             DiaryDatabase.getDatabase(context).sensorReadingLogDao().insert(
                 SensorReadingLog(
                     timestamp = Instant.ofEpochMilli(timestamp)
-                        .atZone(ZoneId.systemDefault())
+                        .atZone(AppClock.zone)
                         .toLocalDateTime(),
                     bloodSugar = bloodSugar
                 )
