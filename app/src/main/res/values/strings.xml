@@ -135,14 +135,13 @@
     <string name="record_long_label">длинный</string>
     <string name="record_no_preset">Без пресета</string>
     <string name="record_composition">состав</string>
-    <string name="record_composition_snapshot">Состав на момент записи</string>
-    <string name="record_composition_empty">Состав не сохранён</string>
     <string name="record_measurement_tag">замер</string>
     <string name="record_type_meal">еда</string>
     <string name="record_type_shot">укол</string>
     <string name="sugar_source_sensor">сенсор</string>
     <string name="sugar_source_manual">вручную</string>
     <string name="record_edit_title">Редактировать запись</string>
+    <string name="record_edit_button">Изменить запись</string>
     <string name="delete_entry_pill">Удалить запись</string>
     <string name="range_picker_from_title">Дата начала</string>
     <string name="range_picker_to_title">Дата окончания</string>

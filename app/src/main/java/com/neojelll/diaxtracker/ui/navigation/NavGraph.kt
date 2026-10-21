@@ -61,7 +61,6 @@ import com.neojelll.diaxtracker.ui.screens.HistoryScreen
 import com.neojelll.diaxtracker.ui.screens.MealPresetsScreen
 import com.neojelll.diaxtracker.ui.screens.PresetDetailSheet
 import com.neojelll.diaxtracker.ui.screens.PresetEditSheet
-import com.neojelll.diaxtracker.ui.screens.RecordCompositionSheet
 import com.neojelll.diaxtracker.ui.screens.RecordEditSheet
 import com.neojelll.diaxtracker.ui.screens.SettingsScreen
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
@@ -244,11 +243,6 @@ private fun OverlayLayer(
             onDismiss = overlays::dismiss
         )
 
-        is Overlay.RecordComposition -> RecordCompositionSheet(
-            viewModel = viewModel,
-            entryId = overlay.entryId,
-            onDismiss = overlays::dismiss
-        )
 
         is Overlay.PresetDetail -> {
             val preset = mealPresets.find { it.preset.id == overlay.presetId }

@@ -30,6 +30,8 @@ object LucidePaths {
     const val Plus = "M12 6v12M6 12h12"
     const val Minus = "M6 12h12"
     const val ChevronRight = "M9.5 5.5 16 12l-6.5 6.5"
+    const val Bookmark = "M18 21l-6-4-6 4V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z"
+    const val Pencil = "M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"
     const val ChevronDown = "M6 9.5l6 6 6-6"
     const val ChevronUp = "M6 14.5l6-6 6 6"
     const val ChevronLeft = "M14.5 5.5 8 12l6.5 6.5"

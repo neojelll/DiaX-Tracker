@@ -1,6 +1,7 @@
 package com.neojelll.diaxtracker.ui.screens
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,9 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -56,6 +59,13 @@ internal fun DiaryEntry.recordKind(): RecordKind = when {
     else -> RecordKind.CHECK
 }
 
+/**
+ * Whether opening the record shows anything: a preset (with its composition), a photo, a note, or
+ * sugar readings after the meal. Without any of these a tap goes straight to editing.
+ */
+internal fun DiaryEntry.hasMoreInside(hasAfterMeal: Boolean): Boolean =
+    mealLabel != null || photoPath != null || notes.isNotBlank() || hasAfterMeal
+
 /** Narrow no-break space between a number and its unit: "4 ед" stays one piece and doesn't look loose. */
 private const val NUMBER_UNIT_GAP = " "
 
@@ -63,16 +73,24 @@ private const val NUMBER_UNIT_GAP = " "
  * One History record on a line: time with the record kind under it; the values as capsules (food,
  * short insulin, long insulin - only those logged); sugar in its range colour with its source under it.
  * The capsules wrap only when there's no room left (a huge font); on a phone all three fit with a
- * two-digit sugar.
+ * two-digit sugar. [expanded] null - nothing to open, no chevron; otherwise the chevron's state.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun RecordRow(entry: DiaryEntry, sugarColor: Color, modifier: Modifier = Modifier) {
+internal fun RecordRow(entry: DiaryEntry, sugarColor: Color, modifier: Modifier = Modifier, expanded: Boolean? = null) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Column(Modifier.width(44.dp)) {
             Text(entry.createdAt.format(TIME_FORMAT), style = GlukoType.RecordTime.tabular, maxLines = 1)
             Spacer(Modifier.height(3.dp))
-            Text(stringResource(entry.recordKind().label), style = RowCaption, maxLines = 1)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(entry.recordKind().label), style = RowCaption, maxLines = 1)
+                // The chevron lives here, after the kind: the left column has room, the capsules don't.
+                if (expanded != null) {
+                    val turn by animateFloatAsState(if (expanded) 180f else 0f, label = "recordChevron")
+                    Spacer(Modifier.width(2.dp))
+                    LucideIcon(LucidePaths.ChevronDown, 10.dp, GlukoColors.Placeholder, strokeWidth = 2.4f, modifier = Modifier.rotate(turn))
+                }
+            }
         }
         Spacer(Modifier.width(8.dp))
         FlowRow(
