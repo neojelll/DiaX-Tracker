@@ -51,6 +51,7 @@ import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.carbsGramsOn
 import com.neojelll.diaxtracker.insulin.insulinOn
+import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import com.neojelll.diaxtracker.ui.components.DaySummaryCard
 import com.neojelll.diaxtracker.ui.components.dashedBorder
 import com.neojelll.diaxtracker.ui.components.formatSummaryValue
@@ -118,6 +119,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             .padding(horizontal = GlukoSpacing.screenHorizontal)
             .padding(top = 12.dp)
             .verticalScroll(scrollState, enabled = scrollEnabled)
+            .padding(bottom = LocalDockClearance.current)
     ) {
         // Header: greeting and the bell. The day summary below replaced the "N entries today" line.
         Row(

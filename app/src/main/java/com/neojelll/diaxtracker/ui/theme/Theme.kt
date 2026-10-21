@@ -100,7 +100,6 @@ object GlukoType {
     val Unit = style(10, color = GlukoColors.TextLabel).copy(fontSize = 9.5f.sp)
     val Hint = style(12, color = GlukoColors.TextTertiary).copy(fontSize = 11.5f.sp)
     val Note = style(13, lineHeight = 19f, color = GlukoColors.TextSecondary).copy(fontSize = 12.5f.sp)
-    val NavLabel = style(11).copy(fontSize = 10.5f.sp)
     val StatusBar = style(14, FontWeight.Medium).copy(fontSize = 13.5f.sp)
 }
 

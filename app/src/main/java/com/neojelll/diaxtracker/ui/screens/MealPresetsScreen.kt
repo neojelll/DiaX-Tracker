@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.MealPresetProduct
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
+import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
@@ -84,7 +85,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(
                 start = GlukoSpacing.screenHorizontal, end = GlukoSpacing.screenHorizontal,
-                top = 18.dp, bottom = GlukoSpacing.bottomInset
+                top = 18.dp, bottom = GlukoSpacing.bottomInset + LocalDockClearance.current
             ),
             horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.cardGap),
             verticalArrangement = Arrangement.spacedBy(GlukoSpacing.cardGap)
@@ -127,7 +128,7 @@ fun MealPresetsScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         Box(
             Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 20.dp, bottom = 20.dp)
+                .padding(end = 20.dp, bottom = 20.dp + LocalDockClearance.current)
                 .size(56.dp)
                 .clip(RoundedCornerShape(GlukoRadius.pill))
                 .background(GlukoColors.Ink)
