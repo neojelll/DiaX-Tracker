@@ -3,12 +3,10 @@ package com.neojelll.diaxtracker.ui.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -22,6 +20,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.neojelll.diaxtracker.ui.components.DockBottomGap
+import com.neojelll.diaxtracker.ui.components.DockHeight
+import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -99,6 +105,18 @@ fun NavGraph(navController: NavHostController) {
     var navBarHeightPx by remember { mutableStateOf(0) }
     val density = LocalDensity.current
 
+    // The dock steps aside while content scrolls down and comes back on the way up or on a tab switch.
+    var dockVisible by remember { mutableStateOf(true) }
+    LaunchedEffect(currentRoute) { dockVisible = true }
+    val dockScroll = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                if (consumed.y < -1f) dockVisible = false else if (consumed.y > 1f) dockVisible = true
+                return Offset.Zero
+            }
+        }
+    }
+
     CompositionLocalProvider(LocalToast provides toastState, LocalCarbDisplay provides carbDisplay) {
     val toasts = rememberAppToasts()
     LaunchedEffect(viewModel) {
@@ -112,9 +130,8 @@ fun NavGraph(navController: NavHostController) {
         ) { padding ->
             // Scaffold no longer consumes navigationBars itself (see contentWindowInsets
             // above), so the live inset is applied here as bottom padding on the whole
-            // column instead - this is what actually keeps GlukoNavBar, the last child,
-            // clear of the system bar. The fixed 10.dp spacer below it is unrelated: it's
-            // just the visual gap between scrolled content and the navbar itself.
+            // column instead - this is what keeps the floating dock, aligned to the
+            // column's bottom, clear of the system bar in gesture and 3-button nav alike.
             val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             Column(Modifier.fillMaxSize().padding(padding).padding(bottom = navBarInset)) {
                 InsulinBanner(
@@ -124,37 +141,44 @@ fun NavGraph(navController: NavHostController) {
                     onToggle = { insulinExpanded = !insulinExpanded }
                 )
 
-                // One place for every screen: a tap on empty space closes the keyboard.
-                Box(Modifier.weight(1f).clearFocusOnTap()) {
-                    NavHost(navController = navController, startDestination = ROUTE_ADD_ENTRY) {
-                        composable(ROUTE_ADD_ENTRY) { AddEntryScreen(viewModel, overlays) }
-                        composable(ROUTE_MEAL_PRESETS) { MealPresetsScreen(viewModel, overlays) }
-                        composable(ROUTE_HISTORY) { HistoryScreen(viewModel, overlays) }
-                        composable(ROUTE_SETTINGS) { SettingsScreen(viewModel) }
-                    }
-                }
-
-                Spacer(Modifier.height(10.dp))
-
-                GlukoNavBar(
-                    modifier = Modifier.onSizeChanged { navBarHeightPx = it.height },
-                    items = navBarItems,
-                    currentRoute = currentRoute,
-                    onSelect = { item ->
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                Box(Modifier.weight(1f)) {
+                    // One place for every screen: a tap on empty space closes the keyboard. Content
+                    // runs under the dock; each screen pads its bottom by LocalDockClearance.
+                    Box(Modifier.fillMaxSize().clearFocusOnTap().nestedScroll(dockScroll)) {
+                        CompositionLocalProvider(LocalDockClearance provides DockHeight + DockBottomGap + 8.dp) {
+                            NavHost(navController = navController, startDestination = ROUTE_ADD_ENTRY) {
+                                composable(ROUTE_ADD_ENTRY) { AddEntryScreen(viewModel, overlays) }
+                                composable(ROUTE_MEAL_PRESETS) { MealPresetsScreen(viewModel, overlays) }
+                                composable(ROUTE_HISTORY) { HistoryScreen(viewModel, overlays) }
+                                composable(ROUTE_SETTINGS) { SettingsScreen(viewModel) }
+                            }
                         }
                     }
-                )
+
+                    GlukoNavBar(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = DockBottomGap)
+                            .onSizeChanged { navBarHeightPx = it.height },
+                        items = navBarItems,
+                        currentRoute = currentRoute,
+                        visible = dockVisible,
+                        onSelect = { item ->
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
             }
         }
 
         // Toasts float above the screen and its sheets, but under the photo action menu.
         OverlayHost(viewModel, overlays, navController) { it !is Overlay.PhotoActions }
-        // Above the nav bar (and the spacer over it) with a small gap; a sheet covers the bar, so drop to the bottom.
-        val aboveNavBar = with(density) { navBarHeightPx.toDp() } + 10.dp + 12.dp
+        // Above the dock (and the gap under it) with a small gap; a sheet covers the dock, so drop to the bottom.
+        val aboveNavBar = with(density) { navBarHeightPx.toDp() } + DockBottomGap + 12.dp
         ToastHost(toastState, bottomOffset = if (overlays.stack.isEmpty()) aboveNavBar else 24.dp)
         OverlayHost(viewModel, overlays, navController) { it is Overlay.PhotoActions }
     }

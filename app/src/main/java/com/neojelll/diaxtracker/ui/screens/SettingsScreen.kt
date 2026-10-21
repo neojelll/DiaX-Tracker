@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.backup.BackupFolder
+import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.data.AutoBackupState
 import com.neojelll.diaxtracker.ui.components.BackupExportRow
@@ -80,7 +81,7 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = GlukoSpacing.screenHorizontal)
-                .padding(top = 18.dp, bottom = GlukoSpacing.bottomInset)
+                .padding(top = 18.dp, bottom = GlukoSpacing.bottomInset + LocalDockClearance.current)
         ) {
             Column(Modifier.padding(horizontal = 8.dp).padding(bottom = 14.dp)) {
                 Text(stringResource(R.string.settings_title), style = GlukoType.ScreenTitle)

@@ -51,6 +51,7 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.SugarSource
+import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FilterChip
 import com.neojelll.diaxtracker.ui.components.FoodPicker
@@ -169,7 +170,7 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(
             start = GlukoSpacing.screenHorizontal, end = GlukoSpacing.screenHorizontal,
-            top = 18.dp, bottom = GlukoSpacing.bottomInset
+            top = 18.dp, bottom = GlukoSpacing.bottomInset + LocalDockClearance.current
         )
     ) {
         item {
