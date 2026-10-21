@@ -51,6 +51,8 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.SugarSource
+import com.neojelll.diaxtracker.ui.components.InsulinIcon
+import com.neojelll.diaxtracker.ui.components.InsulinKind
 import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FilterChip
@@ -694,7 +696,11 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
             Spacer(Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
                 Column(Modifier.weight(1f)) {
-                    Kicker(stringResource(R.string.short_insulin_short_label))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        InsulinIcon(InsulinKind.SHORT, 13.dp)
+                        Spacer(Modifier.width(5.dp))
+                        Kicker(stringResource(R.string.short_insulin_short_label))
+                    }
                     Spacer(Modifier.height(8.dp))
                     GlukoField(
                         formState.shortInsulinDose, { formState = formState.copy(shortInsulinDose = numeric(it)) }, "0",
@@ -702,7 +708,11 @@ fun RecordEditSheet(viewModel: DiaryViewModel, entryId: Long, overlays: OverlayC
                     )
                 }
                 Column(Modifier.weight(1f)) {
-                    Kicker(stringResource(R.string.long_insulin_short_label))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        InsulinIcon(InsulinKind.LONG, 13.dp)
+                        Spacer(Modifier.width(5.dp))
+                        Kicker(stringResource(R.string.long_insulin_short_label))
+                    }
                     Spacer(Modifier.height(8.dp))
                     GlukoField(
                         formState.longInsulinDose, { formState = formState.copy(longInsulinDose = numeric(it)) }, "0",

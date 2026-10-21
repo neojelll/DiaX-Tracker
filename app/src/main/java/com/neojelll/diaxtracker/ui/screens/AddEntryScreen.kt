@@ -61,6 +61,8 @@ import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
 import com.neojelll.diaxtracker.ui.components.GlukoField
 import com.neojelll.diaxtracker.ui.components.GlukoTile
+import com.neojelll.diaxtracker.ui.components.InsulinIcon
+import com.neojelll.diaxtracker.ui.components.InsulinKind
 import com.neojelll.diaxtracker.ui.components.LucideIcon
 import com.neojelll.diaxtracker.ui.components.LucidePaths
 import com.neojelll.diaxtracker.ui.components.OverlayController
@@ -200,12 +202,14 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             Row(horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
                 InsulinTile(
                     modifier = Modifier.weight(1f),
+                    kind = InsulinKind.SHORT,
                     label = stringResource(R.string.short_insulin_short_label),
                     value = formState.shortInsulinDose,
                     onChange = { formState = formState.copy(shortInsulinDose = numeric(it)) }
                 )
                 InsulinTile(
                     modifier = Modifier.weight(1f),
+                    kind = InsulinKind.LONG,
                     label = stringResource(R.string.long_insulin_short_label),
                     value = formState.longInsulinDose,
                     onChange = { formState = formState.copy(longInsulinDose = numeric(it)) }
@@ -445,10 +449,10 @@ internal fun PickerButton(modifier: Modifier, iconPath: String, text: String, on
 }
 
 @Composable
-private fun InsulinTile(modifier: Modifier, label: String, value: String, onChange: (String) -> Unit) {
+private fun InsulinTile(modifier: Modifier, kind: InsulinKind, label: String, value: String, onChange: (String) -> Unit) {
     GlukoTile(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            LucideIcon(LucidePaths.Syringe, 13.dp, GlukoColors.TextLabel, strokeWidth = 2f)
+            InsulinIcon(kind, 14.dp)
             Spacer(Modifier.width(5.dp))
             Text(label, style = GlukoType.Hint.copy(color = GlukoColors.TextLabel), maxLines = 1)
         }

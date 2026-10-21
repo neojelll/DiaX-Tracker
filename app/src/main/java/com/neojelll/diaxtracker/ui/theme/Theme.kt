@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 
-/** Design tokens ported from the design_handoff_gluko package. Color is never used as accent. */
+/** Design tokens ported from the design_handoff_gluko package. Color carries meaning (sugar range, insulin type), never decoration. */
 object GlukoColors {
     val Screen = Color(0xFFF7F6F5)
     val Surface = Color(0xFFFFFFFF)
@@ -41,7 +41,11 @@ object GlukoColors {
     val PhotoOverlay = Color(0xB80D0D0D)
     val Scrim = Color(0x570D0D0D)
     val PresetCubeBorder = Color(0xFFEFEDEB)
-    // Day summary, sugar column: the only colour in the app - a quiet "sensor is live" signal.
+    // Insulin type, carried by the icons (with a shape difference too, so colour isn't the only cue).
+    // Kept clear of the sugar palette - green/yellow/orange/red already mean a sugar range.
+    val InsulinShort = Color(0xFF2F6BD6)
+    val InsulinLong = Color(0xFF8B3FC9)
+    // Day summary, sugar column: a quiet "sensor is live" signal.
     val SensorFreshDot = Color(0xFF2FA36B)
     val SensorFreshText = Color(0xFF2A8A5C)
     val SensorStaleDot = Color(0xFFC9C5BF)

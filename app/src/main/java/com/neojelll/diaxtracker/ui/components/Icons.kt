@@ -20,6 +20,8 @@ object LucidePaths {
     const val Clock = "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7.2v5l3 2"
     const val CornerLeftDown = "M14 15l-5 5-5-5M20 4h-7a4 4 0 0 0-4 4v12"
     const val Droplet = "M12 3.2c3.4 3.8 6 6.9 6 10.1a6 6 0 0 1-12 0c0-3.2 2.6-6.3 6-10.1z"
+    /** Capped insulin pen with a dose window and dial, turned like [Syringe] - the long-insulin icon. */
+    const val InsulinPen = "M3.51 15.54L12.71 6.34A2 2 0 0 1 15.54 6.34L17.66 8.46A2 2 0 0 1 17.66 11.29L8.46 20.49A2 2 0 0 1 5.64 20.49L3.51 18.36A2 2 0 0 1 3.51 15.54ZM6.34 12.71L11.29 17.66M11.29 12.71L14.12 9.88M15.18 5.99L16.6 4.58A1.5 1.5 0 0 1 18.72 4.58L19.42 5.28A1.5 1.5 0 0 1 19.42 7.4L18.01 8.82"
     const val Syringe = "m18 2 4 4M17 7l3-3M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5m-6 6 4 4m-8 4-3.1 3.1M14 4l6 6"
     const val Camera = "M14.5 4.5h-5L8 6.5H5a2 2 0 0 0-2 2v9.5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a2 2 0 0 0-2-2h-3zM12 16.1a3.1 3.1 0 1 0 0-6.2 3.1 3.1 0 0 0 0 6.2z"
     const val Bell = "M6 8.5a6 6 0 0 1 12 0c0 6.5 2.5 8.5 2.5 8.5h-17S6 15 6 8.5M10.2 20.5a2 2 0 0 0 3.6 0"
@@ -71,5 +73,19 @@ fun LucideIcon(
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round)
             )
         }
+    }
+}
+
+enum class InsulinKind { SHORT, LONG }
+
+/**
+ * The insulin type as an icon: short - a blue syringe, long - a violet capped pen. Shape and colour
+ * both differ, so it still reads without colour.
+ */
+@Composable
+fun InsulinIcon(kind: InsulinKind, size: Dp, modifier: Modifier = Modifier) {
+    when (kind) {
+        InsulinKind.SHORT -> LucideIcon(LucidePaths.Syringe, size, GlukoColors.InsulinShort, strokeWidth = 2f, modifier = modifier)
+        InsulinKind.LONG -> LucideIcon(LucidePaths.InsulinPen, size, GlukoColors.InsulinLong, strokeWidth = 2f, modifier = modifier)
     }
 }
