@@ -292,27 +292,16 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 is HistoryRow.Entry -> {
                     val entry = row.entry
                     val sugarColor = entry.bloodSugar?.let { glucoseColor(it, glucoseRange.low, glucoseRange.high) } ?: GlukoColors.Ink
-                    val statCount = listOfNotNull(entry.bloodSugar, entry.shortInsulinDose, entry.longInsulinDose).size
-                    val pill = afterMeal.byMeal[entry.id]
-                    // carbsGrams excluded from statCount on purpose: the compact row has no carbs
-                    // display at all, so an entry that would only show its carbs there needs the
-                    // full card instead, or that value is invisible in the feed.
-                    if (entry.mealLabel == null && entry.carbsGrams == null && statCount <= 1 &&
-                        entry.notes.isBlank() && entry.photoPath == null && pill == null
-                    ) {
-                        CompactRecordRow(entry, sugarColor) { overlays.openRecordEdit(entry.id) }
-                    } else {
-                        val caption = photoCaption(entry.createdAt)
-                        FullRecordCard(
-                            entry = entry,
-                            sugarColor = sugarColor,
-                            afterMeal = pill,
-                            fetchProducts = viewModel::getEntryProducts,
-                            onEdit = { overlays.openRecordEdit(entry.id) },
-                            onOpenComposition = { overlays.openRecordComposition(entry.id) },
-                            onOpenPhoto = { overlays.openPhoto(entry.photoPath, caption) }
-                        )
-                    }
+                    val caption = photoCaption(entry.createdAt)
+                    RecordCard(
+                        entry = entry,
+                        sugarColor = sugarColor,
+                        afterMeal = afterMeal.byMeal[entry.id],
+                        fetchProducts = viewModel::getEntryProducts,
+                        onEdit = { overlays.openRecordEdit(entry.id) },
+                        onOpenComposition = { overlays.openRecordComposition(entry.id) },
+                        onOpenPhoto = { overlays.openPhoto(entry.photoPath, caption) }
+                    )
                     Spacer(Modifier.height(GlukoSpacing.itemGap))
                 }
             }
@@ -365,39 +354,17 @@ private fun photoCaption(createdAt: LocalDateTime): String {
     return "${dayLabel.lowercase()}, ${createdAt.format(DateTimeFormatter.ofPattern("HH:mm"))}"
 }
 
-@Composable
-private fun CompactRecordRow(entry: DiaryEntry, sugarColor: Color, onClick: () -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .shadowSoft(GlukoRadius.tile)
-            .clip(RoundedCornerShape(GlukoRadius.tile))
-            .background(GlukoColors.Surface)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(entry.createdAt.format(DateTimeFormatter.ofPattern("HH:mm")), style = GlukoType.RecordTime.tabular)
-        Spacer(Modifier.width(8.dp))
-        Text(stringResource(R.string.record_measurement_tag), style = GlukoType.Hint)
-        Spacer(Modifier.weight(1f))
-        LucideIcon(LucidePaths.Droplet, 12.dp, GlukoColors.TextLabel, strokeWidth = 1.8f)
-        Spacer(Modifier.width(4.dp))
-        entry.bloodSugar?.let {
-            Text("%.1f".format(it), style = GlukoType.Value.copy(color = sugarColor).tabular)
-            Spacer(Modifier.width(3.dp))
-            Text(stringResource(R.string.mmol_unit), style = GlukoType.Unit)
-        }
-    }
-}
-
 // Strict, not a minimum - matching the fixed-size preset cards/cubes elsewhere (MealPresetsScreen,
 // FoodPicker) - so a portrait photo can't stretch this box (and the row) taller than the preset
 // tile next to it.
 private val RecordMediaHeight = 88.dp
 
+/**
+ * A History record: the one-line [RecordRow] on top; under it, only when there are any, the preset
+ * and photo, the after-meal pill and the note - the bits that move into an opened record next.
+ */
 @Composable
-private fun FullRecordCard(
+private fun RecordCard(
     entry: DiaryEntry,
     sugarColor: Color,
     afterMeal: AfterMeal?,
@@ -412,89 +379,28 @@ private fun FullRecordCard(
     }
 
     GlukoCard(radius = GlukoRadius.record, padding = 0.dp, modifier = Modifier.plainClickable(onClick = onEdit)) {
-        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 15.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(entry.createdAt.format(DateTimeFormatter.ofPattern("HH:mm")), style = GlukoType.RecordTime.tabular)
-                // Only a preset name is worth a tag; "no preset" would just label an absence.
-                entry.mealLabel?.let { preset ->
-                    Spacer(Modifier.width(9.dp))
-                    Box(
-                        Modifier.clip(RoundedCornerShape(GlukoRadius.pill)).background(GlukoColors.Tile).padding(horizontal = 9.dp, vertical = 3.dp)
-                    ) {
-                        Text(preset, style = GlukoType.CardLabel.copy(fontSize = 11.sp), maxLines = 1)
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-                Column {
-                    Text(stringResource(R.string.record_sugar_label), style = GlukoType.CardLabel)
-                    Spacer(Modifier.height(3.dp))
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(entry.bloodSugar?.let { "%.1f".format(it) } ?: "—", style = GlukoType.ValueLarge.copy(color = sugarColor).tabular)
-                        Spacer(Modifier.width(3.dp))
-                        Text(stringResource(R.string.mmol_unit), style = GlukoType.Unit)
-                    }
-                }
-                Spacer(Modifier.width(14.dp))
-                Box(Modifier.width(1.dp).heightIn(min = 40.dp).background(GlukoColors.Divider))
-                Spacer(Modifier.width(14.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.record_insulin_label), style = GlukoType.CardLabel)
-                    Spacer(Modifier.height(3.dp))
-                    Row {
-                        InsulinValue(
-                            entry.shortInsulinDose,
-                            stringResource(R.string.record_short_label),
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(Modifier.width(10.dp))
-                        InsulinValue(
-                            entry.longInsulinDose,
-                            stringResource(R.string.record_long_label),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
+        Column(Modifier.padding(start = 14.dp, end = 14.dp, top = 11.dp, bottom = 11.dp)) {
+            RecordRow(entry, sugarColor)
 
             val hasPreset = entry.mealLabel != null
             val hasPhoto = entry.photoPath != null
-            val hasCarbs = entry.carbsGrams != null
-            // An entry with none of the three has nothing for this row to show - skip it
-            // entirely rather than render an empty tile pair, and skip the divider above it
-            // too (an afterMeal pill only ever exists on a meal entry, which always has
-            // a preset or carbs, so this also gates the pill correctly).
-            val hasMediaRow = hasPreset || hasCarbs || hasPhoto
-
-            if (hasMediaRow) {
-                Spacer(Modifier.height(13.dp))
+            if (hasPreset || hasPhoto || afterMeal != null) {
+                Spacer(Modifier.height(11.dp))
                 GlukoDivider()
                 if (afterMeal != null) AfterMealPill(afterMeal)
-                Spacer(Modifier.height(13.dp))
-
-                if (hasCarbs && !hasPreset && !hasPhoto) {
-                    // Nothing else in the row to sit next to - a plain line reads better than
-                    // a tile with a single line of text floating in it.
-                    Text(carbsText(entry.carbsGrams!!), style = GlukoType.Body)
-                } else {
+                if (hasPreset || hasPhoto) {
+                    Spacer(Modifier.height(11.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GlukoSpacing.itemGap)) {
-                        when {
-                            hasPreset -> PresetTile(entry, products, Modifier.weight(1f), onOpenComposition)
-                            hasCarbs -> CarbsTile(entry.carbsGrams!!, Modifier.weight(1f))
-                        }
-                        // The only case with nothing beside it (no preset, no carbs) - Row's default
-                        // start alignment already puts it on the left, nothing extra needed.
+                        if (hasPreset) PresetTile(entry, products, Modifier.weight(1f), onOpenComposition)
                         if (hasPhoto) RecordPhotoTile(entry.photoPath!!, onOpenPhoto)
                     }
                 }
             }
 
             if (entry.notes.isNotBlank()) {
-                Spacer(Modifier.height(13.dp))
+                Spacer(Modifier.height(11.dp))
                 GlukoDivider()
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(10.dp))
                 Text(entry.notes, style = GlukoType.Note, maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -530,21 +436,6 @@ private fun PresetTile(entry: DiaryEntry, products: List<DiaryEntryProduct>, mod
     }
 }
 
-/** No preset to name, so no composition link and no click override - taps fall through to the card's own onEdit. */
-@Composable
-private fun CarbsTile(carbsGrams: Float, modifier: Modifier) {
-    Box(
-        modifier
-            .height(RecordMediaHeight)
-            .clip(RoundedCornerShape(GlukoRadius.tile))
-            .background(GlukoColors.Tile)
-            .padding(horizontal = 13.dp, vertical = 11.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Text(carbsText(carbsGrams), style = GlukoType.Body)
-    }
-}
-
 @Composable
 private fun RecordPhotoTile(photoPath: String, onOpenPhoto: () -> Unit) {
     Box(
@@ -567,15 +458,6 @@ private fun RecordPhotoTile(photoPath: String, onOpenPhoto: () -> Unit) {
         ) {
             LucideIcon(LucidePaths.Expand, 11.dp, strokeWidth = 2.2f)
         }
-    }
-}
-
-@Composable
-private fun InsulinValue(dose: Float?, label: String, modifier: Modifier = Modifier) {
-    Row(modifier, verticalAlignment = Alignment.Bottom) {
-        Text(dose?.let { formatAmount(it) } ?: "—", style = GlukoType.Value.tabular, maxLines = 1)
-        Spacer(Modifier.width(5.dp))
-        Text(label, style = GlukoType.Unit, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
