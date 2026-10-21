@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** The four automatic sugar checks of one meal, +1h..+4h after it, as one pill on its card. */
+/** The four automatic sugar checks of one meal, +1h..+4h after it - the after-meal line of its record. */
 data class AfterMeal(
     /** Sugar at +1h..+4h; null where that check hasn't happened (yet) or found no sensor reading. Always 4 long. */
     val values: List<Double?>
