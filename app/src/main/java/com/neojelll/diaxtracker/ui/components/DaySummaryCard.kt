@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,10 +24,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
+import com.neojelll.diaxtracker.data.carbGoalProgress
+import com.neojelll.diaxtracker.data.carbGoalReached
 import com.neojelll.diaxtracker.insulin.DayInsulin
 import com.neojelll.diaxtracker.sensor.LatestSensorReading
 import com.neojelll.diaxtracker.sensor.SensorFreshness
@@ -40,10 +44,16 @@ import com.neojelll.diaxtracker.ui.theme.Ruda
  * 10.5sp. Sugar sits on ink - the screen's one dark accent; carbs and insulin on white.
  */
 @Composable
-fun DaySummaryCard(sensorReading: LatestSensorReading?, nowMillis: Long, carbsGramsToday: Float, insulinToday: DayInsulin) {
+fun DaySummaryCard(
+    sensorReading: LatestSensorReading?,
+    nowMillis: Long,
+    carbsGramsToday: Float,
+    insulinToday: DayInsulin,
+    carbGoalGrams: Float? = null
+) {
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         SugarTile(sensorReading, nowMillis, Modifier.weight(1.25f).fillMaxHeight())
-        CarbsTile(carbsGramsToday, Modifier.weight(1f).fillMaxHeight())
+        CarbsTile(carbsGramsToday, carbGoalGrams, Modifier.weight(1f).fillMaxHeight())
         InsulinTile(insulinToday, Modifier.weight(1f).fillMaxHeight())
     }
 }
@@ -67,13 +77,39 @@ private fun InsulinTile(insulin: DayInsulin, modifier: Modifier) {
     }
 }
 
-/** Today's carbohydrates in the unit from the settings; the unit goes into the note: "ХЕ за день". */
+/**
+ * Today's carbohydrates in the unit from the settings; the unit goes into the note: "ХЕ за день".
+ * With a daily goal the note says "из 12.5 ХЕ" (or "✓ цель набрана") and a thin ink bar along the
+ * bottom fills toward it - the goal isn't put beside the number, a 4-digit pair doesn't fit the tile.
+ */
 @Composable
-private fun CarbsTile(gramsToday: Float, modifier: Modifier) {
+private fun CarbsTile(gramsToday: Float, goalGrams: Float?, modifier: Modifier) {
     LightTile(modifier, stringResource(R.string.summary_carbs_label)) {
         Text(LocalCarbDisplay.current.format(gramsToday), style = SummaryValue, maxLines = 1)
         Spacer(Modifier.height(6.dp))
-        Text("${carbsUnitLabel()} ${stringResource(R.string.summary_carbs_today)}", style = SummarySub, maxLines = 1)
+        when {
+            goalGrams == null ->
+                Text("${carbsUnitLabel()} ${stringResource(R.string.summary_carbs_today)}", style = SummarySub, maxLines = 1)
+            carbGoalReached(gramsToday, goalGrams) -> Row(verticalAlignment = Alignment.CenterVertically) {
+                LucideIcon(LucidePaths.Check, 10.dp, GlukoColors.Ink, strokeWidth = 2.6f)
+                Spacer(Modifier.width(3.dp))
+                Text(stringResource(R.string.summary_carbs_goal_reached), style = SummarySub.copy(color = GlukoColors.Ink), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            else ->
+                Text(stringResource(R.string.summary_carbs_of_goal, carbsText(goalGrams)), style = SummarySub, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        if (goalGrams != null) {
+            Spacer(Modifier.weight(1f).heightIn(min = 7.dp))
+            Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(GlukoRadius.pill)).background(GlukoColors.Divider)) {
+                Box(
+                    Modifier
+                        .fillMaxWidth(carbGoalProgress(gramsToday, goalGrams))
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(GlukoRadius.pill))
+                        .background(GlukoColors.Ink)
+                )
+            }
+        }
     }
 }
 

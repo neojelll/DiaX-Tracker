@@ -56,6 +56,8 @@
     <string name="summary_sugar_label">Сахар</string>
     <string name="summary_carbs_label">Углеводы</string>
     <string name="summary_carbs_today">за день</string>
+    <string name="summary_carbs_of_goal">из %1$s</string>
+    <string name="summary_carbs_goal_reached">цель набрана</string>
     <string name="summary_insulin_label">Инсулин, ед</string>
     <string name="summary_insulin_short">короткий</string>
     <string name="summary_insulin_split">кор. / длин.</string>
@@ -112,6 +114,10 @@
     <string name="carbs_unit_grams">Граммы</string>
     <string name="carbs_grams_per_xe_label">Граммов в 1 ХЕ</string>
     <string name="carbs_setting_hint">Записи хранятся в граммах — это меняет только то, как они показываются и вводятся.</string>
+    <string name="carb_goal_title">Цель по углеводам на день</string>
+    <string name="carb_goal_step">шаг %1$s</string>
+    <string name="carb_goal_equivalent">≈ %1$s</string>
+    <string name="carb_goal_hint">Личная цель: на главной видно, сколько уже набрано за день. Это не рекомендация — значение выбираете вы.</string>
     <string name="short_insulin_short_label">Короткий инсулин</string>
     <string name="long_insulin_short_label">Длинный инсулин</string>
 

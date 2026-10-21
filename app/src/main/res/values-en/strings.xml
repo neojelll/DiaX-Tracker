@@ -56,6 +56,8 @@
     <string name="summary_sugar_label">Sugar</string>
     <string name="summary_carbs_label">Carbs</string>
     <string name="summary_carbs_today">today</string>
+    <string name="summary_carbs_of_goal">of %1$s</string>
+    <string name="summary_carbs_goal_reached">goal reached</string>
     <string name="summary_insulin_label">Insulin, u</string>
     <string name="summary_insulin_short">short</string>
     <string name="summary_insulin_split">short / long</string>
@@ -110,6 +112,10 @@
     <string name="carbs_unit_grams">Grams</string>
     <string name="carbs_grams_per_xe_label">Grams in 1 BU</string>
     <string name="carbs_setting_hint">Entries are stored in grams — this only changes how they are shown and typed.</string>
+    <string name="carb_goal_title">Daily carbohydrate goal</string>
+    <string name="carb_goal_step">step %1$s</string>
+    <string name="carb_goal_equivalent">≈ %1$s</string>
+    <string name="carb_goal_hint">A personal goal: the home screen shows how much of it is eaten today. Not a recommendation — you choose the number.</string>
     <string name="short_insulin_short_label">Fast-Acting Insulin</string>
     <string name="long_insulin_short_label">Long-Acting Insulin</string>
 
