@@ -1,5 +1,6 @@
 package com.neojelll.diaxtracker.ui.screens
 
+import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.sensor.FRESH_FOR_MILLIS
 import com.neojelll.diaxtracker.sensor.LatestSensorReading
 import java.time.LocalDateTime
@@ -44,5 +45,29 @@ class SensorSugarFillTest {
         assertEquals("6.4", sugarFieldText(6.4f))
         assertEquals("7.0", sugarFieldText(7f))
         assertEquals("5.6", sugarFieldText(101.0f / 18.0182f))
+    }
+
+    @Test
+    fun `a value from the sensor button saved as is counts as a sensor reading`() {
+        val filled = EntryFormState(bloodSugar = "6.4", sugarFilledFromSensor = "6.4")
+        assertEquals(SugarSource.SENSOR, typedSugarSource(filled))
+    }
+
+    @Test
+    fun `a value edited after the sensor button counts as typed`() {
+        val edited = EntryFormState(bloodSugar = "6.8", sugarFilledFromSensor = "6.4")
+        assertEquals(SugarSource.MANUAL, typedSugarSource(edited))
+    }
+
+    @Test
+    fun `a value typed by hand counts as typed`() {
+        assertEquals(SugarSource.MANUAL, typedSugarSource(EntryFormState(bloodSugar = "5.2")))
+    }
+
+    @Test
+    fun `no sugar has no source and clearing forgets the sensor fill`() {
+        assertNull(typedSugarSource(EntryFormState()))
+        val cleared = EntryFormState(bloodSugar = "6.4", sugarFilledFromSensor = "6.4").cleared()
+        assertNull(cleared.sugarFilledFromSensor)
     }
 }
