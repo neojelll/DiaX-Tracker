@@ -15,7 +15,6 @@ sealed interface Overlay {
     data class TimePicker(val initial: LocalTime, val onPick: (LocalTime) -> Unit, val onNow: (() -> Unit)? = null) : Overlay
     data object Notifications : Overlay
     data class RecordEdit(val entryId: Long) : Overlay
-    data class RecordComposition(val entryId: Long) : Overlay
     data class PresetDetail(val presetId: Long) : Overlay
     data class PresetEdit(val presetId: Long?) : Overlay
     data class Photo(val photoPath: String?, val caption: String) : Overlay
@@ -78,9 +77,6 @@ class OverlayController {
         replace(Overlay.RecordEdit(entryId))
     }
 
-    fun openRecordComposition(entryId: Long) {
-        replace(Overlay.RecordComposition(entryId))
-    }
 
     fun openPresetDetail(presetId: Long) {
         replace(Overlay.PresetDetail(presetId))

@@ -135,8 +135,6 @@
     <string name="record_long_label">длинный</string>
     <string name="record_no_preset">Без пресета</string>
     <string name="record_composition">состав</string>
-    <string name="record_composition_snapshot">Состав на момент записи</string>
-    <string name="record_composition_empty">Состав не сохранён</string>
     <string name="record_measurement_tag">замер</string>
     <string name="record_type_meal">еда</string>
     <string name="record_type_shot">укол</string>
