@@ -2,6 +2,7 @@ package com.neojelll.diaxtracker.ui.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +60,8 @@ import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.SugarSource
+import com.neojelll.diaxtracker.data.carbsGramsOn
+import com.neojelll.diaxtracker.insulin.insulinOn
 import com.neojelll.diaxtracker.ui.components.AfterMealLine
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FilterChip
@@ -125,11 +128,13 @@ private fun DiaryEntry.matches(filter: DateFilter): Boolean {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val entries by viewModel.entries.collectAsState()
     val entryProducts by viewModel.entryProducts.collectAsState()
     val glucoseRange by viewModel.glucoseRange.collectAsState()
+    val carbGoal by viewModel.carbGoal.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     var dateFilter by remember { mutableStateOf<DateFilter>(DateFilter.All) }
@@ -287,18 +292,19 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             }
         }
 
-        items(rows, key = { row ->
+        // Each day's header is pinned while its records scroll under it. Its totals are the whole
+        // day's - the same sums as on the home screen - not just what the search left visible.
+        rows.forEach { row ->
             when (row) {
-                is HistoryRow.DayHeader -> "day-${row.date}"
-                is HistoryRow.Entry -> row.entry.id
-            }
-        }) { row ->
-            when (row) {
-                is HistoryRow.DayHeader -> {
-                    DayHeaderRow(row.date, records.count { it.createdAt.toLocalDate() == row.date && it.matches(dateFilter) })
-                    Spacer(Modifier.height(10.dp))
+                is HistoryRow.DayHeader -> stickyHeader(key = "day-${row.date}") {
+                    DayHeaderRow(
+                        date = row.date,
+                        carbsGrams = carbsGramsOn(row.date, records, entryProducts),
+                        insulin = insulinOn(row.date, records),
+                        carbGoalGrams = carbGoal.activeGrams
+                    )
                 }
-                is HistoryRow.Entry -> {
+                is HistoryRow.Entry -> item(key = row.entry.id) {
                     val entry = row.entry
                     val sugarColor = entry.bloodSugar?.let { glucoseColor(it, glucoseRange.low, glucoseRange.high) } ?: GlukoColors.Ink
                     val caption = photoCaption(entry.createdAt)
@@ -342,24 +348,6 @@ private fun historySummary(count: Int, days: Int): String {
     val entriesLabel = pluralStringResource(R.plurals.day_records_count, count, count)
     val daysLabel = pluralStringResource(R.plurals.history_days_count, days, days)
     return "$entriesLabel · $daysLabel"
-}
-
-@Composable
-private fun DayHeaderRow(date: LocalDate, count: Int) {
-    val locale = LocalConfiguration.current.locales[0]
-    val today = LocalDate.now()
-    val label = when (date) {
-        today -> stringResource(R.string.today_label)
-        today.minusDays(1) -> stringResource(R.string.yesterday_label)
-        else -> date.format(DateTimeFormatter.ofPattern("d MMMM", locale))
-    }
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Kicker(label)
-        Spacer(Modifier.width(10.dp))
-        Box(Modifier.weight(1f).height(1.dp).background(GlukoColors.BorderDashed))
-        Spacer(Modifier.width(10.dp))
-        Text(pluralStringResource(R.plurals.day_records_count, count, count), style = GlukoType.Hint.tabular)
-    }
 }
 
 @Composable
