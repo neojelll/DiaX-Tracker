@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.CarbDisplay
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
+import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.photo.PhotoStore
 import com.neojelll.diaxtracker.sensor.LatestSensorReading
 import com.neojelll.diaxtracker.sensor.SensorFreshness
@@ -43,6 +44,17 @@ internal fun sensorSugarToFill(state: EntryFormState, reading: LatestSensorReadi
 
 /** The reading as the sugar field takes it: one decimal, dot separator (6.4). */
 internal fun sugarFieldText(mmol: Float): String = String.format(Locale.ROOT, "%.1f", mmol)
+
+/**
+ * Where the typed sugar came from: the sensor when it is exactly what the "с сенсора" button put in,
+ * a finger check when typed or edited by hand; null with no sugar (saving then falls back to the
+ * nearest sensor reading itself).
+ */
+internal fun typedSugarSource(state: EntryFormState): SugarSource? = when {
+    state.bloodSugar.isBlank() -> null
+    state.bloodSugar == state.sugarFilledFromSensor -> SugarSource.SENSOR
+    else -> SugarSource.MANUAL
+}
 
 /** Applies a picked preset to the form: real bread units/products, display label from the design. */
 internal fun applyPresetPick(state: EntryFormState, preset: MealPresetWithProducts, option: PresetOption, display: CarbDisplay): EntryFormState =

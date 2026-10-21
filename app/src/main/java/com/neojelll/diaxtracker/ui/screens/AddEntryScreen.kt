@@ -184,7 +184,10 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 sensorSugarToFill(formState, latestSensorReading, nowMillis)?.let { reading ->
                     SensorFillPill(
                         value = formatSummaryValue(reading.mmol),
-                        onClick = { formState = formState.copy(bloodSugar = sugarFieldText(reading.mmol)) },
+                        onClick = {
+                            val text = sugarFieldText(reading.mmol)
+                            formState = formState.copy(bloodSugar = text, sugarFilledFromSensor = text)
+                        },
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                 }
@@ -268,6 +271,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                     val createdAt = formState.dateTimeAt(LocalDateTime.now())
                     viewModel.addEntry(
                         bloodSugar = formState.bloodSugar.toFloatOrNull(),
+                        bloodSugarSource = typedSugarSource(formState),
                         carbsGrams = carbDisplay.parse(formState.carbs),
                         mealLabel = formState.mealLabel,
                         mealProducts = formState.mealProducts.mapIndexed { index, product ->

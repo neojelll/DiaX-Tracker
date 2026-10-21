@@ -156,6 +156,8 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addEntry(
         bloodSugar: Float?,
+        /** Where [bloodSugar] came from; null = typed by hand. */
+        bloodSugarSource: SugarSource? = null,
         carbsGrams: Float?,
         mealLabel: String?,
         mealProducts: List<DiaryEntryProduct>,
@@ -172,7 +174,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                 DiaryEntry(
                     bloodSugar = bloodSugar ?: sensorReading,
                     sugarSource = when {
-                        bloodSugar != null -> SugarSource.MANUAL
+                        bloodSugar != null -> bloodSugarSource ?: SugarSource.MANUAL
                         sensorReading != null -> SugarSource.SENSOR
                         else -> null
                     },

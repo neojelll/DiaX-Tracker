@@ -29,7 +29,9 @@ internal data class EntryFormState(
     /** The preset picked on the add-entry screen; null when none, or once carbs were typed by hand. */
     val presetId: Long? = null,
     /** Whether the comment field is unfolded in the details block. */
-    val noteOpen: Boolean = false
+    val noteOpen: Boolean = false,
+    /** The text the "с сенсора" button put into [bloodSugar]; null when it wasn't used. */
+    val sugarFilledFromSensor: String? = null
 ) {
     val isFillable: Boolean
         get() = bloodSugar.isNotBlank() || carbs.isNotBlank() ||
