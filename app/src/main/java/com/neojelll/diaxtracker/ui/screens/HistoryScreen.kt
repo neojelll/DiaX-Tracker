@@ -53,12 +53,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.aftermeal.AfterMeal
+import com.neojelll.diaxtracker.aftermeal.afterMealPoints
 import com.neojelll.diaxtracker.aftermeal.buildAfterMeal
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.SugarSource
-import com.neojelll.diaxtracker.ui.components.AfterMealPill
+import com.neojelll.diaxtracker.ui.components.AfterMealLine
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FilterChip
 import com.neojelll.diaxtracker.ui.components.FoodPicker
@@ -309,6 +310,8 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                         sugarColor = sugarColor,
                         afterMeal = pill,
                         expanded = if (opensUp) expanded else null,
+                        range = glucoseRange,
+                        now = now,
                         fetchProducts = viewModel::getEntryProducts,
                         // Nothing more inside - a tap edits, as before; otherwise it opens or closes the record.
                         onTap = {
@@ -381,6 +384,8 @@ private fun RecordCard(
     sugarColor: Color,
     afterMeal: AfterMeal?,
     expanded: Boolean?,
+    range: GlucoseRange,
+    now: LocalDateTime,
     fetchProducts: suspend (Long) -> List<DiaryEntryProduct>,
     onTap: () -> Unit,
     onEdit: () -> Unit,
@@ -398,16 +403,18 @@ private fun RecordCard(
     ) {
         Column(Modifier.animateContentSize().padding(start = 14.dp, end = 14.dp, top = 11.dp, bottom = 11.dp)) {
             RecordRow(entry, sugarColor, expanded = expanded)
-            if (open) OpenedRecord(entry, afterMeal, fetchProducts, onEdit, onOpenPhoto)
+            if (open) OpenedRecord(entry, afterMeal, range, now, fetchProducts, onEdit, onOpenPhoto)
         }
     }
 }
 
-/** What an opened record shows: "preset | photo" (no preset - the photo full width), after the meal, the note, edit. */
+/** What an opened record shows: "preset | photo" (no preset - the photo full width), sugar after the meal, the note, edit. */
 @Composable
 private fun OpenedRecord(
     entry: DiaryEntry,
     afterMeal: AfterMeal?,
+    range: GlucoseRange,
+    now: LocalDateTime,
     fetchProducts: suspend (Long) -> List<DiaryEntryProduct>,
     onEdit: () -> Unit,
     onOpenPhoto: () -> Unit
@@ -432,7 +439,13 @@ private fun OpenedRecord(
                 }
             }
         }
-        if (afterMeal != null) AfterMealPill(afterMeal)
+        if (afterMeal != null) {
+            AfterMealLine(
+                afterMealPoints(entry.bloodSugar?.toDouble(), afterMeal, entry.createdAt, now),
+                rangeLow = range.low,
+                rangeHigh = range.high
+            )
+        }
         if (entry.notes.isNotBlank()) NoteBlock(entry.notes)
         Row(
             Modifier
