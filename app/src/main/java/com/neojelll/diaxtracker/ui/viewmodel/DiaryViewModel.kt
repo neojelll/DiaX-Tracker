@@ -11,6 +11,8 @@ import com.neojelll.diaxtracker.backup.AutoBackupScheduler
 import com.neojelll.diaxtracker.data.AutoBackupState
 import com.neojelll.diaxtracker.data.BackupPreferencesStore
 import com.neojelll.diaxtracker.data.CarbDisplay
+import com.neojelll.diaxtracker.data.CarbGoal
+import com.neojelll.diaxtracker.data.CarbGoalStore
 import com.neojelll.diaxtracker.data.CarbSettingsStore
 import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
@@ -58,6 +60,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val glucoseRangeStore = GlucoseRangeStore(application)
     private val insulinSettingsStore = InsulinSettingsStore(application)
     private val carbSettingsStore = CarbSettingsStore(application)
+    private val carbGoalStore = CarbGoalStore(application)
     private val backupPreferencesStore = BackupPreferencesStore(application)
     private val disclaimerStore = DisclaimerStore(application)
 
@@ -93,6 +96,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val _carbDisplay = MutableStateFlow(carbSettingsStore.get())
     /** How carbohydrates are shown and typed (unit, grams per XE). */
     val carbDisplay: StateFlow<CarbDisplay> = _carbDisplay.asStateFlow()
+
+    private val _carbGoal = MutableStateFlow(carbGoalStore.get())
+    val carbGoal: StateFlow<CarbGoal> = _carbGoal.asStateFlow()
 
     val autoBackup: StateFlow<AutoBackupState> = backupPreferencesStore.observe().stateIn(
         scope = viewModelScope,
@@ -288,6 +294,11 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun setCarbDisplay(display: CarbDisplay) {
         carbSettingsStore.save(display)
         _carbDisplay.value = display
+    }
+
+    fun setCarbGoal(goal: CarbGoal) {
+        carbGoalStore.save(goal)
+        _carbGoal.value = goal
     }
 
     /** Returns whether the backup was turned on; on failure an error is already reported. */

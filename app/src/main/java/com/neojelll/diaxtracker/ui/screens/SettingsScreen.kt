@@ -35,6 +35,7 @@ import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.data.AutoBackupState
 import com.neojelll.diaxtracker.ui.components.BackupExportRow
 import com.neojelll.diaxtracker.ui.components.BackupImportRow
+import com.neojelll.diaxtracker.ui.components.CarbGoalSection
 import com.neojelll.diaxtracker.ui.components.CarbSettingSection
 import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
@@ -108,6 +109,11 @@ fun SettingsScreen(viewModel: DiaryViewModel) {
 
             GlukoCard {
                 CarbSettingSection(viewModel)
+            }
+            Spacer(Modifier.height(GlukoSpacing.cardGap))
+
+            GlukoCard {
+                CarbGoalSection(viewModel)
             }
             Spacer(Modifier.height(GlukoSpacing.cardGap))
 

@@ -95,6 +95,7 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     val entryProducts by viewModel.entryProducts.collectAsState()
     val carbsGramsToday = remember(entries, entryProducts, today) { carbsGramsOn(today, entries, entryProducts) }
     val insulinToday = remember(entries, today) { insulinOn(today, entries) }
+    val carbGoal by viewModel.carbGoal.collectAsState()
     val greetingRes = greetingFor(now.hour)
     val carbDisplay = LocalCarbDisplay.current
     val presetOptions = mealPresets.map { it.toPresetOption() }
@@ -134,7 +135,8 @@ fun AddEntryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
             latestSensorReading,
             nowMillis = nowMillis,
             carbsGramsToday = carbsGramsToday,
-            insulinToday = insulinToday
+            insulinToday = insulinToday,
+            carbGoalGrams = carbGoal.activeGrams
         )
         Spacer(Modifier.height(8.dp))
 
