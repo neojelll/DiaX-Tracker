@@ -14,7 +14,9 @@ DiaX-Tracker — дневник для людей с диабетом, глав�
 
 | Запись | История | Пресеты питания |
 | --- | --- | --- |
-| ![Экран записи](docs/screenshots/entry.jpg) | ![История записей](docs/screenshots/history.jpg) | ![Пресеты питания](docs/screenshots/meal-presets.jpg) |
+| ![Экран записи](docs/screenshots/ru/01-home.png) | ![История записей](docs/screenshots/ru/11-history-open-record.png) | ![Пресеты питания](docs/screenshots/ru/20-food.png) |
+
+Все экраны — в [галерее](docs/screenshots/README.md). Снимки делаются автоматически на выдуманных данных.
 
 ## Содержание
 
