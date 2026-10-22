@@ -28,14 +28,16 @@ import com.neojelll.diaxtracker.data.MealPresetWithProducts
 import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.data.isMeal
 import com.neojelll.diaxtracker.photo.PhotoStore
-import com.neojelll.diaxtracker.sensor.PostMealScheduler
 import com.neojelll.diaxtracker.sensor.LatestSensorReading
+import com.neojelll.diaxtracker.sensor.PostMealScheduler
 import com.neojelll.diaxtracker.sensor.SensorReadingStore
 import com.neojelll.diaxtracker.sensor.nearestSensorReading
+import com.neojelll.diaxtracker.time.AppClock
+import java.time.Duration
+import java.time.LocalDateTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -44,11 +46,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Duration
-import java.time.LocalDateTime
 
 class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = DiaryRepository(
@@ -133,7 +134,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     val activeInsulinEntries: StateFlow<List<DiaryEntry>> = combine(entries, insulinTicker, _insulinDurationHours) { list, _, durationHours ->
-        val now = LocalDateTime.now()
+        val now = AppClock.now()
         val duration = Duration.ofMinutes((durationHours * 60).toLong())
         list
             .filter { it.shortInsulinDose != null && Duration.between(it.createdAt, now) < duration }

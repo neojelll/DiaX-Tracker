@@ -6,8 +6,8 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.neojelll.diaxtracker.data.BackupPreferencesStore
+import com.neojelll.diaxtracker.time.AppClock
 import java.io.IOException
-import java.time.LocalDateTime
 
 /** One automatic backup: a full export into the chosen folder, then trimming old automatic ones. */
 class AutoBackupWorker(
@@ -21,7 +21,7 @@ class AutoBackupWorker(
         val folder = store.folderUri()?.let(Uri::parse) ?: return Result.success()
 
         return try {
-            val file = BackupFolder.createFile(applicationContext, folder, autoBackupFileName(LocalDateTime.now()))
+            val file = BackupFolder.createFile(applicationContext, folder, autoBackupFileName(AppClock.now()))
                 ?: throw IOException("The backup folder refused to create a file")
             if (!BackupExporter.export(applicationContext, file, from = null)) {
                 BackupFolder.delete(applicationContext, file)
@@ -30,7 +30,7 @@ class AutoBackupWorker(
             // Trimming is housekeeping: a hiccup there must not make a good backup count as failed.
             runCatching { BackupFolder.deleteStale(applicationContext, folder) }
                 .onFailure { Log.w(TAG, "Couldn't trim old automatic backups", it) }
-            store.recordSuccess(System.currentTimeMillis())
+            store.recordSuccess(AppClock.millis())
             Result.success()
         } catch (e: Exception) {
             // Also covers the folder's access being revoked (SecurityException); Settings shows it.

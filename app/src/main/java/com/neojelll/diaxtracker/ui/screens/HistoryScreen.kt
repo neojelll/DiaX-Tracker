@@ -62,6 +62,7 @@ import com.neojelll.diaxtracker.data.GlucoseRange
 import com.neojelll.diaxtracker.data.SugarSource
 import com.neojelll.diaxtracker.data.carbsGramsOn
 import com.neojelll.diaxtracker.insulin.insulinOn
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.components.AfterMealLine
 import com.neojelll.diaxtracker.ui.components.CircleButton
 import com.neojelll.diaxtracker.ui.components.FilterChip
@@ -118,7 +119,7 @@ private sealed interface DateFilter {
 
 private fun DiaryEntry.matches(filter: DateFilter): Boolean {
     val date = createdAt.toLocalDate()
-    val today = LocalDate.now()
+    val today = AppClock.today()
     return when (filter) {
         DateFilter.All -> true
         DateFilter.Yesterday -> date == today.minusDays(1)
@@ -147,11 +148,11 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
     }
 
     // A pill appears an hour after a meal, so re-evaluate as time passes, not only when entries change.
-    var now by remember { mutableStateOf(LocalDateTime.now()) }
+    var now by remember { mutableStateOf(AppClock.now()) }
     LaunchedEffect(Unit) {
         while (true) {
             delay(60_000)
-            now = LocalDateTime.now()
+            now = AppClock.now()
         }
     }
     val afterMeal = remember(entries, now) { buildAfterMeal(entries, now) }
@@ -246,7 +247,7 @@ fun HistoryScreen(viewModel: DiaryViewModel, overlays: OverlayController) {
                 }
                 item {
                     FilterChip(rangeLabel, dateFilter is DateFilter.Range) {
-                        val today = LocalDate.now()
+                        val today = AppClock.today()
                         overlays.openDatePicker(today) { from ->
                             overlays.openDatePicker(from) { to ->
                                 dateFilter = DateFilter.Range(minOf(from, to), maxOf(from, to))
@@ -352,7 +353,7 @@ private fun historySummary(count: Int, days: Int): String {
 
 @Composable
 private fun photoCaption(createdAt: LocalDateTime): String {
-    val today = LocalDate.now()
+    val today = AppClock.today()
     val dayLabel = when (createdAt.toLocalDate()) {
         today -> stringResource(R.string.today_label)
         today.minusDays(1) -> stringResource(R.string.yesterday_label)

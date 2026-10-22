@@ -30,27 +30,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.backup.BackupFolder
-import com.neojelll.diaxtracker.ui.components.LocalDockClearance
-import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.data.AutoBackupState
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.components.BackupExportRow
 import com.neojelll.diaxtracker.ui.components.BackupImportRow
 import com.neojelll.diaxtracker.ui.components.CarbGoalSection
 import com.neojelll.diaxtracker.ui.components.CarbSettingSection
+import com.neojelll.diaxtracker.ui.components.GlucoseRangeSection
 import com.neojelll.diaxtracker.ui.components.GlukoCard
 import com.neojelll.diaxtracker.ui.components.GlukoDivider
 import com.neojelll.diaxtracker.ui.components.GlukoSwitch
-import com.neojelll.diaxtracker.ui.components.GlucoseRangeSection
 import com.neojelll.diaxtracker.ui.components.InsulinDurationSection
 import com.neojelll.diaxtracker.ui.components.LanguageSettingRow
+import com.neojelll.diaxtracker.ui.components.LocalDockClearance
 import com.neojelll.diaxtracker.ui.components.SecondaryButton
+import com.neojelll.diaxtracker.ui.components.rememberAppToasts
 import com.neojelll.diaxtracker.ui.theme.DangerRed
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoSpacing
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -59,7 +59,7 @@ private fun autoBackupStatus(state: AutoBackupState): String = when {
     state.lastSuccessMillis == 0L -> stringResource(R.string.backup_toggle_never)
     else -> stringResource(
         R.string.backup_toggle_last,
-        Instant.ofEpochMilli(state.lastSuccessMillis).atZone(ZoneId.systemDefault())
+        Instant.ofEpochMilli(state.lastSuccessMillis).atZone(AppClock.zone)
             .format(DateTimeFormatter.ofPattern("d MMM, HH:mm"))
     )
 }

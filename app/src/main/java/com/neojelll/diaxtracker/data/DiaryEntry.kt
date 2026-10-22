@@ -2,6 +2,7 @@ package com.neojelll.diaxtracker.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.neojelll.diaxtracker.time.AppClock
 import java.time.LocalDateTime
 
 enum class SugarSource { MANUAL, SENSOR }
@@ -19,7 +20,7 @@ data class DiaryEntry(
     val longInsulinDose: Float?,
     val notes: String,
     val photoPath: String? = null,
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: LocalDateTime = AppClock.now(),
     /** For an automatic sugar check: the meal entry that scheduled it. Not a foreign key - see [isMeal]. */
     val sourceEntryId: Long? = null,
     /** For an automatic sugar check: which hour after the meal it is for, 1..4. */

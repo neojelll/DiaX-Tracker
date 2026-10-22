@@ -31,15 +31,15 @@ import androidx.compose.ui.unit.sp
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.notifications.yesterdayMeals
 import com.neojelll.diaxtracker.ui.screens.formatAmount
-import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import com.neojelll.diaxtracker.ui.theme.GlukoColors
 import com.neojelll.diaxtracker.ui.theme.GlukoRadius
 import com.neojelll.diaxtracker.ui.theme.GlukoType
 import com.neojelll.diaxtracker.ui.theme.tabular
+import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
+import java.time.format.DateTimeFormatter
 
 /**
  * Notifications as a bottom sheet, matching the design's other sheets (date, time, presets,
@@ -50,7 +50,7 @@ import com.neojelll.diaxtracker.ui.theme.tabular
 @Composable
 fun NotificationSheet(viewModel: DiaryViewModel, onDismiss: () -> Unit) {
     val entries by viewModel.entries.collectAsState()
-    val meals = remember(entries) { yesterdayMeals(entries, LocalDateTime.now()) }
+    val meals = remember(entries) { yesterdayMeals(entries, AppClock.now()) }
     val xeFormat = carbsValueFormat()
 
     GlukoSheet(onDismiss, maxHeightFraction = 0.76f) {

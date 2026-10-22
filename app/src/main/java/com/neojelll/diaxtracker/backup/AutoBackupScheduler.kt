@@ -7,7 +7,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import java.time.LocalDateTime
+import com.neojelll.diaxtracker.time.AppClock
 import java.util.concurrent.TimeUnit
 
 object AutoBackupScheduler {
@@ -36,7 +36,7 @@ object AutoBackupScheduler {
             PERIODIC_NAME,
             ExistingPeriodicWorkPolicy.UPDATE,
             PeriodicWorkRequestBuilder<AutoBackupWorker>(1, TimeUnit.DAYS)
-                .setInitialDelay(delayUntilNextEvening(LocalDateTime.now()).toMillis(), TimeUnit.MILLISECONDS)
+                .setInitialDelay(delayUntilNextEvening(AppClock.now()).toMillis(), TimeUnit.MILLISECONDS)
                 .setConstraints(constraints)
                 .build()
         )

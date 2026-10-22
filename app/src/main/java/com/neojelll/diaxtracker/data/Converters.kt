@@ -2,6 +2,7 @@ package com.neojelll.diaxtracker.data
 
 import android.util.Log
 import androidx.room.TypeConverter
+import com.neojelll.diaxtracker.time.AppClock
 import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
 
@@ -17,7 +18,7 @@ class Converters {
             } catch (e: DateTimeParseException) {
                 // A malformed timestamp would otherwise crash every query that reads this row.
                 Log.e(TAG, "Corrupt timestamp in database, substituting now(): $it", e)
-                LocalDateTime.now()
+                AppClock.now()
             }
         }
 

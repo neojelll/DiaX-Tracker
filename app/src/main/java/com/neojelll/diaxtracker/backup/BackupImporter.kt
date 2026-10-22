@@ -9,6 +9,7 @@ import com.neojelll.diaxtracker.data.DiaryDatabase
 import com.neojelll.diaxtracker.data.DiaryEntry
 import com.neojelll.diaxtracker.data.DiaryEntryProduct
 import com.neojelll.diaxtracker.data.MealPresetWithProducts
+import com.neojelll.diaxtracker.time.AppClock
 import java.io.File
 import java.time.LocalDateTime
 import java.util.UUID
@@ -83,7 +84,7 @@ object BackupImporter {
             }
 
             // Only records are counted in the summary; the checks inside a pill are imported with their meal.
-            val recordIds = feedRecords(backupEntries, LocalDateTime.now()).mapTo(HashSet()) { it.id }
+            val recordIds = feedRecords(backupEntries, AppClock.now()).mapTo(HashSet()) { it.id }
 
             val live = DiaryDatabase.getDatabase(context)
             val photosDir = File(context.filesDir, PHOTOS_DIR_NAME).apply { mkdirs() }
@@ -181,7 +182,7 @@ object BackupImporter {
             context.deleteDatabase(PREVIEW_DB_NAME)
             val archive = DiaryDatabase.newBuilder(context, PREVIEW_DB_NAME).createFromFile(dbFile).build()
             try {
-                val records = feedRecords(archive.diaryDao().getAllEntries().first(), LocalDateTime.now())
+                val records = feedRecords(archive.diaryDao().getAllEntries().first(), AppClock.now())
                 ArchiveInfo(
                     entries = records.size,
                     first = records.minOfOrNull { it.createdAt },

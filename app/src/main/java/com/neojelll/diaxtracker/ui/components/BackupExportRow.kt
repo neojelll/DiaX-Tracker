@@ -14,9 +14,8 @@ import androidx.compose.ui.res.stringResource
 import com.neojelll.diaxtracker.R
 import com.neojelll.diaxtracker.aftermeal.feedRecords
 import com.neojelll.diaxtracker.backup.BackupExporter
+import com.neojelll.diaxtracker.time.AppClock
 import com.neojelll.diaxtracker.ui.viewmodel.DiaryViewModel
-import java.time.LocalDate
-import java.time.LocalDateTime
 import kotlinx.coroutines.launch
 
 @Composable
@@ -36,7 +35,7 @@ fun BackupExportRow(viewModel: DiaryViewModel) {
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val success = BackupExporter.export(context, uri, period.startsAt(LocalDate.now()))
+            val success = BackupExporter.export(context, uri, period.startsAt(AppClock.today()))
             if (success) toasts.exported(queryDisplayName(context, uri)) else toasts.error(failureMessage)
         }
     }
@@ -49,9 +48,9 @@ fun BackupExportRow(viewModel: DiaryViewModel) {
     )
 
     if (showSheet) {
-        val from = period.startsAt(LocalDate.now())
+        val from = period.startsAt(AppClock.today())
         // Pills are worked out over all entries: a meal just before the period still owns its checks inside it.
-        val inPeriod = feedRecords(entries, LocalDateTime.now()).filter { from == null || it.createdAt >= from }
+        val inPeriod = feedRecords(entries, AppClock.now()).filter { from == null || it.createdAt >= from }
         ExportSheet(
             period = period,
             recordsCount = inPeriod.size,
@@ -60,7 +59,7 @@ fun BackupExportRow(viewModel: DiaryViewModel) {
             onPeriod = { period = it },
             onExport = {
                 showSheet = false
-                exportLauncher.launch("diax-backup-${period.fileTag}-${LocalDate.now()}.zip")
+                exportLauncher.launch("diax-backup-${period.fileTag}-${AppClock.today()}.zip")
             },
             onDismiss = { showSheet = false }
         )
