@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.3.0-beta.1...v0.4.0-beta.1) (2026-10-22)
+
+
+### Features
+
+* **carbs:** add a personal daily carbohydrate goal ([#204](https://github.com/neojelll/DiaX-Tracker/issues/204)) ([bae4f32](https://github.com/neojelll/DiaX-Tracker/commit/bae4f32549f94f23fd55f7f2f053615fda60d724))
+* **entry:** fill sugar from the current sensor reading ([#198](https://github.com/neojelll/DiaX-Tracker/issues/198)) ([28add5d](https://github.com/neojelll/DiaX-Tracker/commit/28add5dc76d857d4dddf1eb247e3868a1744aeea))
+* **history:** open records with a preset, photo or note in place ([#214](https://github.com/neojelll/DiaX-Tracker/issues/214)) ([3438c76](https://github.com/neojelll/DiaX-Tracker/commit/3438c7673bda57970bef9d5daf7062201e63e05e))
+* **history:** show day totals in a pinned day header ([#216](https://github.com/neojelll/DiaX-Tracker/issues/216)) ([5f8ccc3](https://github.com/neojelll/DiaX-Tracker/commit/5f8ccc3684cab74d06d3eb436fc72b6c9a4312ac))
+* **history:** show each record as a one-line row with capsules ([#213](https://github.com/neojelll/DiaX-Tracker/issues/213)) ([c1283b3](https://github.com/neojelll/DiaX-Tracker/commit/c1283b32ffc95df51e6c5f2e1ebcd2ec3f75d3cd))
+* **history:** show sugar after a meal as a quiet line ([#215](https://github.com/neojelll/DiaX-Tracker/issues/215)) ([3ec229f](https://github.com/neojelll/DiaX-Tracker/commit/3ec229f03e193b4c06a06137ca7ef692771a468e))
+* **home:** show day summary as three separate tiles ([#197](https://github.com/neojelll/DiaX-Tracker/issues/197)) ([e1a65ae](https://github.com/neojelll/DiaX-Tracker/commit/e1a65ae53ca1e797642747725a87ae5dc6bb5eb9))
+* **nav:** replace the bottom bar with a compact floating dock ([#202](https://github.com/neojelll/DiaX-Tracker/issues/202)) ([2aa5fa2](https://github.com/neojelll/DiaX-Tracker/commit/2aa5fa27ed827a645ef2a0eaa33393f0c2ceb93c))
+* **ui:** show insulin type with coloured syringe and pen icons ([#212](https://github.com/neojelll/DiaX-Tracker/issues/212)) ([3901964](https://github.com/neojelll/DiaX-Tracker/commit/39019640ce00c57962c8c7367e38987153064427))
+
+
+### Bug Fixes
+
+* **entry:** save sensor-button sugar as a sensor reading ([#206](https://github.com/neojelll/DiaX-Tracker/issues/206)) ([3b2d352](https://github.com/neojelll/DiaX-Tracker/commit/3b2d3527e5afb2f99cf1fa5af8262dc7991564a0))
+
 ## [0.3.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.2.0-beta.1...v0.3.0-beta.1) (2026-10-11)
 
 
