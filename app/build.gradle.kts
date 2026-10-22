@@ -34,6 +34,7 @@ android {
         // Play Store requires this to strictly increase - bump by hand alongside versionName.
         versionCode = 4
         versionName = "0.3.0-beta.1" // x-release-please-version
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -118,4 +119,13 @@ dependencies {
     implementation(libs.coil.compose)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
+    // The screenshot stand (#191): demo data + every feature captured on an emulator. androidTest only -
+    // none of it reaches the release APK.
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.uiautomator)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
