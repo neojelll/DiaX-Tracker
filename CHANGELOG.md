@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.4.0-beta.1...v0.5.0-beta.1) (2026-11-14)
+
+
+### Features
+
+* **web:** scaffold the React PWA and deploy it to GitHub Pages ([#262](https://github.com/neojelll/DiaX-Tracker/issues/262)) ([28fc870](https://github.com/neojelll/DiaX-Tracker/commit/28fc870dd7a119191b41f8777631bb0b7b18c10e))
+
 ## [0.4.0-beta.1](https://github.com/neojelll/DiaX-Tracker/compare/v0.3.0-beta.1...v0.4.0-beta.1) (2026-10-22)
 
 
