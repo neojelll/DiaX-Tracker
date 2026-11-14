@@ -1,5 +1,9 @@
 name: Release
 
+# release-please versions only the PWA (web/): merging its release PR tags web-vX.Y.Z, and the Pages
+# workflow deploys that tag. The Android app is frozen at v0.4.0-beta.1 - no more releases, so no APK
+# build here (it is in git history if Android ever needs one).
+
 on:
   push:
     branches:
@@ -12,9 +16,6 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         id: app-token
@@ -26,50 +27,3 @@ jobs:
         id: release
         with:
           token: ${{ steps.app-token.outputs.token }}
-
-  build-apk:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    # The Gradle project lives in android/; the renamed APK is copied back to the root for upload.
-    defaults:
-      run:
-        working-directory: android
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ needs.release-please.outputs.tag_name }}
-
-      # Same Java setup as CI. Deliberately no Gradle caching here at all: this job decodes the
-      # signing key and builds what people install, so it downloads and compiles from scratch -
-      # nothing restored from a cache can end up in the APK.
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Decode release keystore
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
-          cat > keystore.properties <<EOF
-          storeFile=$RUNNER_TEMP/release.jks
-          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          EOF
-
-      - name: Build release APK
-        # --no-build-cache: explicit, so turning the build cache on for the project later can't
-        # quietly reach the release.
-        run: ./gradlew --no-build-cache assembleRelease
-
-      - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk ../diax-tracker-${{ needs.release-please.outputs.tag_name }}.apk
-
-      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
-        with:
-          tag_name: ${{ needs.release-please.outputs.tag_name }}
-          prerelease: ${{ contains(needs.release-please.outputs.tag_name, '-') }}
-          files: diax-tracker-${{ needs.release-please.outputs.tag_name }}.apk
