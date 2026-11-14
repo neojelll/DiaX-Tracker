@@ -8,27 +8,53 @@ English | [Русский](README.md)
 DiaX-Tracker is a diary for people with diabetes, built mainly to spare you manual data
 entry and save your time. Blood sugar, insulin, meals, and notes — all in one place.
 
-**Status: beta.** The app is in active development; some features are still rough, and a
-database change between versions can mean an archive exported by a newer version won't
-import into an older one. See [Limitations](#limitations) below.
+**Status: moving to a web app.** DiaX is becoming a PWA — an app that opens from the browser,
+is added to the home screen and works offline, on iPhone and Android. The Android app is
+frozen at [v0.4.0-beta.1](https://github.com/neojelll/DiaX-Tracker/releases/tag/v0.4.0-beta.1):
+it keeps working, but gets no new features. The plan is
+[epic #255](https://github.com/neojelll/DiaX-Tracker/issues/255).
+
+## Contents
+
+- [Web app (PWA)](#web-app-pwa)
+- [Android app (frozen)](#android-app-frozen)
+- [Before you start](#before-you-start)
+- [License](#license)
+
+## Web app (PWA)
+
+| | Address | What it is |
+| --- | --- | --- |
+| **DiaX** | <https://neojelll.github.io/DiaX-Tracker/> | the main version, changes only with a release |
+| **DiaX Dev** | <https://neojelll.github.io/DiaX-Tracker/dev/> | the latest build for trying new features, with its own separate data |
+
+**How to install:**
+
+- **iPhone:** open the address in Safari → Share → "Add to Home Screen".
+- **Android:** open the address in Chrome → menu → "Install app".
+
+Once installed it opens full screen and works offline. Entries stay on the phone only — no
+server, no account, no analytics. A new version downloads in the background and starts on the
+next launch.
+
+The web version is still in development: the first release comes once it has the whole diary
+and the import from the Android app. Until then the main address links to DiaX Dev.
+Developer notes are in [web/README.md](web/README.md).
+
+## Android app (frozen)
+
+Everything below is about the Android app,
+[v0.4.0-beta.1](https://github.com/neojelll/DiaX-Tracker/releases/tag/v0.4.0-beta.1) — a beta;
+an archive from a newer version may not import into an older one (see [Limitations](#limitations)).
+Its code is in [`android/`](android/).
 
 | Entry | History | Meal presets |
 | --- | --- | --- |
 | ![Entry screen](docs/screenshots/entry.jpg) | ![Entry history](docs/screenshots/history.jpg) | ![Meal presets](docs/screenshots/meal-presets.jpg) |
 
-## Contents
+### Features
 
-- [Features](#features)
-- [How to download](#how-to-download)
-- [Connecting a sensor source](#connecting-a-sensor-source)
-- [Your data, backup and privacy](#your-data-backup-and-privacy)
-- [Limitations](#limitations)
-- [Before you start](#before-you-start)
-- [License](#license)
-
-## Features
-
-### Logging
+#### Logging
 
 - Quick entry: blood sugar, carb units (XE), short/long insulin, meal, a photo (camera or
   gallery), and a comment
@@ -36,12 +62,12 @@ import into an older one. See [Limitations](#limitations) below.
 - Automatic blood sugar fill-in from **xDrip+** and **Juggluco** — no need to retype sensor
   readings by hand
 
-### On the home screen
+#### On the home screen
 
 - Active insulin: calculated with a pharmacokinetic model (exponential decay, as in
   Loop/AndroidAPS/OpenAPS), with configurable action duration
 
-### History
+#### History
 
 - Search, date filters, and highlighting for out-of-range values
 - Tap a card to edit it, tap a meal to see its composition
@@ -49,18 +75,18 @@ import into an older one. See [Limitations](#limitations) below.
   own card
 - A reminder of what was eaten at this same time yesterday
 
-### Data
+#### Data
 
 - Export to a ZIP archive (a week, a month, or everything) and import that merges instead of
   replacing, skipping duplicates
 - Automatic nightly backup to a folder you choose, keeping the newest 7 copies
 - Undo for deleting an entry, a meal, or everything
 
-### Interface
+#### Interface
 
 - Russian and English
 
-## How to download
+### How to download
 
 Download the latest APK from the [Releases page](https://github.com/neojelll/DiaX-Tracker/releases/latest)
 and install it (you'll need to allow installs from that source once). Requires Android 8.0
@@ -68,7 +94,7 @@ and install it (you'll need to allow installs from that source once). Requires A
 
 The app isn't on Google Play yet.
 
-## Connecting a sensor source
+### Connecting a sensor source
 
 DiaX-Tracker doesn't talk to a sensor directly — it receives readings that another app
 already broadcasts on the device:
@@ -83,7 +109,7 @@ Once enabled, readings appear in DiaX-Tracker automatically — nothing needs to
 configured on the DiaX-Tracker side. If a screen ever shows a stale-sensor warning, re-check
 the broadcast setting in the source app first.
 
-## Your data, backup and privacy
+### Your data, backup and privacy
 
 - Everything - entries, photos, presets, sensor readings - is stored locally in the app's
   own storage. Nothing is sent anywhere; there is no server, account, or analytics.
@@ -99,7 +125,7 @@ the broadcast setting in the source app first.
 - Uninstalling the app deletes its data. Export or turn on automatic backup first if you
   want to keep it.
 
-## Limitations
+### Limitations
 
 - **Beta software**: expect rough edges and occasional bugs.
 - **Schema changes**: a database change between versions is not undone by downgrading —
