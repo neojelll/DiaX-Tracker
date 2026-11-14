@@ -2,6 +2,11 @@
 
 This is currently a solo, personal project, but issues and pull requests are welcome.
 
+**New work goes to the PWA in [`web/`](web/)** - see [web/README.md](web/README.md) for setup and
+commands. The Android app in `android/` is frozen at v0.4.0-beta.1: it still builds and its CI
+still runs, but it gets no features, dependency updates or releases. The rest of this file is
+about the Android app.
+
 ## Building from source
 
 Requires Android Studio (or Gradle) and a connected device/emulator running Android 8.0
