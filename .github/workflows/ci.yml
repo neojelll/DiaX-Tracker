@@ -18,8 +18,10 @@ permissions:
 
 # A new push to the same PR (or to main) makes the previous run's result moot -
 # cancel it instead of burning time finishing a check nobody will read.
+# Title/description edits get their own group: an edit (which only re-checks the title) must not
+# cancel the build of the commit it came with.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.action == 'edited' && 'edited' || 'code' }}
   cancel-in-progress: true
 
 jobs:
