@@ -2,8 +2,12 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <!-- viewport-fit=cover: the app draws under the notch and the home indicator and pads itself with safe-area insets. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- viewport-fit=cover: the app draws under the notch and the home indicator and pads itself with safe-area insets.
+         interactive-widget: Android Chrome shrinks the page for the keyboard; iOS ignores it (lib/keyboard.ts). -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <meta name="theme-color" content="#F7F6F5" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="%APP_NAME%" />
