@@ -1,5 +1,6 @@
 import { useTab, type Tab } from '@/app/tabs'
 import { Dock, type DockItem } from '@/components/Dock'
+import { CHANNEL } from '@/lib/channel'
 import { Placeholder } from '@/screens/Placeholder'
 
 const DOCK: DockItem[] = [
@@ -27,6 +28,15 @@ export function App() {
         paddingBottom: 'calc(env(safe-area-inset-bottom) + 90px)',
       }}
     >
+      {CHANNEL === 'dev' && (
+        // The dev build looks like the real one; this keeps it from being mistaken for the real diary.
+        <div
+          className="fixed right-3.5 z-30 rounded-full bg-ink px-2 py-0.5 text-[10.5px] font-medium tracking-wider text-surface"
+          style={{ top: 'calc(env(safe-area-inset-top) + 8px)' }}
+        >
+          DEV
+        </div>
+      )}
       <main role="tabpanel">
         <Placeholder {...SCREENS[tab]} />
       </main>

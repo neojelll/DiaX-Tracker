@@ -2,7 +2,14 @@
 
 The DiaX diary as a Progressive Web App: React, TypeScript, Vite, Tailwind CSS. It replaces the Android app (frozen in `../android`) and is installed from the browser. Plan: epic #255.
 
-Live: <https://neojelll.github.io/DiaX-Tracker/>
+Two builds live side by side on GitHub Pages:
+
+|              | Address                                        | Built from                      | Changes                          |
+| ------------ | ---------------------------------------------- | ------------------------------- | -------------------------------- |
+| **DiaX**     | <https://neojelll.github.io/DiaX-Tracker/>     | the latest `web-v*` release tag | only when a release PR is merged |
+| **DiaX Dev** | <https://neojelll.github.io/DiaX-Tracker/dev/> | `main`                          | on every merge                   |
+
+DiaX Dev is the PWA's `.dev` app: install it as a second icon (inverted icon, "DEV" badge) and try changes there before releasing. The two keep separate data (`src/lib/channel.ts`) - the dev build never sees the real diary.
 
 ## Install on a phone
 
@@ -25,7 +32,8 @@ pnpm dev
 | Command                                        | What it does                                                                                   |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `pnpm dev`                                     | dev server with hot reload                                                                     |
-| `pnpm build`                                   | production build into `dist/` (with the service worker)                                        |
+| `pnpm build`                                   | release build into `dist/` (with the service worker)                                           |
+| `pnpm build:dev`                               | the same as DiaX Dev (`/DiaX-Tracker/dev/`)                                                    |
 | `pnpm preview`                                 | serves `dist/` at <http://localhost:4173/DiaX-Tracker/> - the way to check offline and install |
 | `pnpm test`                                    | unit tests (Vitest)                                                                            |
 | `pnpm lint` / `pnpm typecheck` / `pnpm format` | oxlint, TypeScript, Prettier                                                                   |
@@ -44,4 +52,4 @@ Colours and type come from the Android redesign: see the `@theme` block in `src/
 
 ## Release
 
-Every merge to `main` that touches `web/` is deployed to GitHub Pages (`.github/workflows/pages.yml`). release-please keeps a separate version and changelog for `web` (tags `web-vX.Y.Z`).
+release-please keeps a separate version and changelog for `web`. Merging its release PR tags `web-vX.Y.Z`, and `.github/workflows/pages.yml` then rebuilds the release build from that tag. Merges to `main` only update DiaX Dev: the release build is rebuilt from the same tag each time, so installed copies see no change. Before the first release the root page links to DiaX Dev.
