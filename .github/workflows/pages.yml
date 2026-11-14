@@ -1,0 +1,80 @@
+name: Pages
+
+# GitHub Pages hosts two builds of the PWA in web/ side by side:
+#   neojelll.github.io/DiaX-Tracker/      - release: built from the latest web-v* tag, so it changes
+#                                            only when a release PR is merged (the real diary)
+#   neojelll.github.io/DiaX-Tracker/dev/  - dev: built from main on every merge (try things here)
+# Every run rebuilds both. Rebuilding the same tag gives the same files, so installed release apps
+# see no update until there is a new tag.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - web/**
+      - mise.toml
+      - .github/workflows/pages.yml
+    tags:
+      - web-v*
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time; a newer push waits instead of cancelling one that is half published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          # Tags are needed to find the latest release.
+          fetch-depth: 0
+
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+
+      - name: Build release from the latest tag
+        run: |
+          mkdir -p site
+          tag=$(git tag --list 'web-v*' --sort=-version:refname | head -n 1)
+          if [ -z "$tag" ]; then
+            # Before the first release there is nothing to install yet - point at the dev build.
+            echo '<!doctype html><meta charset="utf-8"><title>DiaX</title><p>Релиза ещё нет. <a href="dev/">DiaX Dev</a></p>' > site/index.html
+            exit 0
+          fi
+          echo "Release: $tag"
+          git worktree add --detach release "$tag"
+          cd release/web
+          pnpm install --frozen-lockfile
+          pnpm build
+          cp -R dist/. ../../site/
+
+      - name: Build dev from main
+        working-directory: web
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build:dev
+          mkdir -p ../site/dev
+          cp -R dist/. ../site/dev/
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

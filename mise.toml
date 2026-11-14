@@ -1,0 +1,4 @@
+# Tool versions for the PWA in web/ (the Android build provisions its own JDK through Gradle).
+[tools]
+node = "24.22.3"
+pnpm = "10.34.9"

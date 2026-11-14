@@ -3,12 +3,21 @@
   "packages": {
     ".": {
       "release-type": "simple",
+      "include-component-in-tag": false,
+      "exclude-paths": ["web"],
       "extra-files": [
         {
           "type": "generic",
           "path": "android/app/build.gradle.kts"
         }
       ]
+    },
+    "web": {
+      "release-type": "node",
+      "component": "web",
+      "package-name": "diax-web",
+      "include-component-in-tag": true,
+      "changelog-path": "CHANGELOG.md"
     }
   }
 }
