@@ -33,6 +33,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # The Gradle project lives in android/; the renamed APK is copied back to the root for upload.
+    defaults:
+      run:
+        working-directory: android
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -62,7 +66,7 @@ jobs:
         run: ./gradlew --no-build-cache assembleRelease
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk diax-tracker-${{ needs.release-please.outputs.tag_name }}.apk
+        run: cp app/build/outputs/apk/release/app-release.apk ../diax-tracker-${{ needs.release-please.outputs.tag_name }}.apk
 
       - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:

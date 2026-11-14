@@ -5,7 +5,7 @@ keystore.properties
 
 .gradle/
 build/
-app/build/
+android/app/build/
 
 .idea/
 *.iml
