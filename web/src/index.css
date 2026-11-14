@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+/* Ruda, the app font - a variable font; only weights 400 and 500 are used. */
+@font-face {
+  font-family: 'Ruda';
+  src: url('./assets/fonts/ruda.ttf') format('truetype');
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+/*
+ * Colours of the Android redesign (GlukoColors), one to one, as Tailwind colours: bg-screen,
+ * text-ink, border-border and so on.
+ */
+@theme {
+  --font-sans: 'Ruda', ui-sans-serif, system-ui, sans-serif;
+
+  --color-screen: #f7f6f5;
+  --color-surface: #ffffff;
+  --color-tile: #f4f2f0;
+  --color-tile-hover: #ebe8e5;
+  --color-ink: #0d0d0d;
+  --color-ink-hover: #333333;
+  --color-ink-soft: #242424;
+  --color-text-secondary: #55534f;
+  --color-text-label: #6e6b66;
+  --color-text-tertiary: #7d7a74;
+  --color-text-on-dark: #a9a5a0;
+  --color-placeholder: #9a968f;
+  --color-divider: #f0eeec;
+  --color-border: #e6e3e0;
+  --color-border-hover: #cbc7c2;
+  --color-border-dashed: #ddd9d5;
+  --color-insulin-short: #2f6bd6;
+  --color-insulin-long: #8b3fc9;
+  --color-sensor-fresh: #2fa36b;
+  --color-danger: #dc2626;
+
+  /* shadcn/ui names, pointed at the same palette - its components pick up the DiaX look. */
+  --color-background: var(--color-screen);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-ink);
+  --color-primary-foreground: var(--color-surface);
+  --color-secondary: var(--color-tile);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-tile);
+  --color-muted-foreground: var(--color-text-tertiary);
+  --color-accent: var(--color-tile-hover);
+  --color-accent-foreground: var(--color-ink);
+  --color-destructive: var(--color-danger);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-ink);
+
+  --radius: 0.875rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-screen font-sans text-ink antialiased;
+    /* No rubber-band scroll of the whole page behind the fixed dock. */
+    overscroll-behavior: none;
+  }
+}
