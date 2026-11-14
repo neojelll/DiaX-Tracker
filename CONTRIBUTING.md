@@ -9,6 +9,7 @@ Requires Android Studio (or Gradle) and a connected device/emulator running Andr
 toolchain (JDK 17), which Gradle provisions itself if none is already on the machine.
 
 ```bash
+cd android
 ./gradlew installDev
 ```
 
@@ -23,7 +24,7 @@ A phone with a real diary on it has two copies of the app side by side:
 | application id | `com.neojelll.diaxtracker` | `com.neojelll.diaxtracker.dev` |
 | data | the real diary | a disposable copy |
 | what runs on it | published releases only | whatever is being tried |
-| installed from | [GitHub Releases](https://github.com/neojelll/DiaX-Tracker/releases), by hand | the computer, `./gradlew installDev` |
+| installed from | [GitHub Releases](https://github.com/neojelll/DiaX-Tracker/releases), by hand | the computer, `./gradlew installDev` (in `android/`) |
 
 **Nothing built on a computer is ever installed over the real app.** It is updated only
 with a release APK, installed by hand. A failed migration or a bug in import/backup on
@@ -56,7 +57,7 @@ emulators - previews, the debugger. On a phone, use `dev`.
 - Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat: …`, `fix: …`, …) - a squash-merged PR's title becomes the commit on `main`, and
   the changelog is generated from it.
-- `./gradlew testDebugUnitTest lintDebug` should pass before opening a PR; CI runs the same
+- `./gradlew testDebugUnitTest lintDebug` (in `android/`) should pass before opening a PR; CI runs the same
   checks.
 - See the [open issues](https://github.com/neojelll/DiaX-Tracker/issues) for what's planned
   or being considered - most start as a loosely defined idea and get refined before anyone
