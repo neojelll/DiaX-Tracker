@@ -68,6 +68,7 @@ function PlateRow({
 export function FoodRow({
   presets,
   presetId,
+  mealLabel = null,
   carbs,
   display,
   open,
@@ -77,6 +78,8 @@ export function FoodRow({
 }: {
   presets: SavedPreset[]
   presetId: number | null
+  /** The preset name an edited entry was saved with - the preset itself may be gone. */
+  mealLabel?: string | null
   carbs: string
   display: CarbDisplay
   open: boolean
@@ -85,8 +88,8 @@ export function FoodRow({
   onCarbs: (text: string) => void
 }) {
   const selected = presets.find((p) => p.id === presetId)
-  const filled = selected != null || carbs.trim() !== ''
-  const title = selected?.name ?? (carbs.trim() !== '' ? 'Без пресета' : 'Выбрать пресет')
+  const filled = selected != null || mealLabel != null || carbs.trim() !== ''
+  const title = selected?.name ?? mealLabel ?? (carbs.trim() !== '' ? 'Без пресета' : 'Выбрать пресет')
   const unit = display.unit === 'XE' ? 'ХЕ' : 'г'
   return (
     <div>

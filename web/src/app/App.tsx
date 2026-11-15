@@ -6,6 +6,7 @@ import { ToastProvider } from '@/components/ui/toast'
 import { useEntries, useSettings } from '@/diary/hooks'
 import { CHANNEL } from '@/lib/channel'
 import { useNow } from '@/lib/useNow'
+import { HistoryScreen } from '@/screens/history/HistoryScreen'
 import { HomeScreen } from '@/screens/home/HomeScreen'
 import { Placeholder } from '@/screens/Placeholder'
 
@@ -16,9 +17,8 @@ const DOCK: DockItem[] = [
   { tab: 'settings', label: 'Настройки', icon: 'settings' },
 ]
 
-const PLACEHOLDERS: Record<Exclude<Tab, 'entry'>, { title: string; note: string }> = {
+const PLACEHOLDERS: Record<Exclude<Tab, 'entry' | 'history'>, { title: string; note: string }> = {
   food: { title: 'Питание', note: 'Здесь будут пресеты блюд.' },
-  history: { title: 'История', note: 'Здесь будут записи по дням.' },
   settings: { title: 'Настройки', note: 'Здесь будут настройки и бэкап.' },
 }
 
@@ -65,6 +65,8 @@ function Shell() {
           </Suspense>
         ) : tab === 'entry' ? (
           <HomeScreen />
+        ) : tab === 'history' ? (
+          <HistoryScreen />
         ) : (
           <Placeholder {...PLACEHOLDERS[tab]} />
         )}
