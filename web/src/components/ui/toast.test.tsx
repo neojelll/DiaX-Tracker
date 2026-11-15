@@ -52,7 +52,7 @@ describe('toasts', () => {
     act(() => toasts.show('Запись удалена', { kind: 'delete', onUndo: undo }))
     act(() => vi.advanceTimersByTime(TOAST_MS + 200))
     expect(screen.getByRole('status')).toHaveTextContent('Запись удалена')
-    act(() => screen.getByRole('button', { name: 'Отменить' }).click())
+    act(() => screen.getByRole('button', { name: 'Вернуть' }).click())
     expect(undo).toHaveBeenCalledOnce()
     expect(screen.getByRole('status')).toHaveTextContent('Восстановлено')
     expect(TOAST_WITH_UNDO_MS).toBeGreaterThan(TOAST_MS)

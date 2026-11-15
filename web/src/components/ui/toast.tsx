@@ -116,7 +116,7 @@ function ToastHost({
                 // The pill stays its drawn size; the invisible padding makes the touch target 44 px.
                 className="relative -my-1 rounded-full bg-surface px-[13px] py-2 text-[12px] leading-4 text-ink after:absolute after:-inset-x-1 after:-inset-y-2"
               >
-                Отменить
+                Вернуть
               </button>
             ) : null}
           </div>
