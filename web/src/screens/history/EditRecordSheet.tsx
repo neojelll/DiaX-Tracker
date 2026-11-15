@@ -39,9 +39,12 @@ export function EditRecordSheet({
   settings: Settings
   onClose: () => void
 }) {
+  // While sliding out it keeps showing the entry it had.
+  const [shown, setShown] = useState(entry)
+  if (entry && entry !== shown) setShown(entry)
   return (
     <Sheet open={entry != null} onOpenChange={(o) => !o && onClose()} title="Редактировать запись">
-      {entry && <EditForm key={entry.id} entry={entry} settings={settings} onClose={onClose} />}
+      {shown && <EditForm key={shown.id} entry={shown} settings={settings} onClose={onClose} />}
     </Sheet>
   )
 }
