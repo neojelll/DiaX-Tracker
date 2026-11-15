@@ -9,17 +9,14 @@ import { useNow } from '@/lib/useNow'
 import { FoodScreen } from '@/screens/food/FoodScreen'
 import { HistoryScreen } from '@/screens/history/HistoryScreen'
 import { HomeScreen } from '@/screens/home/HomeScreen'
-import { Placeholder } from '@/screens/Placeholder'
+import { SettingsScreen } from '@/screens/settings/SettingsScreen'
+import { t, useLang } from '@/i18n'
 
-const DOCK: DockItem[] = [
-  { tab: 'entry', label: 'Запись', icon: 'home' },
-  { tab: 'food', label: 'Питание', icon: 'dish' },
-  { tab: 'history', label: 'История', icon: 'history' },
-  { tab: 'settings', label: 'Настройки', icon: 'settings' },
-]
-
-const PLACEHOLDERS: Record<Exclude<Tab, 'entry' | 'history' | 'food'>, { title: string; note: string }> = {
-  settings: { title: 'Настройки', note: 'Здесь будут настройки и бэкап.' },
+const DOCK_ICONS: Record<Tab, DockItem['icon']> = {
+  entry: 'home',
+  food: 'dish',
+  history: 'history',
+  settings: 'settings',
 }
 
 // The design-system showcase (#/kit): in the dev build and `pnpm dev` only. Both conditions are
@@ -28,8 +25,11 @@ const KIT_ENABLED = import.meta.env.DEV || import.meta.env.VITE_CHANNEL === 'dev
 const Kit = KIT_ENABLED ? lazy(() => import('@/screens/Kit')) : null
 
 export function App() {
+  // A language switch remounts the app: every text - and every number's decimal separator - is
+  // read again. What must survive (the half-filled form, the open tab) lives outside it.
+  const lang = useLang()
   return (
-    <ToastProvider>
+    <ToastProvider key={lang}>
       <Shell />
     </ToastProvider>
   )
@@ -70,15 +70,26 @@ function Shell() {
         ) : tab === 'food' ? (
           <FoodScreen />
         ) : (
-          <Placeholder {...PLACEHOLDERS[tab]} />
-        )}
-        {KIT_ENABLED && tab === 'settings' && !kit && (
-          <a href="#/kit" className="mx-3.5 mt-4 inline-block text-body text-text-secondary underline">
-            Компоненты (dev)
-          </a>
+          <SettingsScreen
+            kitLink={
+              KIT_ENABLED && (
+                <a href="#/kit" className="mx-2 inline-block text-body text-text-secondary underline">
+                  {t().settings.kit}
+                </a>
+              )
+            }
+          />
         )}
       </main>
-      <Dock items={DOCK} current={tab} onSelect={openTab} />
+      <Dock
+        items={(Object.keys(DOCK_ICONS) as Tab[]).map((id) => ({
+          tab: id,
+          label: t().tabs[id],
+          icon: DOCK_ICONS[id],
+        }))}
+        current={tab}
+        onSelect={openTab}
+      />
     </div>
   )
 }

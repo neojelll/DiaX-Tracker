@@ -18,3 +18,8 @@ export function usePresets(): SavedPreset[] {
 export function useSettings(): Settings {
   return useLiveQuery(() => diary.getSettings(), [], DEFAULT_SETTINGS)
 }
+
+/** The settings once read - undefined until then, for a screen that edits them and must start from the real values. */
+export function useLoadedSettings(): Settings | undefined {
+  return useLiveQuery(() => diary.getSettings(), [])
+}

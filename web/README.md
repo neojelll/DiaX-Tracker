@@ -46,6 +46,7 @@ The service worker only runs in the production build, so check offline behaviour
 - `src/screens` - one folder/file per tab.
 - `src/diary` - the diary itself: storage (IndexedDB via Dexie) and the calculations, no UI.
 - `src/components` - shared components; `components/ui` holds the design system.
+- `src/i18n` - every text, Russian (`ru.ts`) and English (`en.ts`, typed against the Russian one so no key can be missing). Components read them with `t()`; switching the language in Settings remounts the app.
 - `src/lib` - helpers.
 - `public/icons` - app icons, made from the Android launcher icon.
 
@@ -56,6 +57,8 @@ It is the Android redesign, ported one to one:
 - **Tokens** - the `@theme` block in `src/index.css`: colours (`bg-tile`, `text-ink`, `text-sugar-high`...), radii (`rounded-card`, `rounded-sheet`), the type scale (`text-value`, `text-sheet-title`... - size, line height and weight together) and the animations. The shadcn/ui colour names point at the same palette. Numbers get `tabular-nums`.
 - **Components** - `src/components/ui`: card, tile and kicker; buttons (primary, secondary, round, chip); capsule; text field; stepper; bottom sheet; toast with undo. Icons are the Android app's own paths (`components/iconPaths.ts`).
 - **Showcase** - every piece on one page at `#/kit`, in `pnpm dev` and DiaX Dev only (Settings → «Компоненты (dev)»). The release build doesn't contain it.
+
+Numbers use the language's one decimal separator - a comma in Russian, a dot in English - in what's shown and what's typed (`lib/format.ts`, `lib/numeric.ts`).
 
 On iPhone the keyboard slides over the page instead of shrinking it; `lib/keyboard.ts` measures it so sheets and toasts ride above it. Text fields are 16 px, or iOS zooms in on focus.
 
