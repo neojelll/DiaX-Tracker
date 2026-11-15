@@ -10,7 +10,7 @@ export interface ToastOptions {
   /** A second, quieter line: what was saved, the reason of an error. */
   sub?: string
   kind?: ToastKind
-  /** Shows "Отменить"; tapping it hides the toast, runs this and says "Восстановлено". */
+  /** Shows "Вернуть"; tapping it hides the toast, runs this and says "Восстановлено". */
   onUndo?: () => void
 }
 
