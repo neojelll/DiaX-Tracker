@@ -1,6 +1,7 @@
 import { CircleButton } from '@/components/ui/button'
 import { Icon } from '@/components/icons'
 import { cn } from '@/lib/utils'
+import { t } from '@/i18n'
 
 /**
  * A number set with − and +, on a tile: a target bound, a duration, grams per XE. The value stays in
@@ -37,7 +38,7 @@ export function Stepper({
         <CircleButton
           size={28}
           tone="surface"
-          aria-label={`Меньше: ${label}`}
+          aria-label={t().common.less(label)}
           disabled={value <= min}
           onClick={() => set(value - step)}
         >
@@ -53,7 +54,7 @@ export function Stepper({
         <CircleButton
           size={28}
           tone="surface"
-          aria-label={`Больше: ${label}`}
+          aria-label={t().common.more(label)}
           disabled={value >= max}
           onClick={() => set(value + step)}
         >

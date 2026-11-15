@@ -4,10 +4,9 @@ import { Button, CircleButton } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import type { LocalDate } from '@/diary/time'
 import { cn } from '@/lib/utils'
+import { t } from '@/i18n'
 
 const pad = (n: number) => String(n).padStart(2, '0')
-const MONTH = new Intl.DateTimeFormat('ru', { month: 'long', year: 'numeric' })
-const WEEKDAYS = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
 
 /**
  * "Готово", and under it "Сейчас" when the form can go back to following the clock - as on Android.
@@ -15,10 +14,10 @@ const WEEKDAYS = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
 function SheetActions({ onDone, onNow }: { onDone: () => void; onNow?: () => void }) {
   return (
     <div className="mt-3.5 space-y-[9px]">
-      <Button onClick={onDone}>Готово</Button>
+      <Button onClick={onDone}>{t().common.done}</Button>
       {onNow && (
         <Button variant="secondary" className="w-full" onClick={onNow}>
-          Сейчас
+          {t().common.now}
         </Button>
       )}
     </div>
@@ -28,7 +27,7 @@ function SheetActions({ onDone, onNow }: { onDone: () => void; onNow?: () => voi
 /** A month to pick a day from, with previous / next month. Days after [today] can't be picked. */
 export function DateSheet({
   open,
-  title = 'Дата',
+  title = t().time.date,
   value,
   today,
   onDone,
@@ -62,18 +61,21 @@ export function DateSheet({
     const d = new Date(y, m - 1 + delta, 1)
     setMonth(`${d.getFullYear()}-${pad(d.getMonth() + 1)}`)
   }
-  const monthTitle = MONTH.format(first).replace(' г.', '')
+  const monthTitle = new Intl.DateTimeFormat(t().locale, { month: 'long', year: 'numeric' })
+    .format(first)
+    // Russian adds "г." after the year.
+    .replace(' г.', '')
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()} title={title}>
       <div className="flex items-center">
-        <CircleButton size={28} aria-label="Предыдущий месяц" onClick={() => step(-1)}>
+        <CircleButton size={28} aria-label={t().time.prevMonth} onClick={() => step(-1)}>
           <Icon name="chevronLeft" size={13} strokeWidth={2.2} />
         </CircleButton>
         <p className="flex-1 text-center text-sheet-title first-letter:uppercase">{monthTitle}</p>
         <CircleButton
           size={28}
-          aria-label="Следующий месяц"
+          aria-label={t().time.nextMonth}
           disabled={month >= today.slice(0, 7)}
           onClick={() => step(1)}
         >
@@ -81,7 +83,7 @@ export function DateSheet({
         </CircleButton>
       </div>
       <div className="mt-3.5 grid grid-cols-7 text-center">
-        {WEEKDAYS.map((d) => (
+        {t().time.weekdays.map((d) => (
           <span key={d} className="pb-1.5 text-card-label text-text-tertiary">
             {d}
           </span>
@@ -140,20 +142,20 @@ export function TimeSheet({
   if (!open && shownFor !== null) setShownFor(null)
 
   return (
-    <Sheet open={open} onOpenChange={(o) => !o && onClose()} title="Время">
+    <Sheet open={open} onOpenChange={(o) => !o && onClose()} title={t().time.time}>
       <p className="-mt-2 mb-3 text-display-insulin tabular-nums">
         {pad(hour)}:{pad(minute)}
       </p>
       <div className="flex gap-[9px]">
         <Wheel
-          label="Часы"
+          label={t().time.hours}
           values={Array.from({ length: 24 }, (_, i) => i)}
           value={hour}
           onPick={setHour}
           open={open}
         />
         <Wheel
-          label="Минуты"
+          label={t().time.minutes}
           values={Array.from({ length: 12 }, (_, i) => i * 5)}
           value={minute}
           onPick={setMinute}

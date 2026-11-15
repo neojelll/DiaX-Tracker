@@ -27,6 +27,7 @@ import {
 } from '@/screens/home/entryForm'
 import { FoodRow, NoteRow } from '@/screens/home/FormRows'
 import { PresetEditSheet } from '@/screens/food/PresetSheets'
+import { useT } from '@/i18n'
 
 /**
  * The home tab: greeting, today at a glance and the entry form - sugar, insulin, food, comment -
@@ -40,6 +41,7 @@ export function HomeScreen() {
   const settings = useSettings()
   const now = useNow()
   const toast = useToast()
+  const t = useT()
   const [picker, setPicker] = useState<'date' | 'time' | null>(null)
   const [newPreset, setNewPreset] = useState(false)
 
@@ -55,7 +57,7 @@ export function HomeScreen() {
     const createdAt = form.pinnedAt ?? nowLocal()
     setForm(EMPTY_FORM)
     const id = await diary.addEntry(toEntry(previous, createdAt, display))
-    toast.show('Запись сохранена', {
+    toast.show(t.home.saved, {
       sub: moment(createdAt),
       onUndo: () => {
         void diary.deleteEntry(id)
@@ -67,7 +69,7 @@ export function HomeScreen() {
   const clear = () => {
     const previous = form
     setForm(cleared(form))
-    toast.show('Форма очищена', { kind: 'delete', onUndo: () => setForm(previous) })
+    toast.show(t.home.cleared, { kind: 'delete', onUndo: () => setForm(previous) })
   }
 
   return (
@@ -76,7 +78,7 @@ export function HomeScreen() {
       <DaySummary entries={entries} settings={settings} now={now} />
 
       <form
-        aria-label="Новая запись"
+        aria-label={t.home.newEntry}
         className="mt-2 rounded-card bg-surface pt-3 pr-3.5 pb-3.5 pl-4 shadow-soft"
         onSubmit={(e) => {
           e.preventDefault()
@@ -85,7 +87,7 @@ export function HomeScreen() {
       >
         <div className="flex items-center">
           <Icon name="droplet" size={14} strokeWidth={1.7} className="text-text-label" />
-          <span className="ml-[7px] flex-1 text-label text-text-label">Сахар в крови</span>
+          <span className="ml-[7px] flex-1 text-label text-text-label">{t.home.bloodSugar}</span>
           <DateTimeChip
             date={shortDate(at)}
             time={hhmm(at)}
@@ -96,13 +98,13 @@ export function HomeScreen() {
         <label className="mt-0.5 flex items-baseline gap-1">
           <input
             inputMode="decimal"
-            aria-label="Сахар, ммоль/л"
-            placeholder="0,0"
+            aria-label={t.home.sugarField}
+            placeholder={`0${t.decimal}0`}
             value={form.sugar}
             onChange={(e) => update({ sugar: numeric(e.target.value) })}
             className="w-[84px] bg-transparent text-display-sugar tabular-nums caret-ink/55 outline-none placeholder:text-placeholder"
           />
-          <span className="text-label text-text-label">ммоль/л</span>
+          <span className="text-label text-text-label">{t.units.mmol}</span>
         </label>
 
         <hr className="my-2.5 border-divider" />
@@ -110,13 +112,13 @@ export function HomeScreen() {
         <div className="flex gap-[9px]">
           <InsulinField
             kind="short"
-            label="Короткий инсулин"
+            label={t.insulin.short}
             value={form.shortInsulin}
             onChange={(v) => update({ shortInsulin: v })}
           />
           <InsulinField
             kind="long"
-            label="Длинный инсулин"
+            label={t.insulin.long}
             value={form.longInsulin}
             onChange={(v) => update({ longInsulin: v })}
           />
@@ -147,7 +149,7 @@ export function HomeScreen() {
           {isDirty(form) && (
             <button
               type="button"
-              aria-label="Очистить форму"
+              aria-label={t.home.clear}
               onClick={clear}
               className="flex size-[50px] shrink-0 animate-fade-in items-center justify-center rounded-full bg-tile active:bg-tile-hover"
             >
@@ -159,7 +161,7 @@ export function HomeScreen() {
             disabled={!isFillable(form)}
             className="flex h-[50px] flex-1 items-center justify-center gap-[9px] rounded-full bg-ink text-button text-surface transition-colors active:bg-ink-hover disabled:bg-border disabled:text-placeholder"
           >
-            Сохранить запись
+            {t.home.save}
             <Icon name="arrowRight" size={16} strokeWidth={2} />
           </button>
         </div>
@@ -210,16 +212,17 @@ function DateTimeChip({
   onDate: () => void
   onTime: () => void
 }) {
+  const t = useT()
   const half =
     'flex items-center gap-[5px] rounded-full px-[9px] py-[5px] text-[12px] leading-4 tabular-nums active:bg-surface'
   return (
     <span className="flex items-center rounded-full bg-tile p-[3px]">
-      <button type="button" aria-label={`Дата: ${date}`} onClick={onDate} className={half}>
+      <button type="button" aria-label={t.time.dateIs(date)} onClick={onDate} className={half}>
         <Icon name="calendar" size={12} strokeWidth={2} />
         {date}
       </button>
       <span className="h-3 w-px bg-border" />
-      <button type="button" aria-label={`Время: ${time}`} onClick={onTime} className={half}>
+      <button type="button" aria-label={t.time.timeIs(time)} onClick={onTime} className={half}>
         <Icon name="clock" size={12} strokeWidth={2} />
         {time}
       </button>
@@ -238,6 +241,7 @@ function InsulinField({
   value: string
   onChange: (value: string) => void
 }) {
+  const t = useT()
   return (
     <label className={cn('min-w-0 flex-1 rounded-tile bg-tile px-[13px] py-[11px]')}>
       <span className="flex items-center gap-[5px]">
@@ -247,13 +251,13 @@ function InsulinField({
       <span className="mt-1.5 flex items-baseline">
         <input
           inputMode="decimal"
-          aria-label={`${label}, ед`}
+          aria-label={`${label}, ${t.units.insulin}`}
           placeholder="0"
           value={value}
           onChange={(e) => onChange(numeric(e.target.value))}
           className="w-full min-w-0 bg-transparent pl-1 text-value-large tabular-nums caret-ink/55 outline-none placeholder:text-placeholder"
         />
-        <span className="text-hint text-text-label">ед</span>
+        <span className="text-hint text-text-label">{t.units.insulin}</span>
       </span>
     </label>
   )

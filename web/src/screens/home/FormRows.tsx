@@ -6,6 +6,8 @@ import { decimal } from '@/lib/format'
 import { numeric } from '@/lib/numeric'
 import { cn } from '@/lib/utils'
 import { NOTES_MAX_LENGTH, presetGrams } from '@/screens/home/entryForm'
+import { t } from '@/i18n'
+import { carbUnit } from '@/lib/format'
 
 /*
  * The form's "Еда" and "Комментарий" rows (Android HomeFoodDetails.kt). Grey only behind fields
@@ -92,15 +94,15 @@ export function FoodRow({
 }) {
   const selected = presets.find((p) => p.id === presetId)
   const filled = selected != null || mealLabel != null || carbs.trim() !== ''
-  const title = selected?.name ?? mealLabel ?? (carbs.trim() !== '' ? 'Без пресета' : 'Выбрать пресет')
-  const unit = display.unit === 'XE' ? 'ХЕ' : 'г'
+  const title = selected?.name ?? mealLabel ?? (carbs.trim() !== '' ? t().home.noPreset : t().home.pickPreset)
+  const unit = carbUnit(display)
   return (
     <div>
       <div className="flex items-center gap-1.5">
         <PlateRow
           icon="dish"
           filled={filled}
-          label="Еда"
+          label={t().home.food}
           value={title}
           onClick={onToggle}
           expanded={open}
@@ -117,7 +119,7 @@ export function FoodRow({
           <span className="text-card-label text-text-tertiary">{unit}</span>
           <input
             inputMode="decimal"
-            aria-label={display.unit === 'XE' ? 'Углеводы, ХЕ' : 'Углеводы, г'}
+            aria-label={t().home.carbsField(unit)}
             placeholder="0"
             value={carbs}
             onChange={(e) => onCarbs(numeric(e.target.value))}
@@ -177,7 +179,7 @@ export function FoodRow({
               <span className="flex size-[30px] items-center justify-center rounded-[10px] border border-dashed border-border-hover text-text-secondary">
                 <Icon name="plus" size={12} strokeWidth={2.4} />
               </span>
-              <span className="ml-2.5 text-[12.5px] text-text-secondary">Новый пресет</span>
+              <span className="ml-2.5 text-[12.5px] text-text-secondary">{t().home.newPreset}</span>
             </button>
           )}
         </div>
@@ -204,16 +206,16 @@ export function NoteRow({
         <PlateRow
           icon="messageCircle"
           filled={notes.trim() !== '' || open}
-          label="Комментарий"
-          value={notes.trim() || 'Добавить'}
+          label={t().home.comment}
+          value={notes.trim() || t().common.add}
           onClick={onToggle}
           expanded={open}
         />
       </div>
       {open && (
         <textarea
-          aria-label="Комментарий"
-          placeholder="Самочувствие, активность…"
+          aria-label={t().home.comment}
+          placeholder={t().home.commentPlaceholder}
           rows={2}
           maxLength={NOTES_MAX_LENGTH}
           value={notes}

@@ -5,6 +5,7 @@ import { Icon } from '@/components/icons'
 import { useKeyboardInset } from '@/lib/keyboard'
 import { useSheetCount } from '@/lib/sheets'
 import { cn } from '@/lib/utils'
+import { t } from '@/i18n'
 
 // A drag down past this, or a flick faster than this, closes the sheet.
 const CLOSE_DISTANCE_PX = 120
@@ -120,7 +121,7 @@ export function Sheet({
                 ) : null}
               </div>
               <Dialog.Close asChild>
-                <CircleButton size={32} aria-label="Закрыть">
+                <CircleButton size={32} aria-label={t().common.close}>
                   <Icon name="close" size={14} strokeWidth={2.2} />
                 </CircleButton>
               </Dialog.Close>

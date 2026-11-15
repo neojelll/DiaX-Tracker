@@ -46,9 +46,9 @@ describe('history', () => {
   })
 
   it('names what a record is; food wins over its dose', () => {
-    expect(recordKind(newEntry(TODAY + 'T08:00:00', { carbsGrams: 30, shortInsulinDose: 3 }))).toBe('еда')
-    expect(recordKind(newEntry(TODAY + 'T08:00:00', { longInsulinDose: 18 }))).toBe('укол')
-    expect(recordKind(newEntry(TODAY + 'T08:00:00', { bloodSugar: 5 }))).toBe('замер')
+    expect(recordKind(newEntry(TODAY + 'T08:00:00', { carbsGrams: 30, shortInsulinDose: 3 }))).toBe('meal')
+    expect(recordKind(newEntry(TODAY + 'T08:00:00', { longInsulinDose: 18 }))).toBe('shot')
+    expect(recordKind(newEntry(TODAY + 'T08:00:00', { bloodSugar: 5 }))).toBe('check')
   })
 
   it('shows the after-meal line only once a check is in', () => {

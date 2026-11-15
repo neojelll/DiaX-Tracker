@@ -8,10 +8,11 @@ import type { DayInsulin } from '@/diary/insulin'
 import type { Settings } from '@/diary/settings'
 import type { LocalDateTime } from '@/diary/time'
 import type { SavedEntry } from '@/diary/types'
-import { decimal, hhmm, oneDecimal } from '@/lib/format'
+import { carbUnit, decimal, fixedOne, hhmm, oneDecimal } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { AfterMealLine } from '@/screens/history/AfterMealLine'
 import { recordKind } from '@/screens/history/history'
+import { t } from '@/i18n'
 
 /**
  * A History record: one line - time and what it is, the values as capsules, the sugar in its range
@@ -36,7 +37,7 @@ export function RecordCard({
   onEdit: () => void
 }) {
   const display = settings.carbDisplay
-  const unit = display.unit === 'XE' ? 'ХЕ' : 'г'
+  const unit = carbUnit(display)
   const carbs = entry.carbsGrams == null ? null : decimal(formatCarbs(entry.carbsGrams, display))
   return (
     <article
@@ -49,13 +50,13 @@ export function RecordCard({
         type="button"
         onClick={onTap}
         aria-expanded={open ?? undefined}
-        aria-label={`${hhmm(entry.createdAt)}, ${recordKind(entry)}${open == null ? ', изменить' : ''}`}
+        aria-label={`${hhmm(entry.createdAt)}, ${t().history.kind[recordKind(entry)]}${open == null ? `, ${t().history.toEdit}` : ''}`}
         className="flex w-full items-start px-3.5 py-[11px] text-left"
       >
         <span className="w-11 shrink-0">
           <span className="block text-record-time tabular-nums">{hhmm(entry.createdAt)}</span>
           <span className="mt-[3px] flex items-center gap-0.5 text-[10px] leading-[13px] text-placeholder">
-            {recordKind(entry)}
+            {t().history.kind[recordKind(entry)]}
             {open != null && (
               <Icon
                 name="chevronDown"
@@ -74,18 +75,18 @@ export function RecordCard({
           )}
           {entry.shortInsulinDose != null && (
             <Capsule
-              label={`${oneDecimal(entry.shortInsulinDose)} ед, короткий`}
+              label={`${oneDecimal(entry.shortInsulinDose)} ${t().units.insulin}, ${t().insulin.shortKind}`}
               icon={<InsulinIcon kind="short" size={14} />}
             >
-              <NumberWithUnit number={oneDecimal(entry.shortInsulinDose)} unit="ед" />
+              <NumberWithUnit number={oneDecimal(entry.shortInsulinDose)} unit={t().units.insulin} />
             </Capsule>
           )}
           {entry.longInsulinDose != null && (
             <Capsule
-              label={`${oneDecimal(entry.longInsulinDose)} ед, длинный`}
+              label={`${oneDecimal(entry.longInsulinDose)} ${t().units.insulin}, ${t().insulin.longKind}`}
               icon={<InsulinIcon kind="long" size={14} />}
             >
-              <NumberWithUnit number={oneDecimal(entry.longInsulinDose)} unit="ед" />
+              <NumberWithUnit number={oneDecimal(entry.longInsulinDose)} unit={t().units.insulin} />
             </Capsule>
           )}
         </span>
@@ -100,11 +101,11 @@ export function RecordCard({
                   GLUCOSE_TEXT[glucoseLevel(entry.bloodSugar, settings.glucoseRange)],
                 )}
               >
-                {entry.bloodSugar.toFixed(1).replace('.', ',')}
+                {fixedOne(entry.bloodSugar)}
               </span>
               {entry.sugarSource && (
                 <span className="mt-[3px] block text-[10px] leading-[13px] text-placeholder">
-                  {entry.sugarSource === 'SENSOR' ? 'сенсор' : 'вручную'}
+                  {entry.sugarSource === 'SENSOR' ? t().history.sensor : t().history.manual}
                 </span>
               )}
             </>
@@ -122,7 +123,7 @@ export function RecordCard({
               </p>
               {entry.products.length > 0 && (
                 <>
-                  <p className="mt-2 text-card-label text-text-label">состав</p>
+                  <p className="mt-2 text-card-label text-text-label">{t().history.composition}</p>
                   <ul>
                     {entry.products.map((p, i) => (
                       <li key={i} className="mt-[5px] flex gap-2">
@@ -160,7 +161,7 @@ export function RecordCard({
             className="flex w-full items-center justify-center gap-1.5 rounded-field bg-tile py-[11px] text-body text-text-secondary active:bg-tile-hover"
           >
             <Icon name="pencil" size={13} strokeWidth={2} />
-            Изменить запись
+            {t().history.edit}
           </button>
         </div>
       )}
@@ -185,7 +186,7 @@ export function DayHeader({
   settings: Settings
 }) {
   const display = settings.carbDisplay
-  const unit = display.unit === 'XE' ? 'ХЕ' : 'г'
+  const unit = carbUnit(display)
   const goal = settings.carbGoal.enabled ? settings.carbGoal.grams : null
   const reached = goal != null && carbGoalReached(carbsGrams, goal)
   const carbs = decimal(formatCarbs(carbsGrams, display))
@@ -202,7 +203,7 @@ export function DayHeader({
         {carbsGrams > 0 && (
           <span
             role="img"
-            aria-label={`${carbs} ${unit}${reached ? ', цель набрана' : ''}`}
+            aria-label={`${carbs} ${unit}${reached ? `, ${t().summary.goalReached}` : ''}`}
             className={total}
           >
             <Icon name="dish" size={13} strokeWidth={2} />
@@ -211,15 +212,23 @@ export function DayHeader({
           </span>
         )}
         {insulin.short > 0 && (
-          <span role="img" aria-label={`${oneDecimal(insulin.short)} ед, короткий`} className={total}>
+          <span
+            role="img"
+            aria-label={`${oneDecimal(insulin.short)} ${t().units.insulin}, ${t().insulin.shortKind}`}
+            className={total}
+          >
             <InsulinIcon kind="short" size={13} />
-            <NumberWithUnit number={oneDecimal(insulin.short)} unit="ед" />
+            <NumberWithUnit number={oneDecimal(insulin.short)} unit={t().units.insulin} />
           </span>
         )}
         {insulin.long != null && (
-          <span role="img" aria-label={`${oneDecimal(insulin.long)} ед, длинный`} className={total}>
+          <span
+            role="img"
+            aria-label={`${oneDecimal(insulin.long)} ${t().units.insulin}, ${t().insulin.longKind}`}
+            className={total}
+          >
             <InsulinIcon kind="long" size={13} />
-            <NumberWithUnit number={oneDecimal(insulin.long)} unit="ед" />
+            <NumberWithUnit number={oneDecimal(insulin.long)} unit={t().units.insulin} />
           </span>
         )}
       </span>

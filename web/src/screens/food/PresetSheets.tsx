@@ -6,7 +6,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { formatCarbs, type CarbDisplay } from '@/diary/carbs'
 import { diary } from '@/diary/repository'
 import type { SavedPreset } from '@/diary/types'
-import { decimal } from '@/lib/format'
+import { carbUnit, decimal } from '@/lib/format'
 import { numeric } from '@/lib/numeric'
 import { useToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
@@ -20,9 +20,10 @@ import {
   presetOf,
   type PresetDraft,
 } from '@/screens/food/presets'
+import { t } from '@/i18n'
 
 const carbsText = (grams: number, display: CarbDisplay) =>
-  `${decimal(formatCarbs(grams, display))} ${display.unit === 'XE' ? 'ХЕ' : 'г'}`
+  `${decimal(formatCarbs(grams, display))} ${carbUnit(display)}`
 
 /**
  * A preset: its comment, the total, the composition; "Выбрать для записи" puts it into the home
@@ -50,7 +51,7 @@ export function PresetDetailSheet({
     const removed = await diary.deletePreset(p.id)
     onClose()
     if (removed)
-      toast.show('Приём пищи удалён', {
+      toast.show(t().food.deleted, {
         sub: removed.name,
         kind: 'delete',
         onUndo: () => void diary.restorePreset(removed),
@@ -66,12 +67,12 @@ export function PresetDetailSheet({
       {shown && (
         <>
           <div className="flex items-center rounded-tile bg-tile px-3.5 py-[13px]">
-            <span className="flex-1 text-body text-text-secondary">Всего углеводов</span>
+            <span className="flex-1 text-body text-text-secondary">{t().food.totalCarbs}</span>
             <span className="text-[19px] leading-[22px] font-medium tabular-nums">
               {carbsText(presetGrams(shown), display)}
             </span>
           </div>
-          <p className="mt-4 text-kicker text-text-label uppercase">Состав</p>
+          <p className="mt-4 text-kicker text-text-label uppercase">{t().food.composition}</p>
           <ul className="mt-1 divide-y divide-divider">
             {shown.products.map((p, i) => (
               <li key={i} className="flex gap-3 py-[11px] text-body">
@@ -81,17 +82,17 @@ export function PresetDetailSheet({
             ))}
           </ul>
           <div className="mt-4 space-y-[9px]">
-            <Button onClick={() => onPick(shown)}>Выбрать для записи</Button>
+            <Button onClick={() => onPick(shown)}>{t().food.pick}</Button>
             <div className="flex gap-[9px]">
               <Button variant="secondary" className="flex-1" onClick={() => onEdit(shown)}>
-                Редактировать
+                {t().common.edit}
               </Button>
               <Button
                 variant="secondary"
                 className="flex-1 text-text-label"
                 onClick={() => void remove(shown)}
               >
-                Удалить
+                {t().common.delete}
               </Button>
             </div>
           </div>
@@ -126,7 +127,7 @@ export function PresetEditSheet({
     <Sheet
       open={open}
       onOpenChange={(o) => !o && onClose()}
-      title={shown ? 'Изменить приём пищи' : 'Добавить приём пищи'}
+      title={shown ? t().food.editTitle : t().food.add}
     >
       <EditForm
         key={shown?.id ?? 'new'}
@@ -152,7 +153,7 @@ function EditForm({
 }) {
   const toast = useToast()
   const [draft, setDraft] = useState<PresetDraft>(() => draftOf(preset, display))
-  const unit = display.unit === 'XE' ? 'ХЕ' : 'г'
+  const unit = carbUnit(display)
   const atLimit = draft.products.length >= MAX_PRESET_PRODUCTS
   const setProduct = (key: number, change: { name?: string; amount?: string }) =>
     setDraft((d) => ({ ...d, products: d.products.map((p) => (p.key === key ? { ...p, ...change } : p)) }))
@@ -161,7 +162,7 @@ function EditForm({
     const saved = presetOf(draft, display, preset?.id)
     const id = await diary.savePreset(saved)
     onClose()
-    toast.show(preset ? 'Приём пищи обновлён' : 'Приём пищи создан', { sub: saved.name })
+    toast.show(preset ? t().food.updated : t().food.created, { sub: saved.name })
     onSaved?.({ ...saved, id })
   }
 
@@ -173,32 +174,32 @@ function EditForm({
         if (isValidDraft(draft)) void save()
       }}
     >
-      <p className={kicker}>Название</p>
+      <p className={kicker}>{t().food.name}</p>
       <Field
         className="mt-2"
-        aria-label="Название"
-        placeholder="Например: Овсянка"
+        aria-label={t().food.name}
+        placeholder={t().food.namePlaceholder}
         value={draft.name}
         onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
       />
 
       <p className={`${kicker} mt-4 flex`}>
-        <span className="flex-1">Продукт</span>
+        <span className="flex-1">{t().food.product}</span>
         <span className="mr-[42px] w-16">{unit}</span>
       </p>
       <ul className="mt-2 space-y-2">
         {draft.products.map((p, i) => (
           <li key={p.key} className="flex items-center gap-2">
             <Field
-              aria-label={`Продукт ${i + 1}`}
-              placeholder="Например: Хлеб"
+              aria-label={t().food.productN(i + 1)}
+              placeholder={t().food.productPlaceholder}
               value={p.name}
               onChange={(e) => setProduct(p.key, { name: e.target.value })}
               className="min-w-0 flex-1"
             />
             <Field
               inputMode="decimal"
-              aria-label={`Углеводы продукта ${i + 1}, ${unit}`}
+              aria-label={t().food.productCarbs(i + 1, unit)}
               placeholder="0"
               value={p.amount}
               onChange={(e) => setProduct(p.key, { amount: numeric(e.target.value) })}
@@ -206,7 +207,7 @@ function EditForm({
             />
             <CircleButton
               size={34}
-              aria-label={`Убрать продукт ${i + 1}`}
+              aria-label={t().food.removeProduct(i + 1)}
               disabled={draft.products.length <= 1}
               onClick={() => setDraft((d) => ({ ...d, products: d.products.filter((x) => x.key !== p.key) }))}
             >
@@ -224,23 +225,19 @@ function EditForm({
         <span className="flex size-[26px] items-center justify-center rounded-full bg-tile">
           <Icon name="plus" size={13} strokeWidth={2.2} />
         </span>
-        Добавить продукт
+        {t().food.addProduct}
       </button>
-      {atLimit && (
-        <p className="text-card-label text-text-tertiary">
-          Максимум {MAX_PRESET_PRODUCTS} продуктов в пресете
-        </p>
-      )}
+      {atLimit && <p className="text-card-label text-text-tertiary">{t().food.limit(MAX_PRESET_PRODUCTS)}</p>}
 
       <div className="mt-3.5 flex items-center rounded-tile bg-tile px-3.5 py-3">
-        <span className="flex-1 text-body text-text-secondary">Итого</span>
+        <span className="flex-1 text-body text-text-secondary">{t().food.total}</span>
         <span className="text-value tabular-nums">{carbsText(draftGrams(draft, display), display)}</span>
       </div>
 
-      <p className={`${kicker} mt-4`}>Комментарий</p>
+      <p className={`${kicker} mt-4`}>{t().home.comment}</p>
       <textarea
-        aria-label="Комментарий"
-        placeholder="Например: дома по утрам"
+        aria-label={t().home.comment}
+        placeholder={t().food.commentPlaceholder}
         rows={2}
         value={draft.comment}
         onChange={(e) => setDraft((d) => ({ ...d, comment: e.target.value }))}
@@ -250,7 +247,7 @@ function EditForm({
       />
 
       <Button type="submit" className="mt-3.5" disabled={!isValidDraft(draft)}>
-        Сохранить
+        {t().common.save}
       </Button>
     </form>
   )
