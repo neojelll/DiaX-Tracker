@@ -26,6 +26,7 @@ import {
   type EntryForm,
 } from '@/screens/home/entryForm'
 import { FoodRow, NoteRow } from '@/screens/home/FormRows'
+import { PresetEditSheet } from '@/screens/food/PresetSheets'
 
 /**
  * The home tab: greeting, today at a glance and the entry form - sugar, insulin, food, comment -
@@ -40,6 +41,7 @@ export function HomeScreen() {
   const now = useNow()
   const toast = useToast()
   const [picker, setPicker] = useState<'date' | 'time' | null>(null)
+  const [newPreset, setNewPreset] = useState(false)
 
   const display = settings.carbDisplay
   const at = shownAt(form, now)
@@ -124,12 +126,14 @@ export function HomeScreen() {
         <FoodRow
           presets={presets}
           presetId={form.presetId}
+          mealLabel={form.mealLabel}
           carbs={form.carbs}
           display={display}
           open={form.foodOpen}
           onToggle={() => update({ foodOpen: !form.foodOpen })}
           onPick={(p) => setForm((f) => applyPreset(f, p, display))}
           onCarbs={(text) => setForm((f) => typeCarbs(f, text))}
+          onCreatePreset={() => setNewPreset(true)}
         />
         <hr className="my-1 border-divider" />
         <NoteRow
@@ -161,6 +165,14 @@ export function HomeScreen() {
         </div>
       </form>
 
+      <PresetEditSheet
+        open={newPreset}
+        preset={null}
+        display={display}
+        onClose={() => setNewPreset(false)}
+        // A preset made from the form is the one being eaten: it goes straight in.
+        onSaved={(p) => setForm((f) => applyPreset(f, p, display))}
+      />
       <DateSheet
         open={picker === 'date'}
         value={dayOf(at)}

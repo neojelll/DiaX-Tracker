@@ -75,6 +75,7 @@ export function FoodRow({
   onToggle,
   onPick,
   onCarbs,
+  onCreatePreset,
 }: {
   presets: SavedPreset[]
   presetId: number | null
@@ -86,6 +87,8 @@ export function FoodRow({
   onToggle: () => void
   onPick: (preset: SavedPreset) => void
   onCarbs: (text: string) => void
+  /** "Новый пресет" at the end of the list; without it the list has only the presets. */
+  onCreatePreset?: () => void
 }) {
   const selected = presets.find((p) => p.id === presetId)
   const filled = selected != null || mealLabel != null || carbs.trim() !== ''
@@ -164,13 +167,19 @@ export function FoodRow({
               </button>
             )
           })}
-          {presets.length > 0 && <div className="mx-2 my-1 h-px bg-divider" />}
-          <a href="#/food" className="flex items-center rounded-strip p-2 active:bg-screen">
-            <span className="flex size-[30px] items-center justify-center rounded-[10px] border border-dashed border-border-hover text-text-secondary">
-              <Icon name="plus" size={12} strokeWidth={2.4} />
-            </span>
-            <span className="ml-2.5 text-[12.5px] text-text-secondary">Новый пресет</span>
-          </a>
+          {presets.length > 0 && onCreatePreset && <div className="mx-2 my-1 h-px bg-divider" />}
+          {onCreatePreset && (
+            <button
+              type="button"
+              onClick={onCreatePreset}
+              className="flex w-full items-center rounded-strip p-2 active:bg-screen"
+            >
+              <span className="flex size-[30px] items-center justify-center rounded-[10px] border border-dashed border-border-hover text-text-secondary">
+                <Icon name="plus" size={12} strokeWidth={2.4} />
+              </span>
+              <span className="ml-2.5 text-[12.5px] text-text-secondary">Новый пресет</span>
+            </button>
+          )}
         </div>
       )}
     </div>
