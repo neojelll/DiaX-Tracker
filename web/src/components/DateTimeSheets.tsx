@@ -28,6 +28,7 @@ function SheetActions({ onDone, onNow }: { onDone: () => void; onNow?: () => voi
 /** A month to pick a day from, with previous / next month. Days after [today] can't be picked. */
 export function DateSheet({
   open,
+  title = 'Дата',
   value,
   today,
   onDone,
@@ -35,6 +36,7 @@ export function DateSheet({
   onClose,
 }: {
   open: boolean
+  title?: string
   value: LocalDate
   today: LocalDate
   onDone: (date: LocalDate) => void
@@ -60,15 +62,15 @@ export function DateSheet({
     const d = new Date(y, m - 1 + delta, 1)
     setMonth(`${d.getFullYear()}-${pad(d.getMonth() + 1)}`)
   }
-  const title = MONTH.format(first).replace(' г.', '')
+  const monthTitle = MONTH.format(first).replace(' г.', '')
 
   return (
-    <Sheet open={open} onOpenChange={(o) => !o && onClose()} title="Дата">
+    <Sheet open={open} onOpenChange={(o) => !o && onClose()} title={title}>
       <div className="flex items-center">
         <CircleButton size={28} aria-label="Предыдущий месяц" onClick={() => step(-1)}>
           <Icon name="chevronLeft" size={13} strokeWidth={2.2} />
         </CircleButton>
-        <p className="flex-1 text-center text-sheet-title first-letter:uppercase">{title}</p>
+        <p className="flex-1 text-center text-sheet-title first-letter:uppercase">{monthTitle}</p>
         <CircleButton
           size={28}
           aria-label="Следующий месяц"

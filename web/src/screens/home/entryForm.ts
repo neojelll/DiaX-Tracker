@@ -1,6 +1,6 @@
 import { formatCarbs, parseCarbs, parseNumber, type CarbDisplay } from '@/diary/carbs'
 import type { LocalDate, LocalDateTime } from '@/diary/time'
-import { newEntry, type DiaryEntry, type Product, type SavedPreset } from '@/diary/types'
+import { newEntry, type DiaryEntry, type Product, type SavedEntry, type SavedPreset } from '@/diary/types'
 import { decimal } from '@/lib/format'
 import { createStore } from '@/lib/store'
 
@@ -110,6 +110,44 @@ export function toEntry(f: EntryForm, createdAt: LocalDateTime, display: CarbDis
     longInsulinDose: parseNumber(f.longInsulin),
     notes: f.notes.trim(),
   })
+}
+
+const typed = (value: number | null) => (value == null ? '' : decimal(String(value)))
+
+/** A saved entry as the form shows it, for editing: its moment pinned, numbers as text. */
+export function fromEntry(entry: SavedEntry, display: CarbDisplay): EntryForm {
+  return {
+    ...EMPTY_FORM,
+    pinnedAt: entry.createdAt,
+    sugar: typed(entry.bloodSugar),
+    shortInsulin: typed(entry.shortInsulinDose),
+    longInsulin: typed(entry.longInsulinDose),
+    carbs: entry.carbsGrams == null ? '' : decimal(formatCarbs(entry.carbsGrams, display)),
+    mealLabel: entry.mealLabel,
+    products: entry.products,
+    notes: entry.notes,
+  }
+}
+
+/**
+ * The entry with the form's changes. What the form didn't touch keeps its exact stored value - the
+ * carbs aren't rounded through XE, the sugar keeps its source - and a meal's checks stay its own.
+ */
+export function editedEntry(entry: SavedEntry, f: EntryForm, display: CarbDisplay): SavedEntry {
+  const before = fromEntry(entry, display)
+  const changed = toEntry(f, f.pinnedAt ?? entry.createdAt, display)
+  return {
+    ...entry,
+    createdAt: changed.createdAt,
+    bloodSugar: f.sugar === before.sugar ? entry.bloodSugar : changed.bloodSugar,
+    sugarSource: f.sugar === before.sugar ? entry.sugarSource : changed.sugarSource,
+    carbsGrams: f.carbs === before.carbs ? entry.carbsGrams : changed.carbsGrams,
+    mealLabel: changed.mealLabel,
+    products: changed.products,
+    shortInsulinDose: changed.shortInsulinDose,
+    longInsulinDose: changed.longInsulinDose,
+    notes: changed.notes,
+  }
 }
 
 /** Good morning / afternoon / evening / night, by the hour. */
