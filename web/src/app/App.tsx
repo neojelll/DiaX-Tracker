@@ -1,5 +1,7 @@
-import { useTab, type Tab } from '@/app/tabs'
+import { lazy, Suspense } from 'react'
+import { hashPath, useHash, useTab, type Tab } from '@/app/tabs'
 import { Dock, type DockItem } from '@/components/Dock'
+import { ToastProvider } from '@/components/ui/toast'
 import { CHANNEL } from '@/lib/channel'
 import { Placeholder } from '@/screens/Placeholder'
 
@@ -17,8 +19,23 @@ const SCREENS: Record<Tab, { title: string; note: string }> = {
   settings: { title: 'Настройки', note: 'Здесь будут настройки и бэкап.' },
 }
 
+// The design-system showcase (#/kit): in the dev build and `pnpm dev` only. Both conditions are
+// replaced at build time, so the release build doesn't even contain it.
+const KIT_ENABLED = import.meta.env.DEV || import.meta.env.VITE_CHANNEL === 'dev'
+const Kit = KIT_ENABLED ? lazy(() => import('@/screens/Kit')) : null
+
 export function App() {
+  return (
+    <ToastProvider>
+      <Shell />
+    </ToastProvider>
+  )
+}
+
+function Shell() {
   const [tab, openTab] = useTab()
+  const hash = useHash()
+  const kit = Kit != null && hashPath(hash) === 'kit'
   return (
     <div
       className="min-h-dvh"
@@ -38,7 +55,18 @@ export function App() {
         </div>
       )}
       <main role="tabpanel">
-        <Placeholder {...SCREENS[tab]} />
+        {kit ? (
+          <Suspense>
+            <Kit />
+          </Suspense>
+        ) : (
+          <Placeholder {...SCREENS[tab]} />
+        )}
+        {KIT_ENABLED && tab === 'settings' && !kit && (
+          <a href="#/kit" className="mx-3.5 mt-4 inline-block text-body text-text-secondary underline">
+            Компоненты (dev)
+          </a>
+        )}
       </main>
       <Dock items={DOCK} current={tab} onSelect={openTab} />
     </div>

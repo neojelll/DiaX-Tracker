@@ -6,9 +6,14 @@ export type Tab = (typeof TABS)[number]
 
 export const DEFAULT_TAB: Tab = 'entry'
 
+/** "#/history" -> "history". */
+export function hashPath(hash: string): string {
+  return hash.replace(/^#\/?/, '')
+}
+
 /** The tab a hash points at; anything unknown opens the default tab. */
 export function tabFromHash(hash: string): Tab {
-  const id = hash.replace(/^#\/?/, '')
+  const id = hashPath(hash)
   return (TABS as readonly string[]).includes(id) ? (id as Tab) : DEFAULT_TAB
 }
 
@@ -22,9 +27,14 @@ function subscribe(onChange: () => void) {
  * and a reload land where they should.
  */
 export function useTab(): [Tab, (tab: Tab) => void] {
-  const tab = useSyncExternalStore(subscribe, () => tabFromHash(window.location.hash))
+  const tab = tabFromHash(useHash())
   const open = useCallback((next: Tab) => {
     window.location.hash = `/${next}`
   }, [])
   return [tab, open]
+}
+
+/** The URL hash, following its changes. */
+export function useHash(): string {
+  return useSyncExternalStore(subscribe, () => window.location.hash)
 }

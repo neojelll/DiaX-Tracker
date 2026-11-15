@@ -44,11 +44,20 @@ The service worker only runs in the production build, so check offline behaviour
 
 - `src/app` - the app root and tab navigation (the tab lives in the URL hash: `#/history`).
 - `src/screens` - one folder/file per tab.
-- `src/components` - shared components; `components/ui` is reserved for shadcn/ui components.
+- `src/diary` - the diary itself: storage (IndexedDB via Dexie) and the calculations, no UI.
+- `src/components` - shared components; `components/ui` holds the design system.
 - `src/lib` - helpers.
 - `public/icons` - app icons, made from the Android launcher icon.
 
-Colours and type come from the Android redesign: see the `@theme` block in `src/index.css`. The shadcn/ui colour names point at the same palette.
+## Design system
+
+It is the Android redesign, ported one to one:
+
+- **Tokens** - the `@theme` block in `src/index.css`: colours (`bg-tile`, `text-ink`, `text-sugar-high`...), radii (`rounded-card`, `rounded-sheet`), the type scale (`text-value`, `text-sheet-title`... - size, line height and weight together) and the animations. The shadcn/ui colour names point at the same palette. Numbers get `tabular-nums`.
+- **Components** - `src/components/ui`: card, tile and kicker; buttons (primary, secondary, round, chip); capsule; text field; stepper; bottom sheet; toast with undo. Icons are the Android app's own paths (`components/iconPaths.ts`).
+- **Showcase** - every piece on one page at `#/kit`, in `pnpm dev` and DiaX Dev only (Settings → «Компоненты (dev)»). The release build doesn't contain it.
+
+On iPhone the keyboard slides over the page instead of shrinking it; `lib/keyboard.ts` measures it so sheets and toasts ride above it. Text fields are 16 px, or iOS zooms in on focus.
 
 ## Release
 
