@@ -1,8 +1,12 @@
 import { lazy, Suspense } from 'react'
 import { hashPath, useHash, useTab, type Tab } from '@/app/tabs'
 import { Dock, type DockItem } from '@/components/Dock'
+import { InsulinBanner } from '@/components/InsulinBanner'
 import { ToastProvider } from '@/components/ui/toast'
+import { useEntries, useSettings } from '@/diary/hooks'
 import { CHANNEL } from '@/lib/channel'
+import { useNow } from '@/lib/useNow'
+import { HomeScreen } from '@/screens/home/HomeScreen'
 import { Placeholder } from '@/screens/Placeholder'
 
 const DOCK: DockItem[] = [
@@ -12,8 +16,7 @@ const DOCK: DockItem[] = [
   { tab: 'settings', label: 'Настройки', icon: 'settings' },
 ]
 
-const SCREENS: Record<Tab, { title: string; note: string }> = {
-  entry: { title: 'Добрый день!', note: 'Здесь будет новая запись: сахар, инсулин, еда.' },
+const PLACEHOLDERS: Record<Exclude<Tab, 'entry'>, { title: string; note: string }> = {
   food: { title: 'Питание', note: 'Здесь будут пресеты блюд.' },
   history: { title: 'История', note: 'Здесь будут записи по дням.' },
   settings: { title: 'Настройки', note: 'Здесь будут настройки и бэкап.' },
@@ -54,13 +57,16 @@ function Shell() {
           DEV
         </div>
       )}
+      <ActiveInsulin />
       <main role="tabpanel">
         {kit ? (
           <Suspense>
             <Kit />
           </Suspense>
+        ) : tab === 'entry' ? (
+          <HomeScreen />
         ) : (
-          <Placeholder {...SCREENS[tab]} />
+          <Placeholder {...PLACEHOLDERS[tab]} />
         )}
         {KIT_ENABLED && tab === 'settings' && !kit && (
           <a href="#/kit" className="mx-3.5 mt-4 inline-block text-body text-text-secondary underline">
@@ -71,4 +77,12 @@ function Shell() {
       <Dock items={DOCK} current={tab} onSelect={openTab} />
     </div>
   )
+}
+
+/** Short insulin still acting, above every tab. */
+function ActiveInsulin() {
+  const entries = useEntries()
+  const settings = useSettings()
+  const now = useNow()
+  return <InsulinBanner entries={entries} durationHours={settings.insulinDurationHours} now={now} />
 }
