@@ -49,3 +49,9 @@ export function moment(at: LocalDateTime): string {
 export function duration(minutes: number): string {
   return t().time.duration(Math.floor(minutes / 60), Math.round(minutes % 60))
 }
+
+/** "340 КБ", "1,2 МБ". */
+export function fileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} ${t().units.kb}`
+  return `${oneDecimal(bytes / 1024 / 1024)} ${t().units.mb}`
+}
