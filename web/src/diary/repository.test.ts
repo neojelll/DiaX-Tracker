@@ -104,3 +104,33 @@ describe('settings', () => {
     expect((await repo.updateSettings({ insulinDurationHours: 9 })).insulinDurationHours).toBe(5.5)
   })
 })
+
+describe('replaceDiary', () => {
+  it('puts the given entries, presets and photos in place of everything, keeping the settings', async () => {
+    await repo.addEntry(newEntry('2026-11-01T10:00:00', { bloodSugar: 5 }))
+    await repo.savePreset({ name: 'Старый', comment: '', products: [] })
+    await repo.updateSettings({ insulinDurationHours: 5 })
+
+    const meal: SavedEntry = { ...newEntry('2026-10-21T08:20:00', { carbsGrams: 48 }), id: 7 }
+    const check: SavedEntry = {
+      ...newEntry('2026-10-21T09:20:00', { bloodSugar: 8.4, sourceEntryId: 7, sourceHour: 1 }),
+      id: 9,
+    }
+    await repo.replaceDiary({
+      entries: [meal, check],
+      presets: [{ name: 'Овсянка', comment: '', products: [{ name: 'хлопья', carbsGrams: 30 }] }],
+      photos: new Map([[7, new Blob(['jpeg'])]]),
+    })
+
+    expect((await repo.allEntries()).map((e) => e.id)).toEqual([9, 7])
+    expect((await repo.checksOf(7)).map((e) => e.id)).toEqual([9])
+    expect((await repo.allPresets()).map((p) => p.name)).toEqual(['Овсянка'])
+    // fake-indexeddb can't clone a jsdom Blob back, so only its presence is checked here.
+    expect(await repo.photoOf(7)).toBeDefined()
+    expect(await repo.photoOf(9)).toBeUndefined()
+    expect(await repo.countEntries()).toBe(2)
+    expect((await repo.getSettings()).insulinDurationHours).toBe(5)
+    // New entries carry on after the imported ids.
+    expect(await repo.addEntry(newEntry('2026-11-02T10:00:00'))).toBeGreaterThan(9)
+  })
+})
