@@ -1,7 +1,9 @@
 import initSqlJs, { type SqlJsStatic } from 'sql.js'
 import { strToU8, zipSync } from 'fflate'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { BackupError, localDateTime, readAndroidBackup } from '@/backup/androidBackup'
+import { localDateTime } from '@/backup/androidBackup'
+import { readArchive } from '@/backup/archive'
+import { BackupError } from '@/backup/types'
 
 // The Android schema at Room version 12 (android/app/schemas/.../12.json).
 const SCHEMA = `
@@ -46,7 +48,7 @@ const photo = strToU8('jpeg bytes')
 
 describe('readAndroidBackup', () => {
   it('reads entries, their products, presets and photos', async () => {
-    const backup = await readAndroidBackup(
+    const backup = await readArchive(
       zip({ diary_database: database(12), 'entry_photos/a1.jpg': photo, 'entry_photos/orphan.jpg': photo }),
       SQL,
     )
@@ -88,14 +90,14 @@ describe('readAndroidBackup', () => {
   })
 
   it('reads a backup whose photo is missing from the zip', async () => {
-    const backup = await readAndroidBackup(zip({ diary_database: database(12) }), SQL)
+    const backup = await readArchive(zip({ diary_database: database(12) }), SQL)
     expect(backup.entries).toHaveLength(3)
     expect(backup.photos.size).toBe(0)
   })
 
   it('turns down an older schema and anything that is not a backup', async () => {
     const problem = (file: Blob) =>
-      readAndroidBackup(file, SQL).then(
+      readArchive(file, SQL).then(
         () => 'read',
         (e: unknown) => (e instanceof BackupError ? e.problem : String(e)),
       )

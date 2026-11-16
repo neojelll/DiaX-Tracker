@@ -1,47 +1,29 @@
 import type { Database, SqlJsStatic, SqlValue } from 'sql.js'
 import type { LocalDateTime } from '@/diary/time'
 import type { MealPreset, Product, SavedEntry, SugarSource } from '@/diary/types'
+import { BackupError, type DiaryArchive } from '@/backup/types'
 
 /**
- * Reading the Android app's backup zip (BackupExporter.kt): the Room database file
+ * Reading the Android app's backup zip (BackupExporter.kt), once archive.ts has unzipped it: the Room database file
  * `diary_database` plus the photos in `entry_photos/`. The database is opened in the browser with
  * sql.js; only the last schema (Room version 12) is read - the Android app is frozen there, and an
  * older backup can be brought up to it by restoring it on the phone and saving it again.
  */
 
-const DB_NAME = 'diary_database'
-const PHOTOS_DIR = 'entry_photos/'
+export const ANDROID_DB = 'diary_database'
+export const ANDROID_PHOTOS_DIR = 'entry_photos/'
 const SCHEMA_VERSION = 12
 const SQLITE_HEADER = 'SQLite format 3\0'
 
-/** Why a file can't be imported. */
-export type BackupProblem = 'not-backup' | 'old-version'
-
-export class BackupError extends Error {
-  readonly problem: BackupProblem
-
-  constructor(problem: BackupProblem) {
-    super(problem)
-    this.name = 'BackupError'
-    this.problem = problem
-  }
-}
-
-/** What the archive holds, in the PWA's shapes. Entries keep their Android ids, so a meal's checks still point at it. */
-export interface AndroidBackup {
-  entries: SavedEntry[]
-  presets: MealPreset[]
-  /** Photos by the id of their entry. */
-  photos: Map<number, Blob>
-}
-
 /**
- * Unzips [file] and reads its database. [sql] is the sql.js module - loaded on demand (with its
- * wasm) when not given, so the app doesn't carry it until someone imports.
+ * Reads the database and photos of an unzipped Android archive. [sql] is the sql.js module -
+ * loaded on demand (with its wasm) when not given, so the app doesn't carry it until someone imports.
  */
-export async function readAndroidBackup(file: Blob, sql?: SqlJsStatic): Promise<AndroidBackup> {
-  const files = await unzip(file)
-  const dbFile = files[DB_NAME]
+export async function readAndroidFiles(
+  files: Record<string, Uint8Array>,
+  sql?: SqlJsStatic,
+): Promise<DiaryArchive> {
+  const dbFile = files[ANDROID_DB]
   if (!dbFile || !hasSqliteHeader(dbFile)) throw new BackupError('not-backup')
 
   const SQL = sql ?? (await loadSqlJs())
@@ -67,7 +49,7 @@ export async function readAndroidBackup(file: Blob, sql?: SqlJsStatic): Promise<
   }
 }
 
-function read(database: Database, files: Record<string, Uint8Array>): AndroidBackup {
+function read(database: Database, files: Record<string, Uint8Array>): DiaryArchive {
   const entryProducts = productsBy(
     rows(
       database,
@@ -86,7 +68,7 @@ function read(database: Database, files: Record<string, Uint8Array>): AndroidBac
     (row): SavedEntry => {
       const id = Number(row.id)
       const photo = photoName(row.photoPath)
-      const bytes = photo == null ? undefined : files[PHOTOS_DIR + photo]
+      const bytes = photo == null ? undefined : files[ANDROID_PHOTOS_DIR + photo]
       if (bytes) photos.set(id, new Blob([bytes as Uint8Array<ArrayBuffer>], { type: 'image/jpeg' }))
       return {
         id,
@@ -113,7 +95,7 @@ function read(database: Database, files: Record<string, Uint8Array>): AndroidBac
     }),
   )
 
-  return { entries, presets, photos }
+  return { source: 'android', entries, presets, photos, settings: null }
 }
 
 /**
@@ -160,18 +142,6 @@ function hasSqliteHeader(bytes: Uint8Array): boolean {
   if (bytes.length < SQLITE_HEADER.length) return false
   for (let i = 0; i < SQLITE_HEADER.length; i++) if (bytes[i] !== SQLITE_HEADER.charCodeAt(i)) return false
   return true
-}
-
-/** The database and the photos; anything else in the zip is skipped. */
-async function unzip(file: Blob): Promise<Record<string, Uint8Array>> {
-  const { unzipSync } = await import('fflate')
-  try {
-    return unzipSync(new Uint8Array(await file.arrayBuffer()), {
-      filter: (f) => f.name === DB_NAME || (f.name.startsWith(PHOTOS_DIR) && !f.name.endsWith('/')),
-    })
-  } catch {
-    throw new BackupError('not-backup')
-  }
 }
 
 async function loadSqlJs(): Promise<SqlJsStatic> {
