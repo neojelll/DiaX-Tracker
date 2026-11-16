@@ -152,6 +152,12 @@ export const en: Messages = {
     updated: 'Meal preset updated',
     deleted: 'Meal preset deleted',
   },
+  backupReminder: {
+    never: 'No archive saved yet',
+    days: (n) => `No archive for ${n} ${n === 1 ? 'day' : 'days'}`,
+    hint: 'Records live only on this device',
+    save: 'Save',
+  },
   settings: {
     title: 'Settings',
     subtitle: 'Data stays on this device',

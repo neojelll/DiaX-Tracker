@@ -9,6 +9,7 @@ import { numeric } from '@/lib/numeric'
 import { useToast } from '@/lib/toast'
 import { useNow } from '@/lib/useNow'
 import { cn } from '@/lib/utils'
+import { BackupReminder } from '@/screens/home/BackupReminder'
 import { DaySummary } from '@/screens/home/DaySummary'
 import {
   applyPreset,
@@ -76,6 +77,7 @@ export function HomeScreen() {
     <section className="px-3.5 pt-3">
       <h1 className="px-2 pb-2.5 text-screen-title">{greeting(Number(now.slice(11, 13)))}</h1>
       <DaySummary entries={entries} settings={settings} now={now} />
+      <BackupReminder entries={entries} now={now} />
 
       <form
         aria-label={t.home.newEntry}
