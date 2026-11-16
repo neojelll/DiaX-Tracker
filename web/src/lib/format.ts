@@ -33,6 +33,13 @@ export function shortDate(at: LocalDateTime): string {
   return new Intl.DateTimeFormat(t().locale, { day: 'numeric', month: 'short' }).format(fromLocalDateTime(at))
 }
 
+/** "15 нояб. 2026 г." / "Nov 15, 2026". */
+export function dateWithYear(at: LocalDateTime): string {
+  return new Intl.DateTimeFormat(t().locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(
+    fromLocalDateTime(at),
+  )
+}
+
 /** "Сегодня, 09:41" for today, "10 нояб., 13:20" otherwise - the second line of a toast. */
 export function moment(at: LocalDateTime): string {
   return dayOf(at) === today() ? t().time.todayAt(hhmm(at)) : `${shortDate(at)}, ${hhmm(at)}`
