@@ -1,9 +1,10 @@
 import { db as defaultDb, type DiaryDatabase } from '@/diary/db'
 import { normalizeSettings, type Settings } from '@/diary/settings'
-import { plusDays, type LocalDate } from '@/diary/time'
+import { plusDays, type LocalDate, type LocalDateTime } from '@/diary/time'
 import type { DiaryEntry, MealPreset, SavedEntry, SavedPreset } from '@/diary/types'
 
 const SETTINGS_KEY = 'settings'
+const LAST_BACKUP_KEY = 'lastBackup'
 
 /**
  * Everything the screens read and write, over one database. Reads return plain arrays; a screen
@@ -82,19 +83,40 @@ export function diaryRepository(db: DiaryDatabase = defaultDb) {
 
     /**
      * Puts [contents] in place of every entry, preset and photo - in one transaction, so a failure
-     * leaves the old diary as it was. Settings stay.
+     * leaves the old diary as it was. Settings are replaced only when the archive has them.
      */
     replaceDiary: async (contents: {
       entries: SavedEntry[]
       presets: MealPreset[]
       photos: Map<number, Blob>
+      settings?: Settings | null
     }): Promise<void> =>
-      db.transaction('rw', db.entries, db.presets, db.photos, async () => {
+      db.transaction('rw', db.entries, db.presets, db.photos, db.values, async () => {
         await Promise.all([db.entries.clear(), db.presets.clear(), db.photos.clear()])
         await db.entries.bulkAdd(contents.entries)
         await db.presets.bulkAdd(contents.presets.map(stripId))
         await db.photos.bulkAdd([...contents.photos].map(([entryId, blob]) => ({ entryId, blob })))
+        if (contents.settings) await db.values.put({ key: SETTINGS_KEY, value: contents.settings })
       }),
+
+    /** Everything an archive holds, read in one go. */
+    wholeDiary: async () =>
+      db.transaction('r', db.entries, db.presets, db.photos, db.values, async () => ({
+        entries: (await db.entries.orderBy('createdAt').toArray()) as SavedEntry[],
+        presets: (await db.presets.toArray()) as SavedPreset[],
+        photos: new Map((await db.photos.toArray()).map((p) => [p.entryId, p.blob])),
+        settings: normalizeSettings((await db.values.get(SETTINGS_KEY))?.value),
+      })),
+
+    /** When an archive was last saved - for the reminder on Home. */
+    lastBackup: async (): Promise<LocalDateTime | null> => {
+      const value = (await db.values.get(LAST_BACKUP_KEY))?.value
+      return typeof value === 'string' ? value : null
+    },
+
+    markBackedUp: async (at: LocalDateTime): Promise<void> => {
+      await db.values.put({ key: LAST_BACKUP_KEY, value: at })
+    },
 
     /** The photo of an entry, if it has one. */
     photoOf: async (entryId: number): Promise<Blob | undefined> => (await db.photos.get(entryId))?.blob,
