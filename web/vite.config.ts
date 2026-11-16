@@ -64,8 +64,8 @@ export default defineConfig({
       },
       workbox: {
         // Everything the app needs is precached: it opens and works with no network at all. Each
-        // build carries only its own icons.
-        globPatterns: ['**/*.{html,js,css,ttf,svg}', `${icons}*.png`],
+        // build carries only its own icons. The wasm is sql.js, for the Android backup import.
+        globPatterns: ['**/*.{html,js,css,ttf,svg,wasm}', `${icons}*.png`],
         globIgnores: dev ? [] : ['icons/dev-*'],
         // The release build's scope contains /dev/: its service worker must leave the dev build alone.
         navigateFallbackDenylist: dev ? [] : [new RegExp(`^${RELEASE_BASE}dev/`)],

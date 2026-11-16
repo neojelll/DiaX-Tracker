@@ -17,6 +17,7 @@ import { LANGS, setLang, t, useLang, type Lang } from '@/i18n'
 import { carbUnit, decimal, fixedOne } from '@/lib/format'
 import { numeric } from '@/lib/numeric'
 import { cn } from '@/lib/utils'
+import { DataCard } from '@/screens/settings/DataCard'
 
 // The bounds can't cross: the range keeps at least this much between them.
 const MIN_RANGE_GAP = 0.5
@@ -26,8 +27,8 @@ const LANG_NAMES: Record<Lang, string> = { ru: 'Русский', en: 'English' }
 
 /**
  * The Настройки tab: language, target range, insulin duration, carb unit and grams per XE, the
- * daily carb goal. Each change is saved at once (diary/settings.ts keeps the bounds); the data
- * section - export and import - comes with #250 / #251.
+ * daily carb goal. Each change is saved at once (diary/settings.ts keeps the bounds). The data
+ * card imports the Android backup (DataCard.tsx).
  */
 export function SettingsScreen({ kitLink }: { kitLink?: ReactNode }) {
   const settings = useLoadedSettings()
@@ -49,10 +50,7 @@ export function SettingsScreen({ kitLink }: { kitLink?: ReactNode }) {
             <GoalCard settings={settings} save={save} />
           </>
         )}
-        <Card>
-          <h2 className="text-label text-text-label">{t().settings.data}</h2>
-          <p className="mt-2 text-hint text-text-tertiary">{t().settings.dataSoon}</p>
-        </Card>
+        <DataCard />
         {kitLink}
       </div>
     </section>

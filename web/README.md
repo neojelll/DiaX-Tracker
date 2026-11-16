@@ -45,6 +45,7 @@ The service worker only runs in the production build, so check offline behaviour
 - `src/app` - the app root and tab navigation (the tab lives in the URL hash: `#/history`).
 - `src/screens` - one folder/file per tab.
 - `src/diary` - the diary itself: storage (IndexedDB via Dexie) and the calculations, no UI.
+- `src/backup` - reading backup archives. `androidBackup.ts` opens the Android app's `diax-*.zip` (Room database version 12 + `entry_photos/`) with sql.js and fflate, both loaded only when an import starts. Settings → Данные → «Импорт из Android» shows what the archive holds and then replaces the diary with it (entries keep their ids; settings are not in the archive).
 - `src/components` - shared components; `components/ui` holds the design system.
 - `src/i18n` - every text, Russian (`ru.ts`) and English (`en.ts`, typed against the Russian one so no key can be missing). Components read them with `t()`; switching the language in Settings remounts the app.
 - `src/lib` - helpers.

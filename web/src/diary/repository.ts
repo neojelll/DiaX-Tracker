@@ -75,6 +75,30 @@ export function diaryRepository(db: DiaryDatabase = defaultDb) {
       await db.presets.put(preset)
     },
 
+    // ---- The whole diary ----
+
+    /** How many entries there are - is the diary empty? */
+    countEntries: () => db.entries.count(),
+
+    /**
+     * Puts [contents] in place of every entry, preset and photo - in one transaction, so a failure
+     * leaves the old diary as it was. Settings stay.
+     */
+    replaceDiary: async (contents: {
+      entries: SavedEntry[]
+      presets: MealPreset[]
+      photos: Map<number, Blob>
+    }): Promise<void> =>
+      db.transaction('rw', db.entries, db.presets, db.photos, async () => {
+        await Promise.all([db.entries.clear(), db.presets.clear(), db.photos.clear()])
+        await db.entries.bulkAdd(contents.entries)
+        await db.presets.bulkAdd(contents.presets.map(stripId))
+        await db.photos.bulkAdd([...contents.photos].map(([entryId, blob]) => ({ entryId, blob })))
+      }),
+
+    /** The photo of an entry, if it has one. */
+    photoOf: async (entryId: number): Promise<Blob | undefined> => (await db.photos.get(entryId))?.blob,
+
     // ---- Settings ----
 
     getSettings: async (): Promise<Settings> => normalizeSettings((await db.values.get(SETTINGS_KEY))?.value),
