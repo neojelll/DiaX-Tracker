@@ -134,3 +134,28 @@ describe('replaceDiary', () => {
     expect(await repo.addEntry(newEntry('2026-11-02T10:00:00'))).toBeGreaterThan(9)
   })
 })
+
+describe('the whole diary', () => {
+  it('reads everything for an archive and takes the settings of a restored one', async () => {
+    await repo.addEntry(newEntry('2026-11-02T10:00:00', { bloodSugar: 6 }))
+    await repo.addEntry(newEntry('2026-11-01T10:00:00', { bloodSugar: 5 }))
+    await repo.updateSettings({ insulinDurationHours: 5 })
+    const whole = await repo.wholeDiary()
+    expect(whole.entries.map((e) => e.createdAt)).toEqual(['2026-11-01T10:00:00', '2026-11-02T10:00:00'])
+    expect(whole.settings.insulinDurationHours).toBe(5)
+
+    await repo.replaceDiary({
+      entries: [],
+      presets: [],
+      photos: new Map(),
+      settings: { ...DEFAULT_SETTINGS, insulinDurationHours: 3.5 },
+    })
+    expect((await repo.getSettings()).insulinDurationHours).toBe(3.5)
+  })
+
+  it('remembers when an archive was saved', async () => {
+    expect(await repo.lastBackup()).toBeNull()
+    await repo.markBackedUp('2026-11-16T12:00:00')
+    expect(await repo.lastBackup()).toBe('2026-11-16T12:00:00')
+  })
+})

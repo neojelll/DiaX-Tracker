@@ -1,59 +1,72 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState } from 'react'
-import { Icon } from '@/components/icons'
+import { Icon, type IconName } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { Card } from '@/components/ui/surface'
-import { BackupError, readAndroidBackup, type AndroidBackup } from '@/backup/androidBackup'
+import { readArchive } from '@/backup/archive'
+import { BackupError, type DiaryArchive } from '@/backup/types'
+import { useArchiveExport } from '@/backup/useArchiveExport'
 import { feedRecords } from '@/diary/afterMeal'
 import { diary } from '@/diary/repository'
-import { clock, toLocalDateTime } from '@/diary/time'
+import { nowLocal } from '@/diary/time'
 import { t } from '@/i18n'
-import { dateWithYear } from '@/lib/format'
+import { dateWithYear, moment } from '@/lib/format'
 import { useToast } from '@/lib/toast'
 
 /** A read archive with what the sheet shows about it. */
 interface Pending {
-  backup: AndroidBackup
+  archive: DiaryArchive
   /** Records as History counts them - a meal's checks come with it. */
   records: number
-  /** Records already in the diary, which the import will replace. */
+  /** Records already in the diary, which restoring will replace. */
   existing: number
 }
 
 /**
- * The Данные card: import of the Android app's backup zip. The archive is read first and shown -
- * how many records, from when to when - and only "Импортировать" changes the diary. A diary that
- * already has records is replaced, never merged, and the sheet says so.
+ * The Данные card: saving the whole diary as an archive, and restoring one - the PWA's own or the
+ * Android app's. An archive is read first and shown - how many records, from when to when - and
+ * only "Восстановить" changes the diary. A diary that already has records is replaced, never
+ * merged, and the sheet says so.
  */
 export function DataCard() {
   const toast = useToast()
   const input = useRef<HTMLInputElement>(null)
   const [reading, setReading] = useState(false)
   const [pending, setPending] = useState<Pending | null>(null)
+  const exporter = useArchiveExport()
+  const lastBackup = useLiveQuery(() => diary.lastBackup(), [])
 
   const pick = async (file: File) => {
     setReading(true)
     try {
-      const backup = await readAndroidBackup(file)
-      const records = feedRecords(backup.entries, toLocalDateTime(clock.now())).length
-      setPending({ backup, records, existing: await diary.countEntries() })
+      const archive = await readArchive(file)
+      const records = feedRecords(archive.entries, nowLocal()).length
+      // Counted the same way, so "уже есть записи (N)" matches what History shows.
+      const existing = feedRecords(await diary.allEntries(), nowLocal()).length
+      setPending({ archive, records, existing })
     } catch (e) {
+      const s = t().settings
       const problem = e instanceof BackupError ? e.problem : null
       if (problem === 'old-version')
-        toast.show(t().settings.importOldVersion, { kind: 'error', sub: t().settings.importOldVersionSub })
+        toast.show(s.importOldVersion, { kind: 'error', sub: s.importOldVersionSub })
+      else if (problem === 'newer-version')
+        toast.show(s.importNewerVersion, { kind: 'error', sub: s.importNewerVersionSub })
       else if (problem === 'not-backup')
-        toast.show(t().settings.importNotBackup, { kind: 'error', sub: t().settings.importNotBackupSub })
-      else toast.show(t().settings.importFailed, { kind: 'error' })
+        toast.show(s.importNotBackup, { kind: 'error', sub: s.importNotBackupSub })
+      else toast.show(s.importFailed, { kind: 'error' })
     } finally {
       setReading(false)
     }
   }
 
-  const confirm = async (p: Pending) => {
+  const confirm = async ({ archive, records }: Pending) => {
     try {
-      await diary.replaceDiary(p.backup)
+      await diary.replaceDiary(archive)
       setPending(null)
-      toast.show(t().settings.imported(p.records), { sub: t().settings.importedSub })
+      toast.show(t().settings.imported(records), {
+        sub: archive.settings ? undefined : t().settings.importedSub,
+      })
     } catch {
       setPending(null)
       toast.show(t().settings.importFailed, { kind: 'error' })
@@ -63,26 +76,33 @@ export function DataCard() {
   return (
     <Card>
       <h2 className="text-label text-text-label">{t().settings.data}</h2>
-      <button
-        type="button"
-        disabled={reading}
-        onClick={() => input.current?.click()}
-        className="mt-[11px] flex w-full items-center gap-3 rounded-field bg-tile px-3.5 py-3 text-left active:bg-tile-hover disabled:opacity-60"
-      >
-        <Icon name="download" size={18} strokeWidth={1.9} className="shrink-0 text-text-secondary" />
-        <span className="min-w-0 flex-1">
-          <span className="block text-body">{t().settings.importAndroid}</span>
-          <span className="mt-0.5 block truncate text-hint text-text-tertiary">
-            {reading ? t().settings.importReading : t().settings.importAndroidHint}
-          </span>
-        </span>
-        <Icon name="chevronRight" size={16} strokeWidth={2} className="shrink-0 text-text-tertiary" />
-      </button>
+      <div className="mt-[11px] space-y-2">
+        <DataRow
+          icon="upload"
+          title={t().settings.save}
+          hint={
+            exporter.busy
+              ? t().settings.preparing
+              : lastBackup
+                ? t().settings.lastSaved(moment(lastBackup))
+                : t().settings.neverSaved
+          }
+          disabled={exporter.busy}
+          onClick={() => void exporter.start()}
+        />
+        <DataRow
+          icon="download"
+          title={t().settings.restore}
+          hint={reading ? t().settings.importReading : t().settings.restoreHint}
+          disabled={reading}
+          onClick={() => input.current?.click()}
+        />
+      </div>
       <input
         ref={input}
         type="file"
         accept=".zip,application/zip"
-        aria-label={t().settings.importAndroid}
+        aria-label={t().settings.restore}
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0]
@@ -91,14 +111,45 @@ export function DataCard() {
           if (file) void pick(file)
         }}
       />
-      <p className="mt-2.5 text-hint text-text-tertiary">{t().settings.dataSoon}</p>
+      <p className="mt-2.5 text-hint text-text-tertiary">{t().settings.dataHint}</p>
 
-      <ImportSheet pending={pending} onConfirm={confirm} onClose={() => setPending(null)} />
+      {exporter.sheet}
+      <RestoreSheet pending={pending} onConfirm={confirm} onClose={() => setPending(null)} />
     </Card>
   )
 }
 
-function ImportSheet({
+function DataRow({
+  icon,
+  title,
+  hint,
+  disabled,
+  onClick,
+}: {
+  icon: IconName
+  title: string
+  hint: string
+  disabled: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-field bg-tile px-3.5 py-3 text-left active:bg-tile-hover disabled:opacity-60"
+    >
+      <Icon name={icon} size={18} strokeWidth={1.9} className="shrink-0 text-text-secondary" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-body">{title}</span>
+        <span className="mt-0.5 block truncate text-hint text-text-tertiary">{hint}</span>
+      </span>
+      <Icon name="chevronRight" size={16} strokeWidth={2} className="shrink-0 text-text-tertiary" />
+    </button>
+  )
+}
+
+function RestoreSheet({
   pending,
   onConfirm,
   onClose,
@@ -113,7 +164,7 @@ function ImportSheet({
   const shown = pending ?? last
   const [busy, setBusy] = useState(false)
 
-  const entries = shown?.backup.entries ?? []
+  const entries = shown?.archive.entries ?? []
   const first = entries[0]?.createdAt
   const lastAt = entries.at(-1)?.createdAt
   const rows: [string, string][] = shown
@@ -127,13 +178,18 @@ function ImportSheet({
               ],
             ]
           : []),
-        [t().settings.importPresets, String(shown.backup.presets.length)],
-        [t().settings.importPhotos, String(shown.backup.photos.size)],
+        [t().settings.importPresets, String(shown.archive.presets.length)],
+        [t().settings.importPhotos, String(shown.archive.photos.size)],
       ]
     : []
+  const android = shown?.archive.source === 'android'
 
   return (
-    <Sheet open={pending != null} onOpenChange={(o) => !o && onClose()} title={t().settings.importTitle}>
+    <Sheet
+      open={pending != null}
+      onOpenChange={(o) => !o && onClose()}
+      title={android ? t().settings.importTitle : t().settings.restoreTitle}
+    >
       {shown && (
         <>
           <dl className="divide-y divide-divider rounded-tile bg-tile px-3.5">
@@ -150,7 +206,9 @@ function ImportSheet({
               {t().settings.importReplaceWarning(shown.existing)}
             </p>
           )}
-          <p className="mt-3 px-1 text-hint text-text-tertiary">{t().settings.importSettingsNote}</p>
+          <p className="mt-3 px-1 text-hint text-text-tertiary">
+            {android ? t().settings.importSettingsNote : t().settings.restoreSettingsNote}
+          </p>
           <Button
             className="mt-4"
             disabled={busy}
