@@ -19,13 +19,9 @@ import {
   type DayFilter,
 } from '@/screens/history/history'
 import { DayHeader, RecordCard } from '@/screens/history/RecordCard'
+import { t } from '@/i18n'
 
-const FILTERS: { filter: DayFilter; label: string }[] = [
-  { filter: { kind: 'all' }, label: 'Все дни' },
-  { filter: { kind: 'yesterday' }, label: 'Вчера' },
-  { filter: { kind: 'week' }, label: 'Неделя' },
-  { filter: { kind: 'month' }, label: 'Месяц' },
-]
+const FILTERS: DayFilter['kind'][] = ['all', 'yesterday', 'week', 'month']
 
 /**
  * The History tab: search, day filters and sorting over the records, grouped by day under pinned
@@ -56,9 +52,9 @@ export function HistoryScreen() {
   return (
     <section className="px-3.5 pt-[18px]">
       <div className="px-2">
-        <h1 className="text-screen-title">История записей</h1>
+        <h1 className="text-screen-title">{t().history.title}</h1>
         <p className="mt-[5px] text-label text-text-label">
-          {shown.length} зап. · {days.length} дн.
+          {t().history.summary(shown.length, days.length)}
         </p>
       </div>
 
@@ -66,45 +62,45 @@ export function HistoryScreen() {
         <Icon name="search" size={16} strokeWidth={1.9} className="shrink-0 text-text-tertiary" />
         <input
           type="search"
-          aria-label="Поиск"
-          placeholder="Поиск по комментарию и еде…"
+          aria-label={t().history.search}
+          placeholder={t().history.searchPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="min-w-0 flex-1 bg-transparent text-base leading-5 caret-ink/55 outline-none placeholder:text-placeholder [&::-webkit-search-cancel-button]:hidden"
         />
         {query !== '' && (
-          <CircleButton size={22} aria-label="Очистить поиск" onClick={() => setQuery('')}>
+          <CircleButton size={22} aria-label={t().history.clearSearch} onClick={() => setQuery('')}>
             <Icon name="close" size={11} strokeWidth={2.4} />
           </CircleButton>
         )}
       </label>
 
       <div className="-mx-3.5 mt-2.5 flex [scrollbar-width:none] gap-[7px] overflow-x-auto px-3.5">
-        {FILTERS.map(({ filter: f, label }) => (
+        {FILTERS.map((kind) => (
           <Chip
-            key={f.kind}
-            selected={filter.kind === f.kind}
-            onClick={() => setFilter(f)}
+            key={kind}
+            selected={filter.kind === kind}
+            onClick={() => setFilter({ kind } as DayFilter)}
             className="shrink-0"
           >
-            {label}
+            {t().history[kind]}
           </Chip>
         ))}
         <Chip selected={filter.kind === 'range'} onClick={() => setRangeStep({})} className="shrink-0">
-          {filter.kind === 'range' ? rangeLabel(filter.from, filter.to) : 'Период…'}
+          {filter.kind === 'range' ? rangeLabel(filter.from, filter.to) : t().history.range}
         </Chip>
       </div>
 
       <div className="mt-2 flex items-center px-2 py-1">
         <span className="flex-1 text-hint text-text-tertiary">
-          {query === '' ? `показано: ${shown.length}` : `совпадений: ${shown.length}`}
+          {query === '' ? t().history.shown(shown.length) : t().history.matches(shown.length)}
         </span>
         <button
           type="button"
           onClick={() => setNewestFirst((n) => !n)}
           className="flex items-center gap-1.5 text-hint text-ink"
         >
-          {newestFirst ? 'сначала новые' : 'сначала старые'}
+          {newestFirst ? t().history.newestFirst : t().history.oldestFirst}
           <Icon name="sort" size={13} strokeWidth={1.9} />
         </button>
       </div>
@@ -112,7 +108,7 @@ export function HistoryScreen() {
       <div className="mt-2">
         {days.length === 0 && (
           <p className="py-6 text-center text-hint text-text-tertiary">
-            {entries.length === 0 ? 'Записей пока нет' : 'Ничего не найдено'}
+            {entries.length === 0 ? t().history.empty : t().history.nothingFound}
           </p>
         )}
         {days.map(({ day, records: dayRecords }) => (
@@ -148,14 +144,14 @@ export function HistoryScreen() {
           </div>
         ))}
         {days.length > 0 && (
-          <p className="pt-1 text-center text-hint text-text-tertiary">Раньше записей нет</p>
+          <p className="pt-1 text-center text-hint text-text-tertiary">{t().history.noEarlier}</p>
         )}
       </div>
 
       <EditRecordSheet entry={editing} settings={settings} onClose={() => setEditId(null)} />
       <DateSheet
         open={rangeStep != null}
-        title={rangeStep?.from ? 'По какой день' : 'С какого дня'}
+        title={rangeStep?.from ? t().history.rangeTo : t().history.rangeFrom}
         value={rangeStep?.from ?? todayDay}
         today={todayDay}
         onClose={() => setRangeStep(null)}

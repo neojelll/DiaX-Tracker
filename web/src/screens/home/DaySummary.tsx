@@ -8,6 +8,8 @@ import { dayOf, minutesBetween, type LocalDateTime } from '@/diary/time'
 import type { SavedEntry } from '@/diary/types'
 import { decimal, oneDecimal } from '@/lib/format'
 import { FRESH_MINUTES, sugarAge } from '@/screens/home/sugarAge'
+import { t } from '@/i18n'
+import { carbUnit } from '@/lib/format'
 
 /**
  * Today at a glance, above the form: the last sugar on ink - the screen's one dark accent - then
@@ -40,10 +42,10 @@ function SugarTile({ entries, now }: { entries: SavedEntry[]; now: LocalDateTime
   const age = last ? sugarAge(minutes) : null
   const fresh = minutes <= FRESH_MINUTES
   return (
-    <section aria-label="Сахар" className="rounded-panel bg-ink px-3 py-[11px]">
+    <section aria-label={t().summary.sugar} className="rounded-panel bg-ink px-3 py-[11px]">
       <p className="flex items-center gap-[5px] text-[11px] leading-[14px] text-text-on-dark">
         <span className={`size-1.5 rounded-full ${fresh ? 'bg-sensor-fresh' : 'bg-sensor-stale'}`} />
-        Сахар
+        {t().summary.sugar}
       </p>
       <p
         className={`mt-[5px] text-[26px] leading-[26px] font-medium tracking-[-0.02em] tabular-nums ${fresh ? 'text-surface' : 'text-placeholder'}`}
@@ -51,7 +53,7 @@ function SugarTile({ entries, now }: { entries: SavedEntry[]; now: LocalDateTime
         {age && last ? oneDecimal(last.bloodSugar!) : '—'}
       </p>
       <p className="mt-[5px] truncate text-[10.5px] leading-[14px] text-text-on-dark">
-        {age ?? 'нет данных'}
+        {age ?? t().summary.noData}
       </p>
     </section>
   )
@@ -75,28 +77,26 @@ const NOTE = 'mt-1.5 truncate text-[10.5px] leading-[14px] text-text-tertiary'
  */
 function CarbsTile({ grams, settings }: { grams: number; settings: Settings }) {
   const display = settings.carbDisplay
-  const unit = display.unit === 'XE' ? 'ХЕ' : 'г'
+  const unit = carbUnit(display)
   const goal = activeGoalGrams(settings.carbGoal)
   return (
-    <LightTile label="Углеводы">
+    <LightTile label={t().summary.carbs}>
       <p className={VALUE}>{decimal(formatCarbs(grams, display))}</p>
       {goal == null ? (
-        <p className={NOTE}>{unit} за день</p>
+        <p className={NOTE}>{t().summary.perDay(unit)}</p>
       ) : carbGoalReached(grams, goal) ? (
         <p className={`${NOTE} flex items-center gap-[3px] text-ink`}>
           <Icon name="check" size={10} strokeWidth={2.6} />
-          цель набрана
+          {t().summary.goalReached}
         </p>
       ) : (
-        <p className={NOTE}>
-          из {decimal(formatCarbs(goal, display))} {unit}
-        </p>
+        <p className={NOTE}>{t().summary.ofGoal(`${decimal(formatCarbs(goal, display))} ${unit}`)}</p>
       )}
       {goal != null && <div className="min-h-[7px] flex-1" />}
       {goal != null && (
         <div
           role="progressbar"
-          aria-label="Цель по углеводам"
+          aria-label={t().summary.goal}
           aria-valuenow={Math.round(carbGoalProgress(grams, goal) * 100)}
           className="h-1 overflow-hidden rounded-full bg-divider"
         >
@@ -114,7 +114,7 @@ function CarbsTile({ grams, settings }: { grams: number; settings: Settings }) {
 function InsulinTile({ entries, day }: { entries: SavedEntry[]; day: string }) {
   const insulin = insulinOn(day, entries)
   return (
-    <LightTile label="Инсулин, ед">
+    <LightTile label={t().summary.insulin}>
       <p className="flex items-baseline whitespace-nowrap">
         <span className={VALUE}>{oneDecimal(insulin.short)}</span>
         {insulin.long != null && (
@@ -123,7 +123,7 @@ function InsulinTile({ entries, day }: { entries: SavedEntry[]; day: string }) {
           </span>
         )}
       </p>
-      <p className={NOTE}>{insulin.long != null ? 'кор. / длин.' : 'короткий'}</p>
+      <p className={NOTE}>{insulin.long != null ? t().summary.split : t().summary.shortOnly}</p>
     </LightTile>
   )
 }

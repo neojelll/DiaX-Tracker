@@ -1,6 +1,7 @@
 import { formatCarbs, parseCarbs, parseNumber, type CarbDisplay } from '@/diary/carbs'
 import type { LocalDate, LocalDateTime } from '@/diary/time'
 import { newEntry, type DiaryEntry, type Product, type SavedEntry, type SavedPreset } from '@/diary/types'
+import { t } from '@/i18n'
 import { decimal } from '@/lib/format'
 import { createStore } from '@/lib/store'
 
@@ -152,8 +153,9 @@ export function editedEntry(entry: SavedEntry, f: EntryForm, display: CarbDispla
 
 /** Good morning / afternoon / evening / night, by the hour. */
 export function greeting(hour: number): string {
-  if (hour >= 5 && hour <= 10) return 'Доброе утро!'
-  if (hour >= 11 && hour <= 16) return 'Добрый день!'
-  if (hour >= 17 && hour <= 22) return 'Добрый вечер!'
-  return 'Доброй ночи!'
+  const g = t().home.greeting
+  if (hour >= 5 && hour <= 10) return g.morning
+  if (hour >= 11 && hour <= 16) return g.afternoon
+  if (hour >= 17 && hour <= 22) return g.evening
+  return g.night
 }

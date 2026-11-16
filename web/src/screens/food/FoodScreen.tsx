@@ -8,6 +8,8 @@ import { decimal } from '@/lib/format'
 import { applyPreset, formStore, presetGrams } from '@/screens/home/entryForm'
 import { PresetDetailSheet, PresetEditSheet } from '@/screens/food/PresetSheets'
 import { presetsCount } from '@/screens/food/presets'
+import { t } from '@/i18n'
+import { carbUnit } from '@/lib/format'
 
 const PREVIEW_PRODUCTS = 3
 
@@ -31,7 +33,7 @@ export function FoodScreen() {
   return (
     <section className="px-3.5 pt-[18px]">
       <div className="px-2">
-        <h1 className="text-screen-title">Приёмы пищи</h1>
+        <h1 className="text-screen-title">{t().food.title}</h1>
         <p className="mt-[5px] text-label text-text-label">{presetsCount(presets.length)}</p>
       </div>
 
@@ -48,14 +50,14 @@ export function FoodScreen() {
             className="flex w-full items-center justify-center gap-2 rounded-record border border-dashed border-border-dashed p-[15px] text-body text-text-secondary active:bg-tile"
           >
             <Icon name="plus" size={15} strokeWidth={2} />
-            Добавить приём пищи
+            {t().food.add}
           </button>
         </li>
       </ul>
 
       <button
         type="button"
-        aria-label="Новый приём пищи"
+        aria-label={t().food.addNew}
         onClick={() => setEditing({ preset: null })}
         className="fixed right-5 z-10 flex size-14 items-center justify-center rounded-full bg-ink text-surface shadow-[0_8px_20px_-6px_rgb(13_13_13/0.4)] active:bg-ink-hover"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 92px)' }}
@@ -96,7 +98,7 @@ function PresetCard({
   display: CarbDisplay
   onOpen: () => void
 }) {
-  const unit = display.unit === 'XE' ? 'ХЕ' : 'г'
+  const unit = carbUnit(display)
   const hidden = preset.products.length - PREVIEW_PRODUCTS
   return (
     <button
@@ -115,7 +117,7 @@ function PresetCard({
           </span>
         ))}
         {hidden > 0 && (
-          <span className="mt-[2.5px] block text-card-label text-text-tertiary">+{hidden} ещё</span>
+          <span className="mt-[2.5px] block text-card-label text-text-tertiary">{t().food.more(hidden)}</span>
         )}
       </span>
       <Badge className="mt-auto self-start bg-tile">

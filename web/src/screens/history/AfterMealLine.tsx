@@ -2,6 +2,7 @@ import { afterMealPeak, type AfterMealPoint } from '@/diary/afterMeal'
 import { glucoseLevel } from '@/diary/glucose'
 import type { GlucoseRange } from '@/diary/settings'
 import { oneDecimal } from '@/lib/format'
+import { t } from '@/i18n'
 
 const W = 320
 const H = 88
@@ -24,7 +25,7 @@ const PEAK_FILL: Record<string, string> = {
  */
 export function AfterMealLine({ points, range }: { points: AfterMealPoint[]; range: GlucoseRange }) {
   const peak = afterMealPeak(points)
-  const label = (p: AfterMealPoint) => (p.hour === 0 ? 'до еды' : `${p.hour} ч`)
+  const label = (p: AfterMealPoint) => (p.hour === 0 ? t().history.beforeMeal : t().history.hourAfter(p.hour))
   const values = points.flatMap((p) => (p.value == null ? [] : [p.value]))
   // Room around the readings, but a normal day never squeezed into a steep-looking line.
   const lo = Math.min(4, Math.min(...values, 4) - 0.5)
@@ -42,7 +43,7 @@ export function AfterMealLine({ points, range }: { points: AfterMealPoint[]; ran
 
   return (
     <div className="rounded-field bg-tile px-3 py-2.5">
-      <p className="text-card-label text-text-label">сахар после еды</p>
+      <p className="text-card-label text-text-label">{t().history.afterMeal}</p>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={readable} className="mt-1 block w-full">
         <polyline
           points={line}

@@ -4,6 +4,7 @@ import { useKeyboardInset } from '@/lib/keyboard'
 import { useAnySheetOpen } from '@/lib/sheets'
 import { TOAST_MS, TOAST_WITH_UNDO_MS, ToastContext, type ToastKind, type ToastOptions } from '@/lib/toast'
 import { cn } from '@/lib/utils'
+import { t } from '@/i18n'
 
 /**
  * One toast at a time, as on Android: a new one replaces the current one (no queue). It sits above
@@ -46,7 +47,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const onUndo = toast?.onUndo
     if (!onUndo) return
     onUndo()
-    show('Восстановлено')
+    show(t().common.restored)
   }
 
   return (
@@ -116,7 +117,7 @@ function ToastHost({
                 // The pill stays its drawn size; the invisible padding makes the touch target 44 px.
                 className="relative -my-1 rounded-full bg-surface px-[13px] py-2 text-[12px] leading-4 text-ink after:absolute after:-inset-x-1 after:-inset-y-2"
               >
-                Вернуть
+                {t().common.undo}
               </button>
             ) : null}
           </div>

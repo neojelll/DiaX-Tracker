@@ -24,6 +24,7 @@ import {
   type EntryForm,
 } from '@/screens/home/entryForm'
 import { FoodRow } from '@/screens/home/FormRows'
+import { t } from '@/i18n'
 
 /**
  * Editing a record: the same fields as the home form, in a sheet. Saving says "Изменения сохранены";
@@ -43,7 +44,7 @@ export function EditRecordSheet({
   const [shown, setShown] = useState(entry)
   if (entry && entry !== shown) setShown(entry)
   return (
-    <Sheet open={entry != null} onOpenChange={(o) => !o && onClose()} title="Редактировать запись">
+    <Sheet open={entry != null} onOpenChange={(o) => !o && onClose()} title={t().history.editTitle}>
       {shown && <EditForm key={shown.id} entry={shown} settings={settings} onClose={onClose} />}
     </Sheet>
   )
@@ -69,13 +70,13 @@ function EditForm({
   const save = async () => {
     await diary.updateEntry(editedEntry(entry, form, display))
     onClose()
-    toast.show('Изменения сохранены')
+    toast.show(t().history.edited)
   }
   const remove = async () => {
     const removed = await diary.deleteEntry(entry.id)
     onClose()
     if (removed)
-      toast.show('Запись удалена', {
+      toast.show(t().history.deleted, {
         sub: moment(removed.createdAt),
         kind: 'delete',
         onUndo: () => void diary.restoreEntries([removed]),
@@ -93,13 +94,13 @@ function EditForm({
       <div className="flex gap-[9px]">
         <PickerButton
           icon="calendar"
-          label={`Дата: ${shortDate(at)}`}
+          label={t().time.dateIs(shortDate(at))}
           text={shortDate(at)}
           onClick={() => setPicker('date')}
         />
         <PickerButton
           icon="clock"
-          label={`Время: ${hhmm(at)}`}
+          label={t().time.timeIs(hhmm(at))}
           text={hhmm(at)}
           onClick={() => setPicker('time')}
         />
@@ -107,12 +108,12 @@ function EditForm({
 
       <p className={`${kicker} mt-4`}>
         <Icon name="droplet" size={14} strokeWidth={1.7} />
-        Сахар, ммоль/л
+        {t().home.sugarField}
       </p>
       <Field
         inputMode="decimal"
-        aria-label="Сахар, ммоль/л"
-        placeholder="0,0"
+        aria-label={t().home.sugarField}
+        placeholder={`0${t().decimal}0`}
         value={form.sugar}
         onChange={(e) => update({ sugar: numeric(e.target.value) })}
       />
@@ -121,11 +122,11 @@ function EditForm({
         <label className="min-w-0 flex-1">
           <span className={kicker}>
             <InsulinIcon kind="short" size={13} />
-            Короткий
+            {t().insulin.shortShort}
           </span>
           <Field
             inputMode="decimal"
-            aria-label="Короткий инсулин, ед"
+            aria-label={`${t().insulin.short}, ${t().units.insulin}`}
             placeholder="0"
             value={form.shortInsulin}
             onChange={(e) => update({ shortInsulin: numeric(e.target.value) })}
@@ -134,11 +135,11 @@ function EditForm({
         <label className="min-w-0 flex-1">
           <span className={kicker}>
             <InsulinIcon kind="long" size={13} />
-            Длинный
+            {t().insulin.longShort}
           </span>
           <Field
             inputMode="decimal"
-            aria-label="Длинный инсулин, ед"
+            aria-label={`${t().insulin.long}, ${t().units.insulin}`}
             placeholder="0"
             value={form.longInsulin}
             onChange={(e) => update({ longInsulin: numeric(e.target.value) })}
@@ -146,7 +147,7 @@ function EditForm({
         </label>
       </div>
 
-      <p className={`${kicker} mt-4 mb-1`}>Еда</p>
+      <p className={`${kicker} mt-4 mb-1`}>{t().home.food}</p>
       <div className="pl-1.5">
         <FoodRow
           presets={presets}
@@ -161,10 +162,10 @@ function EditForm({
         />
       </div>
 
-      <p className={`${kicker} mt-4`}>Комментарий</p>
+      <p className={`${kicker} mt-4`}>{t().home.comment}</p>
       <textarea
-        aria-label="Комментарий"
-        placeholder="Самочувствие, активность…"
+        aria-label={t().home.comment}
+        placeholder={t().home.commentPlaceholder}
         rows={2}
         maxLength={NOTES_MAX_LENGTH}
         value={form.notes}
@@ -174,10 +175,10 @@ function EditForm({
 
       <div className="mt-4 space-y-[9px]">
         <Button type="submit" disabled={!isFillable(form)}>
-          Изменить запись
+          {t().history.edit}
         </Button>
         <Button variant="secondary" className="w-full text-text-label" onClick={() => void remove()}>
-          Удалить запись
+          {t().history.deleteEntry}
         </Button>
       </div>
 

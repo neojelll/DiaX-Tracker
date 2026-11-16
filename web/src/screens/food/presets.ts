@@ -1,5 +1,6 @@
 import { formatCarbs, parseCarbs, parseNumber, type CarbDisplay } from '@/diary/carbs'
 import type { MealPreset, Product, SavedPreset } from '@/diary/types'
+import { t } from '@/i18n'
 import { decimal } from '@/lib/format'
 
 export const MAX_PRESET_PRODUCTS = 10
@@ -56,9 +57,7 @@ export function presetOf(d: PresetDraft, display: CarbDisplay, id?: number): Mea
   return { ...(id == null ? {} : { id }), name: d.name.trim(), comment: d.comment.trim(), products }
 }
 
-const PLURAL = new Intl.PluralRules('ru')
-/** "1 пресет", "3 пресета", "5 пресетов". */
+/** "1 пресет", "3 пресета", "5 пресетов" - "1 preset", "3 presets". */
 export function presetsCount(n: number): string {
-  const form = PLURAL.select(n)
-  return `${n} ${form === 'one' ? 'пресет' : form === 'few' ? 'пресета' : 'пресетов'}`
+  return t().food.count(n, new Intl.PluralRules(t().locale).select(n))
 }
