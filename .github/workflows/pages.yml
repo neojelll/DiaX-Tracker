@@ -28,6 +28,12 @@ concurrency:
 
 jobs:
   build:
+    # Merging a release PR pushes to main before release-please tags it, so this run would find no
+    # tag yet. The tag's own run deploys that commit instead - Pages keeps the first deployment of a
+    # commit, so a second one for the same commit would never go live.
+    if: >-
+      !(github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      startsWith(github.event.head_commit.message, 'chore(main): release web'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
