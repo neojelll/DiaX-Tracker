@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon, type IconName } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
@@ -11,7 +11,8 @@ import { feedRecords } from '@/diary/afterMeal'
 import { diary } from '@/diary/repository'
 import { nowLocal } from '@/diary/time'
 import { t } from '@/i18n'
-import { dateWithYear, moment } from '@/lib/format'
+import { dateWithYear, fileSize, moment } from '@/lib/format'
+import { compressAll } from '@/lib/photo'
 import { useToast } from '@/lib/toast'
 
 /** A read archive with what the sheet shows about it. */
@@ -36,11 +37,14 @@ export function DataCard() {
   const [pending, setPending] = useState<Pending | null>(null)
   const exporter = useArchiveExport()
   const lastBackup = useLiveQuery(() => diary.lastBackup(), [])
+  const used = useStorageUsed(lastBackup)
 
   const pick = async (file: File) => {
     setReading(true)
     try {
-      const archive = await readArchive(file)
+      const read = await readArchive(file)
+      // Android kept photos at full camera size; here they are stored small like new ones.
+      const archive = read.source === 'android' ? { ...read, photos: await compressAll(read.photos) } : read
       const records = feedRecords(archive.entries, nowLocal()).length
       // Counted the same way, so "уже есть записи (N)" matches what History shows.
       const existing = feedRecords(await diary.allEntries(), nowLocal()).length
@@ -112,6 +116,9 @@ export function DataCard() {
         }}
       />
       <p className="mt-2.5 text-hint text-text-tertiary">{t().settings.dataHint}</p>
+      {used != null && (
+        <p className="mt-1.5 text-hint text-text-tertiary">{t().settings.storageUsed(used)}</p>
+      )}
 
       {exporter.sheet}
       <RestoreSheet pending={pending} onConfirm={confirm} onClose={() => setPending(null)} />
@@ -223,4 +230,20 @@ function RestoreSheet({
       )}
     </Sheet>
   )
+}
+
+/**
+ * How much the app keeps on this device - the diary and its photos, plus the app itself - as the
+ * browser reports it. Read again when [changed] changes (an archive saved or restored).
+ */
+function useStorageUsed(changed: unknown): string | null {
+  const [used, setUsed] = useState<string | null>(null)
+  useEffect(() => {
+    let alive = true
+    void navigator.storage?.estimate?.().then((e) => alive && e.usage != null && setUsed(fileSize(e.usage)))
+    return () => {
+      alive = false
+    }
+  }, [changed])
+  return used
 }

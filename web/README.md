@@ -48,7 +48,7 @@ The service worker only runs in the production build, so check offline behaviour
 - `src/backup` - archives. `archive.ts` writes the PWA's own zip (`diary.json` with entries, presets and settings, plus `photos/`) - always the whole diary - and restores either it or the Android app's `diax-*.zip` (`androidBackup.ts`: Room database version 12 + `entry_photos/`, read with sql.js). fflate and sql.js load only when an archive is made or read. Settings → Данные saves an archive through the share sheet (a download where sharing files isn't supported) and restores one by replacing the diary; Home reminds when no archive was saved for 7 days.
 - `src/components` - shared components; `components/ui` holds the design system.
 - `src/i18n` - every text, Russian (`ru.ts`) and English (`en.ts`, typed against the Russian one so no key can be missing). Components read them with `t()`; switching the language in Settings remounts the app.
-- `src/lib` - helpers.
+- `src/lib` - helpers. `photo.ts` makes a picked or taken photo small before it is stored (long side 1600 px, JPEG): photos live in their own IndexedDB table, keyed by entry, and go into every archive.
 - `public/icons` - app icons, made from the Android launcher icon.
 
 ## Design system
