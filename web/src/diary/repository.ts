@@ -14,8 +14,13 @@ export function diaryRepository(db: DiaryDatabase = defaultDb) {
   return {
     // ---- Entries ----
 
-    /** Saves a new entry and returns its id. */
-    addEntry: async (entry: DiaryEntry): Promise<number> => (await db.entries.add(stripId(entry)))!,
+    /** Saves a new entry, with its photo if there is one, and returns its id. */
+    addEntry: async (entry: DiaryEntry, photo?: Blob | null): Promise<number> =>
+      db.transaction('rw', db.entries, db.photos, async () => {
+        const id = (await db.entries.add(stripId(entry)))!
+        if (photo) await db.photos.put({ entryId: id, blob: photo })
+        return id
+      }),
 
     /** Replaces a saved entry. */
     updateEntry: async (entry: SavedEntry): Promise<void> => {
@@ -23,19 +28,35 @@ export function diaryRepository(db: DiaryDatabase = defaultDb) {
     },
 
     /**
-     * Deletes an entry and returns it, for undo. A meal's checks stay: an orphaned check shows as
-     * an ordinary reading (see afterMeal.ts).
+     * Deletes an entry with its photo and returns both, for undo. A meal's checks stay: an orphaned
+     * check shows as an ordinary reading (see afterMeal.ts).
      */
-    deleteEntry: async (id: number): Promise<SavedEntry | undefined> => {
-      const entry = (await db.entries.get(id)) as SavedEntry | undefined
-      await db.entries.delete(id)
-      return entry
+    deleteEntry: async (id: number): Promise<DeletedEntry | undefined> =>
+      db.transaction('rw', db.entries, db.photos, async () => {
+        const entry = (await db.entries.get(id)) as SavedEntry | undefined
+        if (!entry) return undefined
+        const photo = (await db.photos.get(id))?.blob
+        await Promise.all([db.entries.delete(id), db.photos.delete(id)])
+        return { entry, photo }
+      }),
+
+    /** Puts deleted entries back under their old ids, photos included (undo). */
+    restoreEntries: async (deleted: DeletedEntry[]): Promise<void> =>
+      db.transaction('rw', db.entries, db.photos, async () => {
+        await db.entries.bulkPut(deleted.map((d) => d.entry))
+        await db.photos.bulkPut(
+          deleted.flatMap((d) => (d.photo ? [{ entryId: d.entry.id, blob: d.photo }] : [])),
+        )
+      }),
+
+    /** Attaches, replaces or (null) removes an entry's photo. */
+    setPhoto: async (entryId: number, photo: Blob | null): Promise<void> => {
+      if (photo) await db.photos.put({ entryId, blob: photo })
+      else await db.photos.delete(entryId)
     },
 
-    /** Puts deleted entries back under their old ids (undo). */
-    restoreEntries: async (entries: SavedEntry[]): Promise<void> => {
-      await db.entries.bulkPut(entries)
-    },
+    /** The ids of the entries that have a photo. */
+    photoIds: async (): Promise<number[]> => (await db.photos.toCollection().primaryKeys()) as number[],
 
     getEntry: (id: number) => db.entries.get(id) as Promise<SavedEntry | undefined>,
 
@@ -139,6 +160,12 @@ export function diaryRepository(db: DiaryDatabase = defaultDb) {
 }
 
 export type DiaryRepository = ReturnType<typeof diaryRepository>
+
+/** A deleted entry and its photo, kept for undo. */
+export interface DeletedEntry {
+  entry: SavedEntry
+  photo?: Blob
+}
 
 /** The repository over this device's diary. */
 export const diary = diaryRepository()

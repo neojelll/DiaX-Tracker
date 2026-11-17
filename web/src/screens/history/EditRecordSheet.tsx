@@ -77,7 +77,7 @@ function EditForm({
     onClose()
     if (removed)
       toast.show(t().history.deleted, {
-        sub: moment(removed.createdAt),
+        sub: moment(removed.entry.createdAt),
         kind: 'delete',
         onUndo: () => void diary.restoreEntries([removed]),
       })
