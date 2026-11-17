@@ -56,6 +56,7 @@ describe('history', () => {
     expect(shownAfterMeal({ values: [8.1, null, null, null] })).toBeDefined()
     expect(hasMoreInside(newEntry(TODAY + 'T08:00:00', { carbsGrams: 30 }), undefined)).toBe(false)
     expect(hasMoreInside(newEntry(TODAY + 'T08:00:00', { notes: 'x' }), undefined)).toBe(true)
+    expect(hasMoreInside(newEntry(TODAY + 'T08:00:00', { carbsGrams: 30 }), undefined, true)).toBe(true)
   })
 
   it('labels days', () => {

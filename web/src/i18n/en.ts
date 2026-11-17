@@ -75,6 +75,13 @@ export const en: Messages = {
     carbsField: (unit) => `Carbs, ${unit}`,
     comment: 'Comment',
     commentPlaceholder: 'How you feel, activity…',
+    photo: 'Photo',
+    photoAdded: 'Added',
+    addPhoto: 'Add a photo',
+    replacePhoto: 'Replace the photo',
+    removePhoto: 'Remove the photo',
+    entryPhoto: 'Entry photo',
+    photoFailed: "Couldn't open the photo",
   },
   summary: {
     sugar: 'Sugar',
@@ -182,6 +189,7 @@ export const en: Messages = {
     data: 'Data',
     dataHint:
       'The diary lives only in this browser. Save an archive to Files or iCloud — without one, records go away with the app.',
+    storageUsed: (size) => `Used on this device: ${size}`,
     save: 'Save an archive',
     lastSaved: (when) => `Last: ${when}`,
     neverSaved: 'Never saved yet',

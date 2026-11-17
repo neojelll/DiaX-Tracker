@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { Icon, InsulinIcon } from '@/components/icons'
 import { Capsule, NumberWithUnit } from '@/components/ui/capsule'
 import { afterMealPoints, type AfterMeal } from '@/diary/afterMeal'
@@ -9,32 +10,38 @@ import type { Settings } from '@/diary/settings'
 import type { LocalDateTime } from '@/diary/time'
 import type { SavedEntry } from '@/diary/types'
 import { carbUnit, decimal, fixedOne, hhmm, oneDecimal } from '@/lib/format'
+import { usePhotoUrl } from '@/lib/usePhotoUrl'
 import { cn } from '@/lib/utils'
+import { diary } from '@/diary/repository'
 import { AfterMealLine } from '@/screens/history/AfterMealLine'
 import { recordKind } from '@/screens/history/history'
 import { t } from '@/i18n'
 
 /**
  * A History record: one line - time and what it is, the values as capsules, the sugar in its range
- * colour. [open] null - nothing more inside, a tap edits; otherwise a tap opens the preset, the
- * sugar after the meal and the note under the line. (Android HistoryRecordRow / RecordCard.)
+ * colour. [open] null - nothing more inside, a tap edits; otherwise a tap opens the preset and the
+ * photo, the sugar after the meal and the note under the line. (Android HistoryRecordRow / RecordCard.)
  */
 export function RecordCard({
   entry,
   settings,
   afterMeal,
   open,
+  hasPhoto = false,
   now,
   onTap,
   onEdit,
+  onOpenPhoto,
 }: {
   entry: SavedEntry
   settings: Settings
   afterMeal: AfterMeal | undefined
   open: boolean | null
+  hasPhoto?: boolean
   now: LocalDateTime
   onTap: () => void
   onEdit: () => void
+  onOpenPhoto?: (photo: Blob) => void
 }) {
   const display = settings.carbDisplay
   const unit = carbUnit(display)
@@ -115,26 +122,39 @@ export function RecordCard({
 
       {open && (
         <div className="mx-3.5 animate-fade-in space-y-[9px] border-t border-divider pt-[11px] pb-[11px]">
-          {entry.mealLabel != null && (
-            <div className="rounded-field bg-tile px-3 py-2.5">
-              <p className="flex items-center gap-1.5 text-body font-medium">
-                <Icon name="bookmark" size={13} strokeWidth={2} className="text-text-secondary" />
-                {entry.mealLabel}
-              </p>
-              {entry.products.length > 0 && (
-                <>
-                  <p className="mt-2 text-card-label text-text-label">{t().history.composition}</p>
-                  <ul>
-                    {entry.products.map((p, i) => (
-                      <li key={i} className="mt-[5px] flex gap-2">
-                        <span className="flex-1 text-[12.5px] leading-[17px]">{p.name}</span>
-                        <span className="text-hint text-text-tertiary tabular-nums">
-                          {decimal(formatCarbs(p.carbsGrams, display))} {unit}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
+          {(entry.mealLabel != null || hasPhoto) && (
+            <div className="flex gap-[9px]">
+              {entry.mealLabel != null && (
+                <div className="min-w-0 flex-1 rounded-field bg-tile px-3 py-2.5">
+                  <p className="flex items-center gap-1.5 text-body font-medium">
+                    <Icon name="bookmark" size={13} strokeWidth={2} className="text-text-secondary" />
+                    {entry.mealLabel}
+                  </p>
+                  {entry.products.length > 0 && (
+                    <>
+                      <p className="mt-2 text-card-label text-text-label">{t().history.composition}</p>
+                      <ul>
+                        {entry.products.map((p, i) => (
+                          <li key={i} className="mt-[5px] flex gap-2">
+                            <span className="flex-1 text-[12.5px] leading-[17px]">{p.name}</span>
+                            <span className="text-hint text-text-tertiary tabular-nums">
+                              {decimal(formatCarbs(p.carbsGrams, display))} {unit}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
+              {hasPhoto && (
+                <RecordPhoto
+                  entryId={entry.id}
+                  className={
+                    entry.mealLabel != null ? 'min-h-24 w-24 shrink-0 self-stretch' : 'h-[150px] flex-1'
+                  }
+                  onOpen={onOpenPhoto}
+                />
               )}
             </div>
           )}
@@ -166,6 +186,30 @@ export function RecordCard({
         </div>
       )}
     </article>
+  )
+}
+
+/** The record's photo, read only once the record is opened; a tap shows it over the whole screen. */
+function RecordPhoto({
+  entryId,
+  className,
+  onOpen,
+}: {
+  entryId: number
+  className: string
+  onOpen?: (photo: Blob) => void
+}) {
+  const photo = useLiveQuery(() => diary.photoOf(entryId), [entryId])
+  const url = usePhotoUrl(photo)
+  return (
+    <button
+      type="button"
+      aria-label={t().home.entryPhoto}
+      onClick={() => photo && onOpen?.(photo)}
+      className={cn('overflow-hidden rounded-field bg-tile', className)}
+    >
+      {url && <img src={url} alt="" className="size-full animate-fade-in object-cover" />}
+    </button>
   )
 }
 

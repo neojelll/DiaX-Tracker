@@ -26,7 +26,7 @@ import {
   withTime,
   type EntryForm,
 } from '@/screens/home/entryForm'
-import { FoodRow, NoteRow } from '@/screens/home/FormRows'
+import { DetailsRow, FoodRow } from '@/screens/home/FormRows'
 import { PresetEditSheet } from '@/screens/food/PresetSheets'
 import { useT } from '@/i18n'
 
@@ -57,7 +57,7 @@ export function HomeScreen() {
     // The real moment of saving while no time was picked, not the last minute tick.
     const createdAt = form.pinnedAt ?? nowLocal()
     setForm(EMPTY_FORM)
-    const id = await diary.addEntry(toEntry(previous, createdAt, display))
+    const id = await diary.addEntry(toEntry(previous, createdAt, display), previous.photo)
     toast.show(t.home.saved, {
       sub: moment(createdAt),
       onUndo: () => {
@@ -140,11 +140,13 @@ export function HomeScreen() {
           onCreatePreset={() => setNewPreset(true)}
         />
         <hr className="my-1 border-divider" />
-        <NoteRow
+        <DetailsRow
           notes={form.notes}
           open={form.noteOpen}
+          photo={form.photo}
           onToggle={() => update({ noteOpen: !form.noteOpen })}
           onChange={(notes) => update({ notes })}
+          onPhoto={(photo) => update({ photo })}
         />
 
         <div className="mt-4 flex gap-1.5">

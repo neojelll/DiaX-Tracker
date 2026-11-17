@@ -69,8 +69,12 @@ export function shownAfterMeal(afterMeal: AfterMeal | undefined): AfterMeal | un
 }
 
 /** Whether opening the record shows anything; without it a tap goes straight to editing. */
-export function hasMoreInside(entry: DiaryEntry, afterMeal: AfterMeal | undefined): boolean {
-  return entry.mealLabel != null || entry.notes.trim() !== '' || afterMeal != null
+export function hasMoreInside(
+  entry: DiaryEntry,
+  afterMeal: AfterMeal | undefined,
+  hasPhoto = false,
+): boolean {
+  return entry.mealLabel != null || entry.notes.trim() !== '' || afterMeal != null || hasPhoto
 }
 
 /** "Сегодня", "Вчера", "12 ноября" - "Today", "12 November". */

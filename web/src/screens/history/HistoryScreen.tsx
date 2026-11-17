@@ -1,12 +1,16 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useState } from 'react'
 import { DateSheet } from '@/components/DateTimeSheets'
 import { Icon } from '@/components/icons'
+import { PhotoViewer } from '@/components/photos'
 import { Chip, CircleButton } from '@/components/ui/button'
 import { buildAfterMeal } from '@/diary/afterMeal'
 import { carbsGramsOn } from '@/diary/carbs'
 import { useEntries, useSettings } from '@/diary/hooks'
 import { insulinOn } from '@/diary/insulin'
-import { dayOf, type LocalDate } from '@/diary/time'
+import { dayOf, type LocalDate, type LocalDateTime } from '@/diary/time'
+import { diary } from '@/diary/repository'
+import { moment } from '@/lib/format'
 import { useNow } from '@/lib/useNow'
 import { EditRecordSheet } from '@/screens/history/EditRecordSheet'
 import {
@@ -48,6 +52,11 @@ export function HistoryScreen() {
   }, [records, filter, todayDay, query, newestFirst])
   const days = byDay(shown)
   const editing = entries.find((e) => e.id === editId) ?? null
+  const photoIds = new Set(useLiveQuery(() => diary.photoIds(), [], []))
+  const [viewing, setViewing] = useState<{ photo: Blob; at: LocalDateTime } | null>(null)
+  // While fading out the viewer keeps its caption.
+  const [lastViewed, setLastViewed] = useState(viewing)
+  if (viewing && viewing !== lastViewed) setLastViewed(viewing)
 
   return (
     <section className="px-3.5 pt-[18px]">
@@ -123,7 +132,7 @@ export function HistoryScreen() {
             <ul className="space-y-[9px] pb-[9px]">
               {dayRecords.map((entry) => {
                 const line = shownAfterMeal(afterMeal.byMeal.get(entry.id))
-                const opens = hasMoreInside(entry, line)
+                const opens = hasMoreInside(entry, line, photoIds.has(entry.id))
                 return (
                   <li key={entry.id}>
                     <RecordCard
@@ -131,6 +140,8 @@ export function HistoryScreen() {
                       settings={settings}
                       afterMeal={line}
                       open={opens ? openId === entry.id : null}
+                      hasPhoto={photoIds.has(entry.id)}
+                      onOpenPhoto={(photo) => setViewing({ photo, at: entry.createdAt })}
                       now={now}
                       onTap={() =>
                         opens ? setOpenId((id) => (id === entry.id ? null : entry.id)) : setEditId(entry.id)
@@ -149,6 +160,11 @@ export function HistoryScreen() {
       </div>
 
       <EditRecordSheet entry={editing} settings={settings} onClose={() => setEditId(null)} />
+      <PhotoViewer
+        photo={viewing?.photo ?? null}
+        caption={lastViewed ? moment(lastViewed.at) : ''}
+        onClose={() => setViewing(null)}
+      />
       <DateSheet
         open={rangeStep != null}
         title={rangeStep?.from ? t().history.rangeTo : t().history.rangeFrom}

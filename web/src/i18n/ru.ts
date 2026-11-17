@@ -74,6 +74,13 @@ export const ru = {
     carbsField: (unit: string) => `Углеводы, ${unit}`,
     comment: 'Комментарий',
     commentPlaceholder: 'Самочувствие, активность…',
+    photo: 'Фото',
+    photoAdded: 'Добавлено',
+    addPhoto: 'Добавить фото',
+    replacePhoto: 'Заменить фото',
+    removePhoto: 'Удалить фото',
+    entryPhoto: 'Фото записи',
+    photoFailed: 'Не удалось открыть фото',
   },
   summary: {
     sugar: 'Сахар',
@@ -181,6 +188,7 @@ export const ru = {
     data: 'Данные',
     dataHint:
       'Дневник хранится только в этом браузере. Сохраняйте архив в Файлы или iCloud — без него записи пропадут вместе с приложением.',
+    storageUsed: (size: string) => `Занято на устройстве: ${size}`,
     save: 'Сохранить архив',
     lastSaved: (when: string) => `Последний: ${when}`,
     neverSaved: 'Ещё не сохранялся',

@@ -159,3 +159,22 @@ describe('the whole diary', () => {
     expect(await repo.lastBackup()).toBe('2026-11-16T12:00:00')
   })
 })
+
+describe('photos', () => {
+  it('saves a photo with its entry, and deleting takes it along and undo brings it back', async () => {
+    const id = await repo.addEntry(newEntry('2026-11-16T08:20:00', { carbsGrams: 40 }), new Blob(['jpeg']))
+    const other = await repo.addEntry(newEntry('2026-11-16T09:00:00', { bloodSugar: 6 }))
+    expect(await repo.photoIds()).toEqual([id])
+
+    const deleted = await repo.deleteEntry(id)
+    expect(deleted!.photo).toBeDefined()
+    expect(await repo.photoIds()).toEqual([])
+
+    await repo.restoreEntries([deleted!])
+    expect(await repo.photoIds()).toEqual([id])
+
+    await repo.setPhoto(other, new Blob(['png']))
+    await repo.setPhoto(id, null)
+    expect(await repo.photoIds()).toEqual([other])
+  })
+})
