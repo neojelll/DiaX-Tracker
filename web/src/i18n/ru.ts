@@ -74,6 +74,13 @@ export const ru = {
     carbsField: (unit: string) => `Углеводы, ${unit}`,
     comment: 'Комментарий',
     commentPlaceholder: 'Самочувствие, активность…',
+    photo: 'Фото',
+    photoAdded: 'Добавлено',
+    addPhoto: 'Добавить фото',
+    replacePhoto: 'Заменить фото',
+    removePhoto: 'Удалить фото',
+    entryPhoto: 'Фото записи',
+    photoFailed: 'Не удалось открыть фото',
   },
   summary: {
     sugar: 'Сахар',

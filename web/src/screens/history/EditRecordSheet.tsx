@@ -1,6 +1,8 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { DateSheet, TimeSheet } from '@/components/DateTimeSheets'
 import { Icon, InsulinIcon } from '@/components/icons'
+import { PhotoInput, PhotoStrip } from '@/components/photos'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Sheet } from '@/components/ui/sheet'
@@ -12,6 +14,7 @@ import type { SavedEntry } from '@/diary/types'
 import { hhmm, moment, shortDate } from '@/lib/format'
 import { numeric } from '@/lib/numeric'
 import { useToast } from '@/lib/toast'
+import { usePhotoPicker } from '@/lib/usePhotoUrl'
 import {
   applyPreset,
   editedEntry,
@@ -66,9 +69,15 @@ function EditForm({
   const [picker, setPicker] = useState<'date' | 'time' | null>(null)
   const at = form.pinnedAt ?? entry.createdAt
   const update = (change: Partial<EntryForm>) => setForm((f) => ({ ...f, ...change }))
+  // undefined - the stored photo stays as it is; a Blob or null - replaced or removed on save.
+  const [photo, setPhoto] = useState<Blob | null | undefined>(undefined)
+  const stored = useLiveQuery(() => diary.photoOf(entry.id), [entry.id])
+  const shownPhoto = photo === undefined ? stored : photo
+  const photoPicker = usePhotoPicker()
 
   const save = async () => {
     await diary.updateEntry(editedEntry(entry, form, display))
+    if (photo !== undefined) await diary.setPhoto(entry.id, photo)
     onClose()
     toast.show(t().history.edited)
   }
@@ -172,6 +181,17 @@ function EditForm({
         onChange={(e) => update({ notes: e.target.value })}
         className="block w-full resize-none rounded-field bg-tile px-3.5 py-[13px] text-base leading-5 caret-ink outline-none placeholder:text-placeholder"
       />
+
+      <p className={`${kicker} mt-4`}>{t().home.photo}</p>
+      {shownPhoto ? (
+        <PhotoStrip photo={shownPhoto} onReplace={photoPicker.open} onRemove={() => setPhoto(null)} />
+      ) : (
+        <Button variant="secondary" className="w-full" onClick={photoPicker.open}>
+          <Icon name="camera" size={15} strokeWidth={1.8} />
+          {t().home.addPhoto}
+        </Button>
+      )}
+      <PhotoInput inputRef={photoPicker.ref} onPhoto={setPhoto} />
 
       <div className="mt-4 space-y-[9px]">
         <Button type="submit" disabled={!isFillable(form)}>

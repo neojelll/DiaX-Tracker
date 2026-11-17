@@ -27,6 +27,8 @@ export interface EntryForm {
   notes: string
   noteOpen: boolean
   foodOpen: boolean
+  /** The photo to save with the entry, already compressed. */
+  photo: Blob | null
 }
 
 export const EMPTY_FORM: EntryForm = {
@@ -41,6 +43,7 @@ export const EMPTY_FORM: EntryForm = {
   notes: '',
   noteOpen: false,
   foodOpen: false,
+  photo: null,
 }
 
 /** The form outlives the screen: switch tabs and come back, it's as you left it. */
@@ -53,7 +56,9 @@ export function isFillable(f: EntryForm): boolean {
 
 /** Anything entered at all - the "clear" button shows. */
 export function isDirty(f: EntryForm): boolean {
-  return isFillable(f) || f.presetId != null || f.mealLabel != null || f.notes.trim() !== ''
+  return (
+    isFillable(f) || f.presetId != null || f.mealLabel != null || f.notes.trim() !== '' || f.photo != null
+  )
 }
 
 /** An empty form that keeps the picked moment, if any. */

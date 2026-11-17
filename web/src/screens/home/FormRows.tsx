@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react'
 import { Icon, type IconName } from '@/components/icons'
+import { PhotoInput, PhotoStrip } from '@/components/photos'
 import { formatCarbs, type CarbDisplay } from '@/diary/carbs'
 import type { SavedPreset } from '@/diary/types'
 import { decimal } from '@/lib/format'
 import { numeric } from '@/lib/numeric'
+import { usePhotoPicker } from '@/lib/usePhotoUrl'
 import { cn } from '@/lib/utils'
 import { NOTES_MAX_LENGTH, presetGrams } from '@/screens/home/entryForm'
 import { t } from '@/i18n'
@@ -29,7 +31,7 @@ function PlateRow({
   label: string
   value: string
   onClick: () => void
-  expanded: boolean
+  expanded?: boolean
   trailing?: ReactNode
 }) {
   return (
@@ -188,21 +190,29 @@ export function FoodRow({
   )
 }
 
-/** "Комментарий": a tap unfolds the field under the row; with text the row shows its start. */
-export function NoteRow({
+/**
+ * "Детали": two rows side by side - "Комментарий" and "Фото". The comment unfolds a field under
+ * them; a photo, once attached, shows as a strip with the thumbnail, "Заменить фото" and ×.
+ */
+export function DetailsRow({
   notes,
   open,
+  photo,
   onToggle,
   onChange,
+  onPhoto,
 }: {
   notes: string
   open: boolean
+  photo: Blob | null
   onToggle: () => void
   onChange: (text: string) => void
+  onPhoto: (photo: Blob | null) => void
 }) {
+  const picker = usePhotoPicker()
   return (
     <div>
-      <div className="flex">
+      <div className="flex gap-1.5">
         <PlateRow
           icon="messageCircle"
           filled={notes.trim() !== '' || open}
@@ -210,6 +220,13 @@ export function NoteRow({
           value={notes.trim() || t().common.add}
           onClick={onToggle}
           expanded={open}
+        />
+        <PlateRow
+          icon="camera"
+          filled={photo != null}
+          label={t().home.photo}
+          value={photo ? t().home.photoAdded : t().common.add}
+          onClick={() => !photo && picker.open()}
         />
       </div>
       {open && (
@@ -223,6 +240,10 @@ export function NoteRow({
           className="mt-1.5 block w-full animate-fade-in resize-none rounded-field bg-tile px-3.5 py-[13px] text-base leading-5 caret-ink outline-none placeholder:text-placeholder"
         />
       )}
+      {photo && (
+        <PhotoStrip className="mt-1.5" photo={photo} onReplace={picker.open} onRemove={() => onPhoto(null)} />
+      )}
+      <PhotoInput inputRef={picker.ref} onPhoto={onPhoto} />
     </div>
   )
 }

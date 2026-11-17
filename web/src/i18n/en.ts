@@ -75,6 +75,13 @@ export const en: Messages = {
     carbsField: (unit) => `Carbs, ${unit}`,
     comment: 'Comment',
     commentPlaceholder: 'How you feel, activity…',
+    photo: 'Photo',
+    photoAdded: 'Added',
+    addPhoto: 'Add a photo',
+    replacePhoto: 'Replace the photo',
+    removePhoto: 'Remove the photo',
+    entryPhoto: 'Entry photo',
+    photoFailed: "Couldn't open the photo",
   },
   summary: {
     sugar: 'Sugar',
