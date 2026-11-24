@@ -157,8 +157,9 @@ jobs:
       - name: Check title length
         # Bot titles (Dependabot, Renovate, release-please) are template-generated and
         # often exceed 70 chars ("bump <pkg> from X to Y in /dir"); they get squash-merged
-        # as-is, so the length budget applies to human-authored PRs only.
-        if: github.event.pull_request.user.bot_id == null
+        # as-is, so the length budget applies to human-authored PRs only. The pull_request
+        # payload has no bot_id, so detect bots by user.type and the "[bot]" login suffix.
+        if: github.event.pull_request.user.type != 'Bot' && !endsWith(github.event.pull_request.user.login, '[bot]')
         env:
           TITLE: ${{ github.event.pull_request.title }}
         run: |
