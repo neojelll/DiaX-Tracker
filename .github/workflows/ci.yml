@@ -155,6 +155,10 @@ jobs:
       # is read via env, not `${{ }}` inside run: - a PR title is attacker-controlled,
       # and inlining it would let a crafted one execute as shell.
       - name: Check title length
+        # Bot titles (Dependabot, Renovate, release-please) are template-generated and
+        # often exceed 70 chars ("bump <pkg> from X to Y in /dir"); they get squash-merged
+        # as-is, so the length budget applies to human-authored PRs only.
+        if: github.event.pull_request.user.bot_id == null
         env:
           TITLE: ${{ github.event.pull_request.title }}
         run: |
