@@ -149,5 +149,7 @@ async function loadSqlJs(): Promise<SqlJsStatic> {
     import('sql.js'),
     import('sql.js/dist/sql-wasm-browser.wasm?url'),
   ])
-  return initSqlJs({ locateFile: () => wasmUrl })
+  // useOldExtensionFunctions became required in @types/sql.js 1.16; `true` is its documented
+  // default (legacy sql.js Math functions), so behavior is unchanged from before the bump.
+  return initSqlJs({ locateFile: () => wasmUrl, useOldExtensionFunctions: true })
 }
