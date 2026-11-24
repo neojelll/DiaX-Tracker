@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/neojelll/DiaX-Tracker/compare/web-v0.1.0...web-v0.2.0) (2026-11-24)
+
+
+### Features
+
+* **web:** add meal photos ([#280](https://github.com/neojelll/DiaX-Tracker/issues/280)) ([e138c6c](https://github.com/neojelll/DiaX-Tracker/commit/e138c6c3f2895f2780bf6a243d4fe8901a9512e6))
+
 ## 0.1.0 (2026-11-16)
 
 
